@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: velostore-multitenant
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MASTER_ADMIN_USERNAME
+        value: master
+      - key: MASTER_ADMIN_PASSWORD
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: TURSO_DB_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false

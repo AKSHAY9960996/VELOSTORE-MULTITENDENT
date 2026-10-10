@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Master Admin | Multi-Store Platform{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --bg-card: rgba(18, 24, 43, 0.85);
+      --bg-card-hover: rgba(28, 36, 62, 0.95);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.3);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.25);
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px 0 rgba(99, 102, 241, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1, h2, h3, h4, .brand-font {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Navbar */
+    .master-header {
+      background: rgba(10, 15, 29, 0.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .master-nav {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .master-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .master-logo-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .master-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 30%, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .master-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .nav-btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn-ghost {
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    .nav-btn-ghost:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Container */
+    .master-container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+      flex: 1;
+    }
+
+    /* Flash Messages */
+    .flash-container {
+      margin-bottom: 24px;
+    }
+
+    .flash-alert {
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid transparent;
+    }
+
+    .flash-success {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .flash-error {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .flash-info {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+    }
+
+    /* Footer */
+    .master-footer {
+      border-top: 1px solid var(--border-color);
+      padding: 24px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      margin-top: auto;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <header class="master-header">
+    <div class="master-nav">
+      <a href="{{ url_for('master_dashboard') }}" class="master-logo">
+        <div class="master-logo-badge">⚡</div>
+        <div>
+          <div class="master-title">VeloStore Hub</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);font-weight:500;">Master Admin Control Panel</div>
+        </div>
+      </a>
+
+      {% if session.get('master_logged_in') %}
+      <div class="master-nav-links">
+        <a href="{{ url_for('master_dashboard') }}" class="nav-btn nav-btn-ghost">📊 Dashboard</a>
+        <a href="{{ url_for('master_tenant_new') }}" class="nav-btn nav-btn-primary">+ Create New Store</a>
+        <a href="{{ url_for('master_logout') }}" class="nav-btn nav-btn-ghost" style="color:var(--danger);border-color:rgba(239,68,68,0.3)">Logout</a>
+      </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="master-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash-alert flash-{{ category if category != 'message' else 'info' }}">
+              {% if category == 'success' %}✅{% elif category == 'error' %}⚠️{% else %}ℹ️{% endif %}
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="master-footer">
+    Multi-Tenant Platform Engine &copy; {{ now_year if now_year else '2026' }} VeloStore Inc. All system rights reserved.
+  </footer>
+
+</body>
+</html>

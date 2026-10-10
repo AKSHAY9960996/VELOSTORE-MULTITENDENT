@@ -1,0 +1,357 @@
+{% extends 'master/base.html' %}
+
+{% block title %}{{ action }} Customer Store | Master Admin{% endblock %}
+
+{% block content %}
+<div style="max-width: 760px; margin: 0 auto; width: 100%;">
+  
+  <div style="margin-bottom: 24px;">
+    <a href="{{ url_for('master_dashboard') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.88rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+      ← Back to Platform Overview
+    </a>
+    <div style="display: flex; align-items: center; gap: 12px; margin-top: 10px;">
+      <h1 style="font-size: 2.1rem; font-weight: 800; color: #fff;">{{ action }} Customer Store</h1>
+      <span style="background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); color: #a5b4fc; font-size: 0.76rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">
+        {% if action == 'Edit' %}ID: #{{ tenant.id }}{% else %}New Instance{% endif %}
+      </span>
+    </div>
+    <p style="color: var(--text-muted); font-size: 0.92rem; margin-top: 4px;">
+      {% if action == 'Edit' %}
+        Modify tenant metadata, change subscription tier, adjust product quotas, toggle feature flags, or reset admin credentials.
+      {% else %}
+        Configure and instantly auto-provision an isolated SQLite database and operational store environment.
+      {% endif %}
+    </p>
+  </div>
+
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-premium);">
+    
+    <form method="POST" action="{% if tenant %}{{ url_for('master_tenant_edit', tenant_id=tenant.id) }}{% else %}{{ url_for('master_tenant_new') }}{% endif %}">
+      
+      <!-- Section 1: Store Identity -->
+      <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 24px; margin-bottom: 24px;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span>🏪</span> Store Identity & URL
+        </h3>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Store Display Name *</label>
+            <input type="text" id="store_name" name="store_name" required placeholder="e.g. Trendy Boutique" value="{{ tenant.store_name if tenant else '' }}"
+                   oninput="{% if not tenant %}generateSlug(this.value){% endif %}"
+                   style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Store Identifier (Slug) *</label>
+            <input type="text" id="store_slug" name="slug" required placeholder="e.g. trendyboutique" pattern="[a-z0-9\-]+" title="Lowercase letters, numbers, and hyphens only" value="{{ tenant.slug if tenant else '' }}" {% if tenant %}readonly style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.95rem; outline: none;"{% else %}style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;"{% endif %} />
+            <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 6px;">
+              Storefront URL: <span style="color: #818cf8; font-family: monospace;">/s/<b id="slugPreview">{{ tenant.slug if tenant else 'your-slug' }}</b></span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Custom Domain (Optional)</label>
+          <input type="text" name="custom_domain" placeholder="e.g. boutique.com (without http:// or /)" value="{{ tenant.custom_domain if tenant and tenant.custom_domain else '' }}"
+                 style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+          <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Points host requests directly to this tenant database. Requires CNAME DNS setup.</div>
+        </div>
+      </div>
+
+      <!-- Section 2: Owner Contact -->
+      <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 24px; margin-bottom: 24px;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span>👤</span> Owner Details
+        </h3>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Owner Full Name *</label>
+            <input type="text" name="owner_name" required placeholder="e.g. Sarah Jenkins" value="{{ tenant.owner_name if tenant else '' }}"
+                   style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Owner WhatsApp / Mobile</label>
+            <input type="text" name="owner_phone" placeholder="e.g. 919876543210" value="{{ tenant.owner_phone if tenant and tenant.owner_phone else '' }}"
+                   style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+          </div>
+        </div>
+
+        <div style="margin-top: 18px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Owner Email</label>
+          <input type="email" name="owner_email" placeholder="e.g. sarah@example.com" value="{{ tenant.owner_email if tenant and tenant.owner_email else '' }}"
+                 style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+        </div>
+      </div>
+
+      <!-- Section 3: Plan Limits & Quotas -->
+      <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 24px; margin-bottom: 24px;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span>⚡</span> Plan Tier & Limits
+        </h3>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Subscription Plan</label>
+            <select id="planSelector" name="plan" onchange="applyPlanDefaults(this.value)"
+                    style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: #12182b; border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;">
+              <option value="free" {% if tenant and tenant.plan == 'free' %}selected{% endif %}>Free Tier (Starter - 25 items)</option>
+              <option value="basic" {% if tenant and tenant.plan == 'basic' %}selected{% endif %}>Basic Plan (Pro - 100 items)</option>
+              <option value="premium" {% if tenant and tenant.plan == 'premium' %}selected{% endif %}>Premium Unlimited (Enterprise - 1000 items)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Max Products Allowed</label>
+            <input type="number" id="max_products" name="max_products" min="1" value="{{ tenant.max_products if tenant else 25 }}"
+                   style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+            <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Enforced when tenant adds catalog items in admin panel.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Storefront Visual Theme -->
+      <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 24px; margin-bottom: 24px;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+          <span>🎨</span> Storefront Visual Theme
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.84rem; margin-bottom: 16px;">
+          Choose the design system and aesthetic palette for this tenant's storefront.
+        </p>
+
+        {% set cur_theme = tenant.theme if tenant and tenant.theme else 'standard' %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          
+          <!-- Theme 1: Standard Sakura Blossom -->
+          <label style="position: relative; display: block; background: rgba(255,255,255,0.02); border: 2px solid {% if cur_theme == 'standard' %}var(--primary){% else %}var(--border-color){% endif %}; border-radius: var(--radius-md); padding: 18px; cursor: pointer; transition: all 0.2s ease;" class="theme-card">
+            <input type="radio" name="theme" value="standard" {% if cur_theme == 'standard' %}checked{% endif %} style="position: absolute; top: 16px; right: 16px; accent-color: var(--primary);" onchange="updateThemeSelection()" />
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <span style="font-size: 1.5rem;">🌸</span>
+              <div>
+                <div style="font-weight: 800; color: #fff; font-size: 0.95rem;">Standard (Sakura Bloom)</div>
+                <div style="font-size: 0.74rem; color: #f472b6;">Japanese Rose & Cherry Blossom</div>
+              </div>
+            </div>
+            <div style="height: 28px; border-radius: 6px; background: linear-gradient(90deg, #fdf7f9, #fde8ed, #c44569); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;"></div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.4;">
+              Delicate, bright sakura silk aesthetic with soft rose gold highlights and floating cherry petal animations.
+            </div>
+          </label>
+
+          <!-- Theme 2: Pure White & Luxury Royal Sapphire Blue -->
+          <label style="position: relative; display: block; background: rgba(255,255,255,0.02); border: 2px solid {% if cur_theme == 'luxury' %}#2563eb{% else %}var(--border-color){% endif %}; border-radius: var(--radius-md); padding: 18px; cursor: pointer; transition: all 0.2s ease;" class="theme-card">
+            <input type="radio" name="theme" value="luxury" {% if cur_theme == 'luxury' %}checked{% endif %} style="position: absolute; top: 16px; right: 16px; accent-color: #2563eb;" onchange="updateThemeSelection()" />
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <span style="font-size: 1.5rem;">💎</span>
+              <div>
+                <div style="font-weight: 800; color: #fff; font-size: 0.95rem;">Luxury (Pure White & Royal Blue)</div>
+                <div style="font-size: 0.74rem; color: #60a5fa;">Pure Crisp White & Imperial Sapphire Blue 💎</div>
+              </div>
+            </div>
+            <div style="height: 28px; border-radius: 6px; background: linear-gradient(90deg, #ffffff, #f0f7ff, #1e40af, #2563eb); border: 1px solid rgba(37, 99, 235, 0.35); margin-bottom: 10px;"></div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.4;">
+              Crisp 100% pure white canvas with royal sapphire accents, deep imperial azure trim, crystal blue particles, and bold luxury typography.
+            </div>
+          </label>
+
+        </div>
+      </div>
+
+      <!-- Section 5: Feature Flags -->
+      <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 24px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+            <span>🚩</span> Feature Flags Entitlements
+          </h3>
+          <span style="font-size: 0.78rem; color: var(--text-dim);">Enable or restrict individual modules</span>
+        </div>
+
+        {% set cur_features = tenant_features if tenant_features else (default_plans['free']['features'] if default_plans else {}) %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          
+          <!-- Custom Domain -->
+          <label style="display: flex; align-items: flex-start; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; cursor: pointer;">
+            <input type="checkbox" id="flag_custom_domain" name="flag_custom_domain" value="1" {% if cur_features.get('custom_domain') %}checked{% endif %} style="width: 18px; height: 18px; accent-color: var(--primary); margin-top: 2px;" />
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Custom Domain</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Bind proprietary vanity domains (e.g. brand.com)</div>
+            </div>
+          </label>
+
+          <!-- Analytics -->
+          <label style="display: flex; align-items: flex-start; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; cursor: pointer;">
+            <input type="checkbox" id="flag_analytics" name="flag_analytics" value="1" {% if cur_features.get('analytics') %}checked{% endif %} style="width: 18px; height: 18px; accent-color: var(--primary); margin-top: 2px;" />
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Sales Analytics</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Visual charts and deep revenue breakdowns</div>
+            </div>
+          </label>
+
+          <!-- Export CSV -->
+          <label style="display: flex; align-items: flex-start; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; cursor: pointer;">
+            <input type="checkbox" id="flag_export_csv" name="flag_export_csv" value="1" {% if cur_features.get('export_csv') %}checked{% endif %} style="width: 18px; height: 18px; accent-color: var(--primary); margin-top: 2px;" />
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Export CSV</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">1-click download of orders and product lists</div>
+            </div>
+          </label>
+
+          <!-- Discount Codes -->
+          <label style="display: flex; align-items: flex-start; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; cursor: pointer;">
+            <input type="checkbox" id="flag_discount_codes" name="flag_discount_codes" value="1" {% if cur_features.get('discount_codes') %}checked{% endif %} style="width: 18px; height: 18px; accent-color: var(--primary); margin-top: 2px;" />
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">Discount & Promos</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Coupon codes and checkout promotional offers</div>
+            </div>
+          </label>
+
+          <!-- WhatsApp Checkout -->
+          <label style="display: flex; align-items: flex-start; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; cursor: pointer;">
+            <input type="checkbox" id="flag_whatsapp_checkout" name="flag_whatsapp_checkout" value="1" {% if cur_features.get('whatsapp_checkout') %}checked{% endif %} style="width: 18px; height: 18px; accent-color: var(--primary); margin-top: 2px;" />
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">WhatsApp Checkout</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Direct 1-click cart submission to seller's WhatsApp</div>
+            </div>
+          </label>
+
+          <!-- POS Thermal Receipt -->
+          <label style="display: flex; align-items: flex-start; gap: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; cursor: pointer;">
+            <input type="checkbox" id="flag_pos_receipt" name="flag_pos_receipt" value="1" {% if cur_features.get('pos_receipt') %}checked{% endif %} style="width: 18px; height: 18px; accent-color: var(--primary); margin-top: 2px;" />
+            <div>
+              <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">POS Receipt Printing</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Thermal receipt and printable order dispatch invoices</div>
+            </div>
+          </label>
+
+        </div>
+      </div>
+
+      <!-- Section 5: Security & Credentials -->
+      <div style="margin-bottom: 28px;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span>🔑</span> Security & Store Status
+        </h3>
+
+        {% if not tenant %}
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Initial Shop Admin Password *</label>
+            <input type="password" name="admin_password" required value="admin123"
+                   style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+            <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Initial login username will be: <code style="color:#a5b4fc">admin</code></div>
+          </div>
+        {% else %}
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Reset Store Admin Password (Optional)</label>
+            <input type="password" name="admin_password" placeholder="Leave blank to keep existing password"
+                   style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+            <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Entering a value here immediately changes the tenant's admin login password.</div>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; color: #fff; font-weight: 600;">
+              <input type="checkbox" name="is_active" value="1" {% if tenant.is_active %}checked{% endif %} style="width: 18px; height: 18px; accent-color: var(--accent);" />
+              Store is Operational (Active). Unchecking suspends customer storefront access.
+            </label>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Actions -->
+      <div style="display: flex; gap: 12px; justify-content: flex-end; align-items: center;">
+        <a href="{{ url_for('master_dashboard') }}" class="nav-btn nav-btn-ghost">Cancel</a>
+        <button type="submit" class="nav-btn nav-btn-primary" style="padding: 12px 28px;">
+          {% if tenant %}💾 Save Tenant Updates{% else %}🚀 Provision Store Instance{% endif %}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+function generateSlug(text) {
+  const slugInput = document.getElementById('store_slug');
+  const preview = document.getElementById('slugPreview');
+  const slug = text.toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\- ]/g, '')
+    .replace(/\s+/g, '-');
+  slugInput.value = slug;
+  if (preview) preview.textContent = slug || 'your-slug';
+}
+
+document.getElementById('store_slug').addEventListener('input', function(e) {
+  const preview = document.getElementById('slugPreview');
+  if (preview) preview.textContent = e.target.value.toLowerCase().trim() || 'your-slug';
+});
+
+const planPresets = {
+  free: {
+    max_products: 25,
+    custom_domain: false,
+    analytics: false,
+    export_csv: false,
+    discount_codes: false,
+    whatsapp_checkout: true,
+    pos_receipt: false
+  },
+  basic: {
+    max_products: 100,
+    custom_domain: false,
+    analytics: false,
+    export_csv: true,
+    discount_codes: true,
+    whatsapp_checkout: true,
+    pos_receipt: true
+  },
+  premium: {
+    max_products: 1000,
+    custom_domain: true,
+    analytics: true,
+    export_csv: true,
+    discount_codes: true,
+    whatsapp_checkout: true,
+    pos_receipt: true
+  }
+};
+
+function applyPlanDefaults(plan) {
+  const config = planPresets[plan];
+  if (!config) return;
+
+  const maxProductsInput = document.getElementById('max_products');
+  if (maxProductsInput) maxProductsInput.value = config.max_products;
+
+  document.getElementById('flag_custom_domain').checked = config.custom_domain;
+  document.getElementById('flag_analytics').checked = config.analytics;
+  document.getElementById('flag_export_csv').checked = config.export_csv;
+  document.getElementById('flag_discount_codes').checked = config.discount_codes;
+  document.getElementById('flag_whatsapp_checkout').checked = config.whatsapp_checkout;
+  document.getElementById('flag_pos_receipt').checked = config.pos_receipt;
+}
+function updateThemeSelection() {
+  const selectedTheme = document.querySelector('input[name="theme"]:checked')?.value || 'standard';
+  document.querySelectorAll('.theme-card').forEach(card => {
+    const radio = card.querySelector('input[name="theme"]');
+    if (radio && radio.checked) {
+      if (radio.value === 'luxury') {
+        card.style.borderColor = '#2563eb';
+        card.style.background = 'rgba(37, 99, 235, 0.08)';
+      } else {
+        card.style.borderColor = 'var(--primary)';
+        card.style.background = 'rgba(99, 102, 241, 0.06)';
+      }
+    } else {
+      card.style.borderColor = 'var(--border-color)';
+      card.style.background = 'rgba(255, 255, 255, 0.02)';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', updateThemeSelection);
+</script>
+{% endblock %}

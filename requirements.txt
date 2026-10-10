@@ -1,0 +1,7 @@
+Flask
+gunicorn
+Pillow
+cloudinary
+libsql-experimental
+python-dotenv
+requests
