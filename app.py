@@ -27,8 +27,16 @@ app.secret_key = app_config.SECRET_KEY
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 ALLOWED_EXTENSIONS = app_config.ALLOWED_EXTENSIONS
 
-# Initialize Master Database
-init_master_db()
+_master_db_initialized = False
+
+def _ensure_master_db_ready():
+    global _master_db_initialized
+    if not _master_db_initialized:
+        try:
+            init_master_db()
+            _master_db_initialized = True
+        except Exception as e:
+            print(f"[Init] Master DB lazy init error: {e}")
 
 @app.route('/health')
 def health_check():
@@ -52,6 +60,8 @@ def resolve_tenant_context():
 
     if path == '/health':
         return
+
+    _ensure_master_db_ready()
 
     # Check if request is for Master Admin
     if path.startswith('/master'):
