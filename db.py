@@ -2,6 +2,7 @@ import os
 import json
 import sqlite3
 import hashlib
+from collections.abc import Mapping
 import requests as _requests
 
 # Try to import libsql; fall back to sqlite3 for local dev
@@ -9,7 +10,11 @@ try:
     import libsql_experimental as libsql
     HAS_LIBSQL = True
 except ImportError:
-    HAS_LIBSQL = False
+    try:
+        import libsql
+        HAS_LIBSQL = True
+    except ImportError:
+        HAS_LIBSQL = False
 
 from config import get_config
 
@@ -119,6 +124,185 @@ def _delete_turso_tenant_db(slug: str):
 
 
 # ---------------------------------------------------------------------------
+# Row wrapper & libSQL Connection/Cursor Wrappers
+# ---------------------------------------------------------------------------
+
+class TursoRow(Mapping):
+    """Dict-like row wrapper for libSQL query results mimicking sqlite3.Row."""
+
+    def __init__(self, columns, values):
+        self._columns = list(columns)
+        self._values = list(values) if values is not None else []
+        self._data = dict(zip(self._columns, self._values))
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self._values[key]
+        return self._data[key]
+
+    def __iter__(self):
+        return iter(self._columns)
+
+    def __len__(self):
+        return len(self._columns)
+
+    def __contains__(self, key):
+        return key in self._data
+
+    def keys(self):
+        return list(self._columns)
+
+    def values(self):
+        return list(self._values)
+
+    def items(self):
+        return list(self._data.items())
+
+    def get(self, key, default=None):
+        return self._data.get(key, default)
+
+    def __repr__(self):
+        return f"TursoRow({self._data})"
+
+
+class LibsqlCursorWrapper:
+    """Wraps a raw libSQL cursor to return TursoRow objects."""
+
+    def __init__(self, raw_cursor):
+        self._raw = raw_cursor
+
+    def execute(self, sql, params=None):
+        if params is None:
+            self._raw.execute(sql)
+        else:
+            self._raw.execute(sql, params)
+        return self
+
+    def executemany(self, sql, seq_of_params):
+        self._raw.executemany(sql, seq_of_params)
+        return self
+
+    @property
+    def description(self):
+        return self._raw.description
+
+    @property
+    def lastrowid(self):
+        return getattr(self._raw, 'lastrowid', None)
+
+    @property
+    def rowcount(self):
+        return getattr(self._raw, 'rowcount', -1)
+
+    def _wrap_row(self, raw_row):
+        if raw_row is None:
+            return None
+        if self._raw.description:
+            columns = [col[0] for col in self._raw.description]
+            return TursoRow(columns, raw_row)
+        return raw_row
+
+    def fetchone(self):
+        return self._wrap_row(self._raw.fetchone())
+
+    def fetchall(self):
+        rows = self._raw.fetchall()
+        if not rows:
+            return []
+        if self._raw.description:
+            columns = [col[0] for col in self._raw.description]
+            return [TursoRow(columns, r) for r in rows]
+        return rows
+
+    def fetchmany(self, size=None):
+        rows = self._raw.fetchmany(size) if size is not None else self._raw.fetchmany()
+        if not rows:
+            return []
+        if self._raw.description:
+            columns = [col[0] for col in self._raw.description]
+            return [TursoRow(columns, r) for r in rows]
+        return rows
+
+    def __iter__(self):
+        for row in self.fetchall():
+            yield row
+
+    def close(self):
+        try:
+            self._raw.close()
+        except Exception:
+            pass
+
+
+class LibsqlConnectionWrapper:
+    """Wraps a raw libSQL connection with sqlite3-compatible API & Row wrappers."""
+
+    def __init__(self, raw_conn):
+        self._raw = raw_conn
+        self._row_factory = None
+
+    @property
+    def row_factory(self):
+        return self._row_factory
+
+    @row_factory.setter
+    def row_factory(self, val):
+        self._row_factory = val
+
+    def cursor(self):
+        return LibsqlCursorWrapper(self._raw.cursor())
+
+    def execute(self, sql, params=None):
+        cur = self.cursor()
+        cur.execute(sql, params)
+        return cur
+
+    def executemany(self, sql, seq_of_params):
+        cur = self.cursor()
+        cur.executemany(sql, seq_of_params)
+        return cur
+
+    def executescript(self, script_str):
+        lines = [ln for ln in script_str.splitlines() if not ln.strip().startswith('--')]
+        clean_sql = '\n'.join(lines)
+        statements = [s.strip() for s in clean_sql.split(';') if s.strip()]
+        for stmt in statements:
+            try:
+                self.execute(stmt)
+            except Exception as e:
+                print(f"[Executescript] Warning: {e}")
+        self.commit()
+
+    def commit(self):
+        return self._raw.commit()
+
+    def rollback(self):
+        if hasattr(self._raw, 'rollback'):
+            return self._raw.rollback()
+
+    def close(self):
+        try:
+            return self._raw.close()
+        except Exception:
+            pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None:
+            self.rollback()
+        else:
+            self.commit()
+
+
+def _connect_turso(database_url: str, auth_token: str):
+    """Establishes and returns a wrapped Turso libSQL connection."""
+    raw_conn = libsql.connect(database=database_url, auth_token=auth_token)
+    return LibsqlConnectionWrapper(raw_conn)
+
+
+# ---------------------------------------------------------------------------
 # Schema executor — works with both sqlite3 and libsql (Turso)
 # ---------------------------------------------------------------------------
 
@@ -159,65 +343,17 @@ class Database:
 
     def connect(self):
         if self._use_turso:
-            conn = libsql.connect(database=self.turso_url, auth_token=self.auth_token)
-            conn.row_factory = _turso_row_factory
+            return _connect_turso(self.turso_url, self.auth_token)
         else:
             path = self.local_path or DEFAULT_DB_PATH
             conn = sqlite3.connect(path)
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys = ON")
-        return conn
+            return conn
 
     @property
     def is_turso(self) -> bool:
         return self._use_turso
-
-
-# ---------------------------------------------------------------------------
-# Row factories
-# ---------------------------------------------------------------------------
-
-def _turso_row_factory(cursor, row):
-    columns = [description[0] for description in cursor.description]
-    return TursoRow(columns, row)
-
-
-class TursoRow:
-    """Dict-like row wrapper for Turso results mimicking sqlite3.Row."""
-
-    def __init__(self, columns, values):
-        self._columns = columns
-        self._values = values
-        self._data = dict(zip(columns, values))
-
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            return self._values[key]
-        return self._data[key]
-
-    def __contains__(self, key):
-        return key in self._data
-
-    def keys(self):
-        return self._columns
-
-    def values(self):
-        return self._values
-
-    def items(self):
-        return self._data.items()
-
-    def get(self, key, default=None):
-        return self._data.get(key, default)
-
-    def __repr__(self):
-        return f"TursoRow({self._data})"
-
-    def __iter__(self):
-        return iter(self._columns)
-
-    def __len__(self):
-        return len(self._columns)
 
 
 # ---------------------------------------------------------------------------
@@ -233,9 +369,7 @@ def get_master_db_connection():
     turso_token = _config.TURSO_AUTH_TOKEN
 
     if turso_url and turso_token and HAS_LIBSQL:
-        conn = libsql.connect(database=turso_url, auth_token=turso_token)
-        conn.row_factory = _turso_row_factory
-        return conn
+        return _connect_turso(turso_url, turso_token)
 
     conn = sqlite3.connect(MASTER_DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -522,8 +656,7 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
 
     # Initialize tenant database (Turso or local SQLite)
     if tenant_turso_url and tenant_turso_token and HAS_LIBSQL:
-        t_conn = libsql.connect(database=tenant_turso_url, auth_token=tenant_turso_token)
-        t_conn.row_factory = _turso_row_factory
+        t_conn = _connect_turso(tenant_turso_url, tenant_turso_token)
     else:
         tenant_db_path = os.path.join(TENANTS_DIR, f"{slug}.db")
         t_conn = sqlite3.connect(tenant_db_path)
