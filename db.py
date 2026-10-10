@@ -1,6 +1,8 @@
 import os
+import json
 import sqlite3
 import hashlib
+import requests as _requests
 
 # Try to import libsql; fall back to sqlite3 for local dev
 try:
@@ -13,6 +15,9 @@ from config import get_config
 
 _config = get_config()
 
+# ---------------------------------------------------------------------------
+# Path constants (used only when Turso is NOT configured / local dev)
+# ---------------------------------------------------------------------------
 DATA_DIR = os.environ.get('DATA_DIR', os.path.dirname(__file__))
 TENANTS_DIR = os.path.join(DATA_DIR, 'tenants_db')
 os.makedirs(TENANTS_DIR, exist_ok=True)
@@ -20,11 +25,124 @@ MASTER_DB_PATH = os.path.join(DATA_DIR, 'master.db')
 DEFAULT_DB_PATH = os.path.join(DATA_DIR, 'database.db')
 
 
+# ---------------------------------------------------------------------------
+# Turso Platform API helpers
+# ---------------------------------------------------------------------------
+
+def _turso_api_headers():
+    api_token = os.environ.get('TURSO_API_TOKEN', '')
+    return {'Authorization': f'Bearer {api_token}', 'Content-Type': 'application/json'}
+
+
+def _turso_is_platform_configured() -> bool:
+    return bool(os.environ.get('TURSO_API_TOKEN') and os.environ.get('TURSO_ORG_NAME'))
+
+
+def _create_turso_tenant_db(slug: str):
+    """
+    Creates a dedicated Turso database for a tenant via the Turso Platform API.
+    Returns (db_url, auth_token) or (None, None) if not configured.
+    """
+    if not _turso_is_platform_configured():
+        return None, None
+
+    org = os.environ.get('TURSO_ORG_NAME')
+    db_name = f"vs-{slug}"
+    headers = _turso_api_headers()
+
+    try:
+        resp = _requests.post(
+            f'https://api.turso.tech/v1/organizations/{org}/databases',
+            headers=headers,
+            json={'name': db_name, 'group': 'default'},
+            timeout=20
+        )
+        if resp.status_code not in (200, 201):
+            print(f"[Turso] DB create failed ({resp.status_code}): {resp.text}")
+            return None, None
+
+        db_data = resp.json()
+        hostname = (
+            db_data.get('database', {}).get('Hostname') or
+            db_data.get('Hostname') or
+            db_data.get('hostname')
+        )
+        if not hostname:
+            print(f"[Turso] No hostname in create response: {db_data}")
+            return None, None
+
+        db_url = f"libsql://{hostname}"
+    except Exception as e:
+        print(f"[Turso] DB create exception: {e}")
+        return None, None
+
+    try:
+        token_resp = _requests.post(
+            f'https://api.turso.tech/v1/organizations/{org}/databases/{db_name}/auth/tokens',
+            headers=headers,
+            timeout=20
+        )
+        if token_resp.status_code not in (200, 201):
+            print(f"[Turso] Token create failed ({token_resp.status_code}): {token_resp.text}")
+            return None, None
+
+        auth_token = token_resp.json().get('jwt')
+        if not auth_token:
+            print(f"[Turso] No jwt in token response: {token_resp.json()}")
+            return None, None
+    except Exception as e:
+        print(f"[Turso] Token create exception: {e}")
+        return None, None
+
+    print(f"[Turso] Created DB for tenant '{slug}': {db_url}")
+    return db_url, auth_token
+
+
+def _delete_turso_tenant_db(slug: str):
+    """Deletes a tenant's Turso database via Turso Platform API."""
+    if not _turso_is_platform_configured():
+        return
+    org = os.environ.get('TURSO_ORG_NAME')
+    db_name = f"vs-{slug}"
+    try:
+        resp = _requests.delete(
+            f'https://api.turso.tech/v1/organizations/{org}/databases/{db_name}',
+            headers=_turso_api_headers(),
+            timeout=15
+        )
+        if resp.status_code in (200, 204):
+            print(f"[Turso] Deleted DB for tenant '{slug}'.")
+        else:
+            print(f"[Turso] DB delete failed ({resp.status_code}): {resp.text}")
+    except Exception as e:
+        print(f"[Turso] DB delete exception: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Schema executor — works with both sqlite3 and libsql (Turso)
+# ---------------------------------------------------------------------------
+
+def _execute_schema(conn, schema_path: str):
+    """Execute SQL schema file one statement at a time (compatible with Turso)."""
+    with open(schema_path, 'r', encoding='utf-8') as f:
+        raw_sql = f.read()
+    lines = [ln for ln in raw_sql.splitlines() if not ln.strip().startswith('--')]
+    clean_sql = '\n'.join(lines)
+    statements = [s.strip() for s in clean_sql.split(';') if s.strip()]
+    for stmt in statements:
+        try:
+            conn.execute(stmt)
+        except Exception as e:
+            print(f"[Schema] Warning: {e}")
+    conn.commit()
+
+
+# ---------------------------------------------------------------------------
+# Database class
+# ---------------------------------------------------------------------------
+
 class Database:
-    """
-    Unified database interface for both Turso (libsql) and local SQLite.
-    Supports specific tenant database connections.
-    """
+    """Unified database interface for Turso (libsql) and local SQLite."""
 
     def __init__(self, turso_url: str = None, auth_token: str = None,
                  local_path: str = None):
@@ -40,23 +158,14 @@ class Database:
             self._use_turso = bool(self.turso_url and self.auth_token and HAS_LIBSQL)
 
     def connect(self):
-        """
-        Create and return a database connection.
-        Returns a connection with row_factory set for dict-like access.
-        """
         if self._use_turso:
-            conn = libsql.connect(
-                database=self.turso_url,
-                auth_token=self.auth_token,
-            )
+            conn = libsql.connect(database=self.turso_url, auth_token=self.auth_token)
             conn.row_factory = _turso_row_factory
         else:
-            # Local SQLite fallback
             path = self.local_path or DEFAULT_DB_PATH
             conn = sqlite3.connect(path)
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys = ON")
-
         return conn
 
     @property
@@ -64,20 +173,17 @@ class Database:
         return self._use_turso
 
 
+# ---------------------------------------------------------------------------
+# Row factories
+# ---------------------------------------------------------------------------
+
 def _turso_row_factory(cursor, row):
-    """
-    Row factory for libsql that returns dict-like Row objects,
-    compatible with sqlite3.Row interface (supports both row['key'] and row[index]).
-    """
     columns = [description[0] for description in cursor.description]
     return TursoRow(columns, row)
 
 
 class TursoRow:
-    """
-    A dict-like row wrapper for Turso results that mimics sqlite3.Row.
-    Supports: row['column'], row[0], dict(row), 'column' in row, row.keys()
-    """
+    """Dict-like row wrapper for Turso results mimicking sqlite3.Row."""
 
     def __init__(self, columns, values):
         self._columns = columns
@@ -115,22 +221,32 @@ class TursoRow:
 
 
 # ---------------------------------------------------------------------------
-# Master Database & Multi-Tenant Helper Functions
+# Master Database connection
 # ---------------------------------------------------------------------------
 
 def get_master_db_connection():
     """
-    Returns connection to the Master Database (`master.db` or Turso Master URL).
+    Returns a connection to the Master Database.
+    Uses Turso (TURSO_DB_URL + TURSO_AUTH_TOKEN) if set, else local master.db.
     """
+    turso_url = _config.TURSO_DB_URL
+    turso_token = _config.TURSO_AUTH_TOKEN
+
+    if turso_url and turso_token and HAS_LIBSQL:
+        conn = libsql.connect(database=turso_url, auth_token=turso_token)
+        conn.row_factory = _turso_row_factory
+        return conn
+
     conn = sqlite3.connect(MASTER_DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
-import json
+# ---------------------------------------------------------------------------
+# Plan configuration
+# ---------------------------------------------------------------------------
 
-# Predefined Plan Configurations (limits & default feature flags)
 DEFAULT_PLAN_CONFIG = {
     'free': {
         'max_products': 25,
@@ -169,9 +285,6 @@ DEFAULT_PLAN_CONFIG = {
 
 
 def get_tenant_feature_flags(tenant) -> dict:
-    """
-    Returns resolved feature flags dictionary for a tenant based on their plan and explicit overrides.
-    """
     if not tenant:
         return DEFAULT_PLAN_CONFIG['free']['features'].copy()
 
@@ -189,14 +302,15 @@ def get_tenant_feature_flags(tenant) -> dict:
     return base_features
 
 
+# ---------------------------------------------------------------------------
+# Master DB initialization
+# ---------------------------------------------------------------------------
+
 def init_master_db():
-    """
-    Initialize master database tables (`master_admins`, `tenants`) and seed default admin/tenant.
-    """
+    """Initialize master database tables and seed defaults. Safe to call on every startup."""
     conn = get_master_db_connection()
     cur = conn.cursor()
 
-    # Create master_admins table
     cur.execute("""
     CREATE TABLE IF NOT EXISTS master_admins (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -206,7 +320,6 @@ def init_master_db():
     )
     """)
 
-    # Create tenants table
     cur.execute("""
     CREATE TABLE IF NOT EXISTS tenants (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -228,19 +341,17 @@ def init_master_db():
     )
     """)
 
-    # Migration: add feature_flags column if table already exists without it
-    try:
-        cur.execute("ALTER TABLE tenants ADD COLUMN feature_flags TEXT DEFAULT '{}'")
-    except Exception:
-        pass
+    for migration_sql in [
+        "ALTER TABLE tenants ADD COLUMN feature_flags TEXT DEFAULT '{}'",
+        "ALTER TABLE tenants ADD COLUMN theme TEXT DEFAULT 'standard'",
+        "ALTER TABLE tenants ADD COLUMN turso_db_url TEXT",
+        "ALTER TABLE tenants ADD COLUMN turso_auth_token TEXT",
+    ]:
+        try:
+            cur.execute(migration_sql)
+        except Exception:
+            pass
 
-    # Migration: add theme column if table already exists without it
-    try:
-        cur.execute("ALTER TABLE tenants ADD COLUMN theme TEXT DEFAULT 'standard'")
-    except Exception:
-        pass
-
-    # Seed default master admin if empty
     cur.execute("SELECT COUNT(*) as cnt FROM master_admins")
     if cur.fetchone()['cnt'] == 0:
         default_pwd = os.environ.get('MASTER_ADMIN_PASSWORD', 'master123')
@@ -251,22 +362,24 @@ def init_master_db():
             [default_user, pwd_hash]
         )
 
-    # Seed default primary tenant if empty
     cur.execute("SELECT COUNT(*) as cnt FROM tenants")
     if cur.fetchone()['cnt'] == 0:
         cur.execute("""
         INSERT INTO tenants (slug, store_name, owner_name, owner_email, plan, is_active, max_products, feature_flags)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, ['default', 'The Cozy Corner', 'Store Owner', 'owner@example.com', 'free', 1, 100, json.dumps(DEFAULT_PLAN_CONFIG['free']['features'])])
+        """, ['default', 'The Cozy Corner', 'Store Owner', 'owner@example.com',
+              'free', 1, 100, json.dumps(DEFAULT_PLAN_CONFIG['free']['features'])])
 
     conn.commit()
     conn.close()
 
 
+# ---------------------------------------------------------------------------
+# Tenant DB helpers
+# ---------------------------------------------------------------------------
+
 def get_tenant_by_identifier(identifier: str):
-    """
-    Looks up tenant by slug or custom_domain.
-    """
+    """Looks up tenant by slug or custom_domain."""
     conn = get_master_db_connection()
     cur = conn.cursor()
     cur.execute(
@@ -281,35 +394,57 @@ def get_tenant_by_identifier(identifier: str):
 def get_tenant_db_connection(tenant_slug: str):
     """
     Returns a connection to the specific tenant's database.
-    If tenant is 'default', uses root database.db or configured Turso URL.
-    Otherwise uses `tenants_db/<slug>.db`.
+    Priority:
+      1. Tenant's own Turso DB (credentials stored in master DB)
+      2. Default Turso DB (for 'default' tenant via TURSO_DB_URL env var)
+      3. Local SQLite fallback (local dev only)
     """
     if not tenant_slug or tenant_slug == 'default':
         return Database().connect()
+
+    try:
+        m_conn = get_master_db_connection()
+        cur = m_conn.cursor()
+        cur.execute(
+            "SELECT turso_db_url, turso_auth_token FROM tenants WHERE slug = ?",
+            [tenant_slug]
+        )
+        row = cur.fetchone()
+        m_conn.close()
+
+        if row and row['turso_db_url'] and row['turso_auth_token'] and HAS_LIBSQL:
+            return Database(
+                turso_url=row['turso_db_url'],
+                auth_token=row['turso_auth_token']
+            ).connect()
+    except Exception as e:
+        print(f"[DB] Could not fetch Turso credentials for '{tenant_slug}': {e}")
 
     tenant_db_path = os.path.join(TENANTS_DIR, f"{tenant_slug}.db")
     return Database(local_path=tenant_db_path).connect()
 
 
 def update_tenant_admin_password(slug: str, new_password: str):
-    """
-    Updates the admin_password for a tenant in their database's settings table.
-    """
+    """Updates the admin_password for a tenant in their settings table."""
     pwd_hash = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
     t_conn = get_tenant_db_connection(slug)
-    t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_password', ?)", [pwd_hash])
+    t_conn.execute(
+        "INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_password', ?)",
+        [pwd_hash]
+    )
     t_conn.commit()
     t_conn.close()
     return True
 
 
 def delete_tenant(tenant_id: int):
-    """
-    Deletes a tenant by ID from master.db and removes their local sqlite db file (safeguarding 'default').
-    """
+    """Deletes a tenant from master DB and removes their Turso DB or local SQLite file."""
     m_conn = get_master_db_connection()
     cur = m_conn.cursor()
-    cur.execute("SELECT slug, store_name FROM tenants WHERE id = ?", [tenant_id])
+    cur.execute(
+        "SELECT slug, store_name, turso_db_url FROM tenants WHERE id = ?",
+        [tenant_id]
+    )
     tenant = cur.fetchone()
     if not tenant:
         m_conn.close()
@@ -325,12 +460,16 @@ def delete_tenant(tenant_id: int):
     m_conn.commit()
     m_conn.close()
 
+    if tenant['turso_db_url']:
+        _delete_turso_tenant_db(slug)
+
     db_path = os.path.join(TENANTS_DIR, f"{slug}.db")
     if os.path.exists(db_path):
         try:
             os.remove(db_path)
         except Exception:
             pass
+
     return store_name
 
 
@@ -342,13 +481,15 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
                          admin_password: str = 'admin123',
                          feature_flags: dict = None):
     """
-    Provisions a brand new tenant database and inserts record into master.db.
+    Provisions a new tenant:
+      1. Creates a dedicated Turso database (if Turso Platform API is configured).
+      2. Inserts tenant record in master DB with Turso credentials.
+      3. Initializes schema and seeds settings in the new tenant DB.
     """
     slug = slug.strip().lower()
     master_conn = get_master_db_connection()
     m_cur = master_conn.cursor()
 
-    # Check if slug or domain exists
     m_cur.execute("SELECT id FROM tenants WHERE slug = ?", [slug])
     if m_cur.fetchone():
         master_conn.close()
@@ -360,31 +501,38 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
             master_conn.close()
             raise ValueError(f"Custom domain '{custom_domain}' is already assigned to another store.")
 
-    # Prepare feature flags JSON
     resolved_features = DEFAULT_PLAN_CONFIG.get(plan, DEFAULT_PLAN_CONFIG['free'])['features'].copy()
     if feature_flags:
         resolved_features.update(feature_flags)
     flags_json = json.dumps(resolved_features)
 
-    # Create tenant entry in master db
+    # Try to create a dedicated Turso database for this tenant
+    tenant_turso_url, tenant_turso_token = _create_turso_tenant_db(slug)
+
     m_cur.execute("""
-    INSERT INTO tenants (slug, store_name, owner_name, owner_email, owner_phone, custom_domain, plan, theme, max_products, feature_flags)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, [slug, store_name, owner_name, owner_email, owner_phone, custom_domain or None, plan, theme or 'standard', max_products, flags_json])
+    INSERT INTO tenants (slug, store_name, owner_name, owner_email, owner_phone,
+                         custom_domain, plan, theme, max_products, feature_flags,
+                         turso_db_url, turso_auth_token)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, [slug, store_name, owner_name, owner_email, owner_phone,
+          custom_domain or None, plan, theme or 'standard', max_products, flags_json,
+          tenant_turso_url, tenant_turso_token])
     master_conn.commit()
     master_conn.close()
 
-    # Create tenant SQLite DB & execute schema.sql
-    tenant_db_path = os.path.join(TENANTS_DIR, f"{slug}.db")
-    t_conn = sqlite3.connect(tenant_db_path)
-    t_conn.row_factory = sqlite3.Row
+    # Initialize tenant database (Turso or local SQLite)
+    if tenant_turso_url and tenant_turso_token and HAS_LIBSQL:
+        t_conn = libsql.connect(database=tenant_turso_url, auth_token=tenant_turso_token)
+        t_conn.row_factory = _turso_row_factory
+    else:
+        tenant_db_path = os.path.join(TENANTS_DIR, f"{slug}.db")
+        t_conn = sqlite3.connect(tenant_db_path)
+        t_conn.row_factory = sqlite3.Row
 
     base_dir = os.path.dirname(__file__)
     schema_path = os.path.join(base_dir, 'schema.sql')
-    with open(schema_path, 'r', encoding='utf-8') as f:
-        t_conn.executescript(f.read())
+    _execute_schema(t_conn, schema_path)
 
-    # Customize settings table for new tenant
     user_to_set = (admin_username or 'admin').strip() or 'admin'
     pwd_hash = hashlib.sha256(admin_password.encode('utf-8')).hexdigest()
     t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('shop_name', ?)", [store_name])
@@ -393,31 +541,37 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
     if owner_phone:
         t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('whatsapp_number', ?)", [owner_phone])
 
-    # Run migrations if any
-    try:
-        t_conn.execute("ALTER TABLE orders ADD COLUMN reserved_until TEXT")
-    except Exception:
-        pass
-    try:
-        t_conn.execute("ALTER TABLE customers ADD COLUMN post_office TEXT")
-    except Exception:
-        pass
+    for migration in [
+        "ALTER TABLE orders ADD COLUMN reserved_until TEXT",
+        "ALTER TABLE customers ADD COLUMN post_office TEXT",
+        "ALTER TABLE customers ADD COLUMN district TEXT",
+        "ALTER TABLE customers ADD COLUMN landmark TEXT",
+    ]:
+        try:
+            t_conn.execute(migration)
+        except Exception:
+            pass
 
     t_conn.commit()
     t_conn.close()
     return True
 
 
-# Default convenience
+# ---------------------------------------------------------------------------
+# Default database convenience helpers
+# ---------------------------------------------------------------------------
+
 _default_db = Database()
 
 
 def get_connection():
-    """Get a connection from default database."""
+    """Get a connection from the default (main) database."""
     return _default_db.connect()
 
 
 def is_turso() -> bool:
-    """Check if default DB is Turso."""
+    """Check if the default DB is using Turso."""
     return _default_db.is_turso
+
+
 
