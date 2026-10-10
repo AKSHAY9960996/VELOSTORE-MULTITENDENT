@@ -165,6 +165,18 @@ class TursoRow(Mapping):
         return f"TursoRow({self._data})"
 
 
+def _normalize_params(params):
+    if params is None:
+        return ()
+    if isinstance(params, tuple):
+        return params
+    if isinstance(params, (list, set)):
+        return tuple(params)
+    if isinstance(params, dict):
+        return params
+    return (params,)
+
+
 class LibsqlCursorWrapper:
     """Wraps a raw libSQL cursor to return TursoRow objects."""
 
@@ -175,11 +187,12 @@ class LibsqlCursorWrapper:
         if params is None:
             self._raw.execute(sql)
         else:
-            self._raw.execute(sql, params)
+            self._raw.execute(sql, _normalize_params(params))
         return self
 
     def executemany(self, sql, seq_of_params):
-        self._raw.executemany(sql, seq_of_params)
+        normalized_seq = [_normalize_params(p) for p in seq_of_params]
+        self._raw.executemany(sql, normalized_seq)
         return self
 
     @property
