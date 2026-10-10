@@ -13,8 +13,11 @@ from config import get_config
 
 _config = get_config()
 
-TENANTS_DIR = os.path.join(os.path.dirname(__file__), 'tenants_db')
+DATA_DIR = os.environ.get('DATA_DIR', os.path.dirname(__file__))
+TENANTS_DIR = os.path.join(DATA_DIR, 'tenants_db')
 os.makedirs(TENANTS_DIR, exist_ok=True)
+MASTER_DB_PATH = os.path.join(DATA_DIR, 'master.db')
+DEFAULT_DB_PATH = os.path.join(DATA_DIR, 'database.db')
 
 
 class Database:
@@ -49,9 +52,7 @@ class Database:
             conn.row_factory = _turso_row_factory
         else:
             # Local SQLite fallback
-            path = self.local_path or os.path.join(
-                os.path.dirname(__file__), 'database.db'
-            )
+            path = self.local_path or DEFAULT_DB_PATH
             conn = sqlite3.connect(path)
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys = ON")
@@ -121,8 +122,7 @@ def get_master_db_connection():
     """
     Returns connection to the Master Database (`master.db` or Turso Master URL).
     """
-    master_path = os.path.join(os.path.dirname(__file__), 'master.db')
-    conn = sqlite3.connect(master_path)
+    conn = sqlite3.connect(MASTER_DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
