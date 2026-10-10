@@ -293,18 +293,51 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def save_image(file):
-    """Upload image to Cloudinary, return URL."""
+    """Upload image to Cloudinary (if configured), fallback to local static/uploads/."""
     if not file or not allowed_file(file.filename):
         return None
-    url = cloudinary_helper.upload_image(file, folder="products")
-    return url
+    url = None
+    try:
+        url = cloudinary_helper.upload_image(file, folder="products")
+    except Exception as e:
+        print(f"[Cloudinary] upload exception: {e}")
+    if url:
+        return url
+    # Fallback to local storage if Cloudinary returns None or is unconfigured
+    try:
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{secrets.token_hex(8)}.{ext}"
+        upload_dir = os.path.join(BASE_DIR, 'static', 'uploads')
+        os.makedirs(upload_dir, exist_ok=True)
+        file.seek(0)
+        file.save(os.path.join(upload_dir, filename))
+        return filename
+    except Exception as e:
+        print(f"[Local Save] error: {e}")
+        return None
 
 def save_logo_image(file):
-    """Upload shop logo to Cloudinary, return URL."""
+    """Upload shop logo to Cloudinary, fallback to local static/uploads/."""
     if not file or not allowed_file(file.filename):
         return None
-    url = cloudinary_helper.upload_logo(file, folder="branding")
-    return url
+    url = None
+    try:
+        url = cloudinary_helper.upload_logo(file, folder="branding")
+    except Exception as e:
+        print(f"[Cloudinary] logo upload exception: {e}")
+    if url:
+        return url
+    try:
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"logo_{secrets.token_hex(6)}.{ext}"
+        upload_dir = os.path.join(BASE_DIR, 'static', 'uploads')
+        os.makedirs(upload_dir, exist_ok=True)
+        file.seek(0)
+        file.save(os.path.join(upload_dir, filename))
+        return filename
+    except Exception as e:
+        print(f"[Local Logo Save] error: {e}")
+        return None
 
 def delete_image(url):
     """Delete an image from Cloudinary."""
@@ -686,7 +719,7 @@ def admin_sw():
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if session.get('admin_logged_in') and session.get('admin_tenant_slug') == g.tenant_slug:
-        return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('admin_dashboard', shop=g.tenant_slug))
     if request.method == 'POST':
         client_ip = request.headers.get('X-Forwarded-For', request.remote_addr or '127.0.0.1')
         attempt_key = f"{g.tenant_slug}:{client_ip}"
@@ -704,19 +737,60 @@ def admin_login():
 
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
-        stored_user = get_setting('admin_username', 'admin')
-        stored_pass = get_setting('admin_password', 'admin123')
+        shop_slug = request.form.get('shop_slug', '').strip() or request.args.get('shop', '').strip()
 
-        if username == stored_user and (
-            password == stored_pass or hash_password(password) == stored_pass
-        ):
+        target_slug = shop_slug or getattr(g, 'tenant_slug', 'default')
+
+        # Check 1: Authenticate against target_slug
+        authenticated_slug = None
+        try:
+            t_conn = get_tenant_db_connection(target_slug)
+            u_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_username'").fetchone()
+            p_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_password'").fetchone()
+            t_conn.close()
+            stored_user = u_row['value'] if u_row else 'admin'
+            stored_pass = p_row['value'] if p_row else 'admin123'
+            if username == stored_user and (password == stored_pass or hash_password(password) == stored_pass):
+                authenticated_slug = target_slug
+        except Exception:
+            pass
+
+        # Check 2: If not matched on target_slug, search across all active tenants automatically
+        if not authenticated_slug:
+            try:
+                m_conn = get_master_db_connection()
+                cur = m_conn.cursor()
+                cur.execute("SELECT slug FROM tenants WHERE is_active = 1")
+                all_tenants = cur.fetchall()
+                m_conn.close()
+                for row in all_tenants:
+                    candidate_slug = row['slug']
+                    if candidate_slug == target_slug:
+                        continue
+                    try:
+                        t_conn = get_tenant_db_connection(candidate_slug)
+                        u_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_username'").fetchone()
+                        p_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_password'").fetchone()
+                        t_conn.close()
+                        cand_user = u_row['value'] if u_row else 'admin'
+                        cand_pass = p_row['value'] if p_row else 'admin123'
+                        if username == cand_user and (password == cand_pass or hash_password(password) == cand_pass):
+                            authenticated_slug = candidate_slug
+                            break
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+
+        if authenticated_slug:
             FAILED_LOGIN_ATTEMPTS.pop(attempt_key, None)
+            session['active_tenant_slug'] = authenticated_slug
+            session['admin_tenant_slug'] = authenticated_slug
             session['admin_logged_in'] = True
-            session['admin_tenant_slug'] = g.tenant_slug
             session['admin_username'] = username
             session.permanent = True
             flash('Welcome back! 👋', 'success')
-            return redirect(url_for('admin_dashboard'))
+            return redirect(url_for('admin_dashboard', shop=authenticated_slug))
 
         # Record failed attempt
         if attempt_key not in FAILED_LOGIN_ATTEMPTS:
@@ -877,7 +951,12 @@ def admin_add_product():
             return render_template('admin/product_form.html', product=None, categories=categories, action='Add')
 
         # Enforce max_products plan limit
-        max_allowed = g.tenant.get('max_products', 100) if getattr(g, 'tenant', None) and g.tenant else 100
+        max_allowed = 100
+        if getattr(g, 'tenant', None) and g.tenant:
+            try:
+                max_allowed = g.tenant['max_products'] if 'max_products' in g.tenant.keys() else 100
+            except Exception:
+                max_allowed = 100
         current_count = query_db('SELECT COUNT(*) as cnt FROM products', one=True)['cnt']
         if current_count >= max_allowed:
             flash(f'Product limit reached for your plan (Maximum: {max_allowed} products). Please contact platform admin to upgrade.', 'error')

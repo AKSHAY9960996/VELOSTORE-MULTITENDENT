@@ -36,7 +36,14 @@
       {% endfor %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('admin_login') }}">
+    <form method="POST" action="{{ request.full_path }}">
+      {% if g.tenant_slug and g.tenant_slug != 'default' %}
+        <input type="hidden" name="shop_slug" value="{{ g.tenant_slug }}" />
+        <div style="background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 8px 12px; margin-bottom: 16px; font-size: 0.82rem; color: #a5b4fc; display: flex; align-items: center; justify-content: space-between;">
+          <span>🏪 Store: <b>{{ g.tenant.store_name if g.tenant else g.tenant_slug }}</b></span>
+          <span style="font-family: monospace; font-size: 0.74rem; background: rgba(0,0,0,0.25); padding: 2px 6px; border-radius: 4px;">{{ g.tenant_slug }}</span>
+        </div>
+      {% endif %}
       <div class="a-form-group">
         <label for="username">Username</label>
         <input type="text" id="username" name="username"
