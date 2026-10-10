@@ -5,13 +5,13 @@ import hashlib
 from collections.abc import Mapping
 import requests as _requests
 
-# Try to import libsql; fall back to sqlite3 for local dev
+# Try to import official libsql; fall back to sqlite3 for local dev
 try:
-    import libsql_experimental as libsql
+    import libsql
     HAS_LIBSQL = True
 except ImportError:
     try:
-        import libsql
+        import libsql_experimental as libsql
         HAS_LIBSQL = True
     except ImportError:
         HAS_LIBSQL = False
@@ -311,7 +311,10 @@ class LibsqlConnectionWrapper:
 
 def _connect_turso(database_url: str, auth_token: str):
     """Establishes and returns a wrapped Turso libSQL connection."""
-    raw_conn = libsql.connect(database=database_url, auth_token=auth_token)
+    try:
+        raw_conn = libsql.connect(database_url, auth_token=auth_token)
+    except TypeError:
+        raw_conn = libsql.connect(database=database_url, auth_token=auth_token)
     return LibsqlConnectionWrapper(raw_conn)
 
 

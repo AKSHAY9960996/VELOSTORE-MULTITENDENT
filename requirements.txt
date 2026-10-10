@@ -2,6 +2,6 @@ Flask
 gunicorn
 Pillow
 cloudinary
-libsql-experimental
+libsql
 python-dotenv
 requests
