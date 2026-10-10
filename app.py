@@ -30,6 +30,10 @@ ALLOWED_EXTENSIONS = app_config.ALLOWED_EXTENSIONS
 # Initialize Master Database
 init_master_db()
 
+@app.route('/health')
+def health_check():
+    return jsonify(status="ok", timestamp=datetime.utcnow().isoformat()), 200
+
 # ---------------------------------------------------------------------------
 # Multi-Tenant Middleware & Database Connection
 # ---------------------------------------------------------------------------
@@ -45,6 +49,9 @@ def resolve_tenant_context():
     Fallback: 'default'
     """
     path = request.path
+
+    if path == '/health':
+        return
 
     # Check if request is for Master Admin
     if path.startswith('/master'):
