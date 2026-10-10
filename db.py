@@ -332,6 +332,7 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
                          owner_email: str = '', owner_phone: str = '',
                          plan: str = 'free', theme: str = 'standard',
                          max_products: int = 100, custom_domain: str = '',
+                         admin_username: str = 'admin',
                          admin_password: str = 'admin123',
                          feature_flags: dict = None):
     """
@@ -378,9 +379,10 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
         t_conn.executescript(f.read())
 
     # Customize settings table for new tenant
+    user_to_set = (admin_username or 'admin').strip() or 'admin'
     pwd_hash = hashlib.sha256(admin_password.encode('utf-8')).hexdigest()
     t_conn.execute("UPDATE settings SET value = ? WHERE key = 'shop_name'", [store_name])
-    t_conn.execute("UPDATE settings SET value = ? WHERE key = 'admin_username'", ['admin'])
+    t_conn.execute("UPDATE settings SET value = ? WHERE key = 'admin_username'", [user_to_set])
     t_conn.execute("UPDATE settings SET value = ? WHERE key = 'admin_password'", [pwd_hash])
     if owner_phone:
         t_conn.execute("UPDATE settings SET value = ? WHERE key = 'whatsapp_number'", [owner_phone])

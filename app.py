@@ -1364,8 +1364,12 @@ def master_dashboard():
         rev = 0.0
         c_cnt = 0
 
+        adm_usr = 'admin'
         try:
             t_conn = get_tenant_db_connection(t['slug'])
+            u_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_username'").fetchone()
+            if u_row and u_row['value']:
+                adm_usr = u_row['value']
             p_cnt = t_conn.execute("SELECT COUNT(*) as cnt FROM products").fetchone()['cnt']
             o_cnt = t_conn.execute("SELECT COUNT(*) as cnt FROM orders").fetchone()['cnt']
             rev_row = t_conn.execute("SELECT COALESCE(SUM(total), 0) as rev FROM orders WHERE status NOT IN ('Cancelled', 'Expired')").fetchone()
@@ -1374,6 +1378,8 @@ def master_dashboard():
             t_conn.close()
         except Exception:
             pass
+
+        t['admin_username'] = adm_usr
 
         t['product_count'] = p_cnt
         t['order_count'] = o_cnt
@@ -1422,6 +1428,7 @@ def master_tenant_new():
             max_products = int(request.form.get('max_products', 100))
         except ValueError:
             max_products = 100
+        admin_username = request.form.get('admin_username', '').strip() or 'admin'
         admin_password = request.form.get('admin_password', 'admin123')
 
         # Feature flags toggles
@@ -1445,10 +1452,11 @@ def master_tenant_new():
                 theme=theme,
                 max_products=max_products,
                 custom_domain=custom_domain,
+                admin_username=admin_username,
                 admin_password=admin_password,
                 feature_flags=feature_flags
             )
-            flash(f"Store database for '{store_name}' (/s/{slug}) successfully provisioned! 🚀", 'success')
+            flash(f"Store database for '{store_name}' (/s/{slug}) successfully provisioned! 🚀 (Login: {admin_username})", 'success')
             return redirect(url_for('master_dashboard'))
         except Exception as e:
             flash(f"Error provisioning store: {str(e)}", 'error')
@@ -1503,12 +1511,15 @@ def master_tenant_edit(tenant_id):
         m_conn.commit()
         m_conn.close()
 
-        # Update tenant settings shop_name and phone
+        # Update tenant settings shop_name, phone, and optional admin_username
+        new_username = request.form.get('admin_username', '').strip()
         try:
             t_conn = get_tenant_db_connection(tenant['slug'])
             t_conn.execute("UPDATE settings SET value = ? WHERE key = 'shop_name'", [store_name])
             if owner_phone:
                 t_conn.execute("UPDATE settings SET value = ? WHERE key = 'whatsapp_number'", [owner_phone])
+            if new_username:
+                t_conn.execute("UPDATE settings SET value = ? WHERE key = 'admin_username'", [new_username])
             t_conn.commit()
             t_conn.close()
         except Exception:
@@ -1527,8 +1538,18 @@ def master_tenant_edit(tenant_id):
         return redirect(url_for('master_dashboard'))
 
     m_conn.close()
+    current_admin_username = 'admin'
+    try:
+        t_conn = get_tenant_db_connection(tenant['slug'])
+        row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_username'").fetchone()
+        if row and row['value']:
+            current_admin_username = row['value']
+        t_conn.close()
+    except Exception:
+        pass
+
     tenant_features = get_tenant_feature_flags(tenant)
-    return render_template('master/tenant_form.html', tenant=tenant, tenant_features=tenant_features, default_plans=DEFAULT_PLAN_CONFIG, action='Edit')
+    return render_template('master/tenant_form.html', tenant=tenant, tenant_features=tenant_features, current_admin_username=current_admin_username, default_plans=DEFAULT_PLAN_CONFIG, action='Edit')
 
 
 @app.route('/master/tenants/<int:tenant_id>/toggle-status', methods=['POST'])

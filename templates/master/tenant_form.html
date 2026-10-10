@@ -237,18 +237,34 @@
         </h3>
 
         {% if not tenant %}
-          <div style="margin-bottom: 16px;">
-            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Initial Shop Admin Password *</label>
-            <input type="password" name="admin_password" required value="admin123"
-                   style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
-            <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Initial login username will be: <code style="color:#a5b4fc">admin</code></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Shop Admin Username</label>
+              <input type="text" name="admin_username" value="admin" placeholder="admin" required
+                     style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+              <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Default is <code style="color:#a5b4fc">admin</code>, or customize as needed.</div>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Initial Shop Admin Password *</label>
+              <input type="password" name="admin_password" required value="admin123"
+                     style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+              <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Temporary password for the store owner.</div>
+            </div>
           </div>
         {% else %}
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Reset Store Admin Password (Optional)</label>
-            <input type="password" name="admin_password" placeholder="Leave blank to keep existing password"
-                   style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
-            <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Entering a value here immediately changes the tenant's admin login password.</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Store Admin Username</label>
+              <input type="text" name="admin_username" value="{{ current_admin_username or 'admin' }}" placeholder="admin"
+                     style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+              <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Update the login username for this store admin.</div>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Reset Admin Password (Optional)</label>
+              <input type="password" name="admin_password" placeholder="Leave blank to keep existing password"
+                     style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
+              <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Entering a value resets the store owner's password.</div>
+            </div>
           </div>
 
           <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
