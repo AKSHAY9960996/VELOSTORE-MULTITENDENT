@@ -25,10 +25,16 @@ class Database:
 
     def __init__(self, turso_url: str = None, auth_token: str = None,
                  local_path: str = None):
-        self.turso_url = turso_url or _config.TURSO_DB_URL
-        self.auth_token = auth_token or _config.TURSO_AUTH_TOKEN
-        self.local_path = local_path
-        self._use_turso = bool(self.turso_url and self.auth_token and HAS_LIBSQL)
+        if local_path:
+            self.local_path = local_path
+            self.turso_url = None
+            self.auth_token = None
+            self._use_turso = False
+        else:
+            self.turso_url = turso_url or _config.TURSO_DB_URL
+            self.auth_token = auth_token or _config.TURSO_AUTH_TOKEN
+            self.local_path = None
+            self._use_turso = bool(self.turso_url and self.auth_token and HAS_LIBSQL)
 
     def connect(self):
         """
@@ -291,7 +297,7 @@ def update_tenant_admin_password(slug: str, new_password: str):
     """
     pwd_hash = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
     t_conn = get_tenant_db_connection(slug)
-    t_conn.execute("UPDATE settings SET value = ? WHERE key = 'admin_password'", [pwd_hash])
+    t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_password', ?)", [pwd_hash])
     t_conn.commit()
     t_conn.close()
     return True
@@ -381,11 +387,11 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
     # Customize settings table for new tenant
     user_to_set = (admin_username or 'admin').strip() or 'admin'
     pwd_hash = hashlib.sha256(admin_password.encode('utf-8')).hexdigest()
-    t_conn.execute("UPDATE settings SET value = ? WHERE key = 'shop_name'", [store_name])
-    t_conn.execute("UPDATE settings SET value = ? WHERE key = 'admin_username'", [user_to_set])
-    t_conn.execute("UPDATE settings SET value = ? WHERE key = 'admin_password'", [pwd_hash])
+    t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('shop_name', ?)", [store_name])
+    t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_username', ?)", [user_to_set])
+    t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_password', ?)", [pwd_hash])
     if owner_phone:
-        t_conn.execute("UPDATE settings SET value = ? WHERE key = 'whatsapp_number'", [owner_phone])
+        t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('whatsapp_number', ?)", [owner_phone])
 
     # Run migrations if any
     try:

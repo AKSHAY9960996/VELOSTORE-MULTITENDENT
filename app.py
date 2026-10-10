@@ -353,6 +353,9 @@ def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not session.get('admin_logged_in') or session.get('admin_tenant_slug') != g.tenant_slug:
+            shop_arg = g.tenant_slug if (getattr(g, 'tenant_slug', None) and g.tenant_slug != 'default') else None
+            if shop_arg:
+                return redirect(url_for('admin_login', shop=shop_arg))
             return redirect(url_for('admin_login'))
         return f(*args, **kwargs)
     return decorated
@@ -721,7 +724,7 @@ def admin_login():
     if session.get('admin_logged_in') and session.get('admin_tenant_slug') == g.tenant_slug:
         return redirect(url_for('admin_dashboard', shop=g.tenant_slug))
     if request.method == 'POST':
-        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr or '127.0.0.1')
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr or '127.0.0.1').split(',')[0].strip()
         attempt_key = f"{g.tenant_slug}:{client_ip}"
         now = datetime.now()
 
@@ -737,25 +740,59 @@ def admin_login():
 
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
-        shop_slug = request.form.get('shop_slug', '').strip() or request.args.get('shop', '').strip()
+        shop_slug = request.form.get('shop_slug', '').strip().lower() or request.args.get('shop', '').strip().lower()
 
-        target_slug = shop_slug or getattr(g, 'tenant_slug', 'default')
+        target_slug = shop_slug or (g.tenant_slug if getattr(g, 'tenant_slug', 'default') != 'default' else None)
 
-        # Check 1: Authenticate against target_slug
         authenticated_slug = None
-        try:
-            t_conn = get_tenant_db_connection(target_slug)
-            u_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_username'").fetchone()
-            p_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_password'").fetchone()
-            t_conn.close()
-            stored_user = u_row['value'] if u_row else 'admin'
-            stored_pass = p_row['value'] if p_row else 'admin123'
-            if username == stored_user and (password == stored_pass or hash_password(password) == stored_pass):
-                authenticated_slug = target_slug
-        except Exception:
-            pass
+        pwd_hash = hash_password(password)
 
-        # Check 2: If not matched on target_slug, search across all active tenants automatically
+        def verify_credentials_for_slug(slug_to_check):
+            """Helper to verify username & password against a specific tenant database & master record."""
+            try:
+                # 1. Check master info for email / slug matching
+                m_conn = get_master_db_connection()
+                cur = m_conn.cursor()
+                cur.execute("SELECT slug, owner_email, is_active FROM tenants WHERE slug = ?", [slug_to_check])
+                tenant_rec = cur.fetchone()
+                m_conn.close()
+
+                if tenant_rec and not tenant_rec['is_active']:
+                    return False
+
+                owner_email = (tenant_rec['owner_email'] or '').strip().lower() if tenant_rec else ''
+
+                # 2. Check tenant db settings
+                t_conn = get_tenant_db_connection(slug_to_check)
+                u_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_username'").fetchone()
+                p_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_password'").fetchone()
+                t_conn.close()
+
+                stored_user = (u_row['value'] if u_row else 'admin').strip()
+                stored_pass = (p_row['value'] if p_row else 'admin123').strip()
+
+                user_matches = (
+                    username.lower() == stored_user.lower() or
+                    (owner_email and username.lower() == owner_email) or
+                    username.lower() == slug_to_check.lower()
+                )
+
+                pass_matches = (
+                    password == stored_pass or
+                    pwd_hash == stored_pass or
+                    pwd_hash.lower() == stored_pass.lower()
+                )
+
+                return user_matches and pass_matches
+            except Exception:
+                return False
+
+        # Step 1: If target_slug is specified, check that tenant first
+        if target_slug:
+            if verify_credentials_for_slug(target_slug):
+                authenticated_slug = target_slug
+
+        # Step 2: Search across all active tenants in master.db
         if not authenticated_slug:
             try:
                 m_conn = get_master_db_connection()
@@ -765,22 +802,18 @@ def admin_login():
                 m_conn.close()
                 for row in all_tenants:
                     candidate_slug = row['slug']
-                    if candidate_slug == target_slug:
+                    if target_slug and candidate_slug == target_slug:
                         continue
-                    try:
-                        t_conn = get_tenant_db_connection(candidate_slug)
-                        u_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_username'").fetchone()
-                        p_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_password'").fetchone()
-                        t_conn.close()
-                        cand_user = u_row['value'] if u_row else 'admin'
-                        cand_pass = p_row['value'] if p_row else 'admin123'
-                        if username == cand_user and (password == cand_pass or hash_password(password) == cand_pass):
-                            authenticated_slug = candidate_slug
-                            break
-                    except Exception:
-                        continue
+                    if verify_credentials_for_slug(candidate_slug):
+                        authenticated_slug = candidate_slug
+                        break
             except Exception:
                 pass
+
+        # Step 3: Check default database
+        if not authenticated_slug and target_slug != 'default':
+            if verify_credentials_for_slug('default'):
+                authenticated_slug = 'default'
 
         if authenticated_slug:
             FAILED_LOGIN_ATTEMPTS.pop(attempt_key, None)
@@ -801,7 +834,7 @@ def admin_login():
 
         remaining = 5 - FAILED_LOGIN_ATTEMPTS[attempt_key][0]
         if remaining > 0:
-            flash(f'Invalid username or password. ({remaining} attempt{"s" if remaining > 1 else ""} remaining before lockout)', 'error')
+            flash(f'Invalid username, store identifier, or password. ({remaining} attempt{"s" if remaining > 1 else ""} remaining before lockout)', 'error')
         else:
             flash('🔒 Too many failed attempts. Account temporarily locked out for 5 minutes for security.', 'error')
 
@@ -812,8 +845,11 @@ def admin_login():
 def admin_logout():
     if session.get('is_impersonating'):
         return redirect(url_for('master_stop_impersonating'))
+    current_shop = session.get('admin_tenant_slug') or session.get('active_tenant_slug')
     session.clear()
     flash('You have been logged out.', 'info')
+    if current_shop and current_shop != 'default':
+        return redirect(url_for('admin_login', shop=current_shop))
     return redirect(url_for('admin_login'))
 
 
