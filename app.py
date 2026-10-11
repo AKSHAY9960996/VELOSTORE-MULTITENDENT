@@ -38,9 +38,54 @@ def _ensure_master_db_ready():
         except Exception as e:
             print(f"[Init] Master DB lazy init error: {e}")
 
+_default_db_initialized = False
+
+def _ensure_default_db_ready():
+    global _default_db_initialized
+    if not _default_db_initialized:
+        try:
+            with app.app_context():
+                init_db()
+            _default_db_initialized = True
+        except Exception as e:
+            print(f"[Init] default DB init error: {e}", flush=True)
+
 @app.route('/health')
 def health_check():
     return jsonify(status="ok", timestamp=datetime.utcnow().isoformat()), 200
+
+@app.route('/diag')
+def diag():
+    """Safe diagnostics: shows env presence + tests Turso with a 10s timeout. No secrets shown."""
+    import threading, time, importlib.util
+    url = os.environ.get('TURSO_DB_URL', '')
+    info = {
+        'flask_env': os.environ.get('FLASK_ENV'),
+        'libsql_installed': importlib.util.find_spec('libsql') is not None,
+        'TURSO_DB_URL_set': bool(url),
+        'TURSO_DB_URL_prefix': url[:9] + '...' if url else '',
+        'TURSO_DB_URL_has_whitespace': url != url.strip(),
+        'TURSO_AUTH_TOKEN_set': bool(os.environ.get('TURSO_AUTH_TOKEN')),
+        'CLOUDINARY_set': bool(os.environ.get('CLOUDINARY_CLOUD_NAME') and os.environ.get('CLOUDINARY_API_KEY') and os.environ.get('CLOUDINARY_API_SECRET')),
+    }
+    result = {}
+    def _test():
+        t = time.time()
+        try:
+            conn = get_master_db_connection()
+            result['connected_in_s'] = round(time.time() - t, 2)
+            rows = conn.execute("SELECT 1").fetchall()
+            result['select_1'] = str(rows)
+            result['total_s'] = round(time.time() - t, 2)
+            conn.close()
+        except Exception as e:
+            result['error'] = f"{type(e).__name__}: {e}"
+    th = threading.Thread(target=_test, daemon=True)
+    th.start()
+    th.join(10)
+    if th.is_alive():
+        result['error'] = 'TIMEOUT: Turso connection did not respond within 10s'
+    return jsonify(env=info, turso_test=result), 200
 
 # ---------------------------------------------------------------------------
 # Multi-Tenant Middleware & Database Connection
@@ -58,10 +103,11 @@ def resolve_tenant_context():
     """
     path = request.path
 
-    if path == '/health':
+    if path in ('/health', '/diag'):
         return
 
     _ensure_master_db_ready()
+    _ensure_default_db_ready()
 
     # Check if request is for Master Admin
     if path.startswith('/master'):
@@ -1824,9 +1870,8 @@ def storefront_shop(shop_slug, subpath):
 # Entry Point
 # ===========================================================================
 
-# Always run DB setup (works under both WSGI and direct python app.py)
-with app.app_context():
-    init_db()
+# DB setup now runs lazily on first real request (see _ensure_default_db_ready),
+# so a slow/unreachable Turso can never block the worker from starting.
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
