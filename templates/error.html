@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <style>
+    :root{--bg:#f7f8fc;--card:#fff;--line:rgba(15,23,42,.10);--text:#0f172a;--muted:#5b6478;--p:#6366f1;--p2:#8b5cf6}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+      background:radial-gradient(800px 420px at 80% -10%,rgba(99,102,241,.14),transparent),var(--bg);
+      color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:44px 32px;max-width:460px;width:100%;
+      text-align:center;box-shadow:0 12px 40px rgba(15,23,42,.08)}
+    .code{font-size:3.4rem;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--p),var(--p2));
+      -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px}
+    h1{font-size:1.45rem;margin-bottom:10px}
+    p{color:var(--muted);font-size:.97rem;margin-bottom:22px}
+    .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    a,button{font:inherit;cursor:pointer;display:inline-block;padding:11px 20px;border-radius:12px;font-weight:600;font-size:.93rem;
+      text-decoration:none;border:1px solid var(--line);background:#fff;color:var(--text)}
+    a.primary{background:linear-gradient(135deg,var(--p),var(--p2));border:0;color:#fff}
+    .ref{margin-top:20px;font-size:.78rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="code">{{ code }}</div>
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+    <div class="row">
+      <a class="primary" href="{{ home_url }}">Back to the store</a>
+      {% if code >= 500 %}<button type="button" onclick="location.reload()">Try again</button>{% endif %}
+    </div>
+    {% if error_id %}<div class="ref">Reference: {{ error_id }}</div>{% endif %}
+  </div>
+</body>
+</html>

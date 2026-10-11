@@ -8,6 +8,12 @@
 // ============================================================
 const CART_KEY = 'shopCart';
 
+// Product images are either full Cloudinary URLs or (legacy) local filenames
+function imgSrc(value) {
+  if (!value) return '';
+  return /^https?:\/\//i.test(value) ? value : '/static/uploads/' + value;
+}
+
 function getCart() {
   try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; }
   catch { return {}; }
@@ -137,7 +143,7 @@ function renderCartItems() {
   container.innerHTML = items.map(item => `
     <div class="cart-item" id="cart-item-${item.id}">
       ${item.image
-        ? `<img class="cart-item-img" src="/static/uploads/${item.image}" alt="${escapeHtml(item.name)}">`
+        ? `<img class="cart-item-img" src="${imgSrc(item.image)}" alt="${escapeHtml(item.name)}">`
         : `<div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;background:var(--clr-surface2)">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -241,7 +247,7 @@ function renderCheckoutSummary() {
     return `
     <div class="summary-item ${isOutOfStock ? 'out-of-stock-item' : ''}" style="position:relative; display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--clr-border);">
       ${item.image
-        ? `<img src="/static/uploads/${item.image}" alt="${escapeHtml(item.name)}" style="width:56px;height:56px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--clr-border);">`
+        ? `<img src="${imgSrc(item.image)}" alt="${escapeHtml(item.name)}" style="width:56px;height:56px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--clr-border);">`
         : `<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:var(--clr-surface2);border-radius:var(--r-sm);border:1px solid var(--clr-border);">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>

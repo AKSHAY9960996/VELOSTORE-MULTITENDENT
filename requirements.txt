@@ -1,7 +1,9 @@
-Flask
-gunicorn
-Pillow
-cloudinary
-libsql
-python-dotenv
-requests
+# Version ranges: accept bug-fix/minor updates, but never jump to a new major version unexpectedly.
+# For exact pins, run `pip freeze` in the Render Shell (or locally) and copy the lines for these packages.
+Flask>=3.1,<4
+Werkzeug>=3.1,<4
+gunicorn>=26,<27
+python-dotenv>=1.0,<2
+requests>=2.31,<3
+cloudinary>=1.36,<2
+libsql>=0.1

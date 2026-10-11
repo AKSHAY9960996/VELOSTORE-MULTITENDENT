@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ settings.get('shop_name','My Shop') }} — {% if is_luxury %}💎 Luxury Collection{% else %}🌸 夢 Yumei Luxury Atelier{% endif %}{% endblock %}
+{% block title %}{{ settings.get('shop_name','My Shop') }} — {% if is_luxury %}💎 Luxury Collection{% else %}🌸 Online Fashion Store{% endif %}{% endblock %}
 {% block description %}Discover handpicked luxury goods at {{ settings.get('shop_name','My Shop') }}. Authentic premium quality.{% endblock %}
 
 {% block content %}
@@ -9,7 +9,7 @@
 <section class="hero-section">
   <div class="hero-overlay-glow"></div>
   <div class="hero-content">
-    <div class="hero-badge">{% if tenant_theme == 'cocoa' %}🤎 HERITAGE COCOA LUXURY COLLECTION 2026 🤎{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}🌸 夢 YUMEI BLOOM COLLECTION — SPRING 2026 🌸{% endif %}</div>
+    <div class="hero-badge">{% if tenant_theme == 'cocoa' %}🤎 HERITAGE COCOA LUXURY COLLECTION 2026 🤎{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}🌸 {{ brand|upper }} · NEW COLLECTION {{ now_year }} 🌸{% endif %}</div>
     <h1 class="hero-title">{{ settings.get('shop_name','My Shop') }}</h1>
     <p class="hero-subtitle">
       {% if settings.get('shop_slogan') %}
@@ -17,7 +17,7 @@
       {% elif is_luxury %}
       Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.
       {% else %}
-      Where Yumei grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance —
+      Where grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance —
       curated for the discerning wardrobe.
       {% endif %}
     </p>
@@ -127,7 +127,7 @@
         {% elif active_category %}
         {{ active_category }}
         {% else %}
-        {% if is_luxury %}Featured Luxury Pieces{% else %}Featured Yumei Pieces{% endif %}
+        {% if is_luxury %}Featured Luxury Pieces{% else %}Featured Pieces{% endif %}
         {% endif %}
       </h2>
       <div class="section-count">
@@ -170,7 +170,7 @@
               <path
                 d="M12 2c-.8 2.2-2.8 3.5-5 3.5 1.5 1.8 1.5 4.5 0 6.3 2.2 0 4.2 1.3 5 3.5.8-2.2 2.8-3.5 5-3.5-1.5-1.8-1.5-4.5 0-6.3-2.2 0-4.2-1.3-5-3.5zm0 5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
             </svg>
-            <p>{% if is_luxury %}LUXURY PIECE 💎{% else %}YUMEI PIECE 🌸{% endif %}</p>
+            <p>{% if is_luxury %}LUXURY PIECE 💎{% else %}PREMIUM PIECE 🌸{% endif %}</p>
           </div>
           {% endif %}
 
@@ -211,7 +211,7 @@
 
         {% if product.stock > 0 %}
         <div class="product-stock {% if product.stock <= 2 %}low{% endif %}">
-          {% if product.stock <= 2 %} {% if is_luxury %}💎 Only {{ product.stock }} available{% else %}🌸 Only {{ product.stock }} available in Yumei Atelier{% endif %} {% else %} ✓ In Stock {% endif %} </div>
+          {% if product.stock <= 2 %} {% if is_luxury %}💎 Only {{ product.stock }} available{% else %}🌸 Only {{ product.stock }} left{% endif %} {% else %} ✓ In Stock {% endif %} </div>
             {% else %}
             <div class="product-stock oos">✕ Exhausted / Out of Stock</div>
             {% endif %}
@@ -226,7 +226,7 @@
                 <line x1="3" y1="6" x2="21" y2="6"></line>
                 <path d="M16 10a4 4 0 0 1-8 0"></path>
               </svg>
-              <span>ADD TO YUMEI BAG</span>
+              <span>ADD TO BAG</span>
               {% else %}
               <span>OUT OF STOCK</span>
               {% endif %}
@@ -242,7 +242,7 @@
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
       </div>
-      <h3>No Yumei Selections Found</h3>
+      <h3>No Selections Found</h3>
       <p>Try refining your search query or collection filter.</p>
     </div>
     {% endif %}

@@ -10,799 +10,799 @@
    DESIGN TOKENS — WARM CREAM & RICH COCOA BROWN 🤎
    ============================================================ */
 :root {
-    /* Warm Cream Canvas Foundation */
-    --clr-navy: #f7f0e8;
-    --clr-navy-dk: #efe5d9;
-    --clr-primary: #fffdf9;
-    --clr-primary-md: #6b5646;
-    --clr-primary-lt: #fffdf9;
-    --clr-primary-xlt: rgba(139, 90, 43, 0.04);
+  /* Warm Cream Canvas Foundation */
+  --clr-navy: #f7f0e8;
+  --clr-navy-dk: #efe5d9;
+  --clr-primary: #fffdf9;
+  --clr-primary-md: #6b5646;
+  --clr-primary-lt: #fffdf9;
+  --clr-primary-xlt: rgba(139, 90, 43, 0.04);
 
-    /* Cocoa, Leather & Caramel Accent System */
-    --clr-gold: #6b4423;
-    --clr-gold-bright: #3e2314;
-    --clr-gold-dk: #8b5a2b;
-    --clr-gold-lt: rgba(139, 90, 43, 0.08);
-    --clr-gold-glow: rgba(139, 90, 43, 0.25);
-    --grad-gold: linear-gradient(135deg, #3e2314 0%, #6b4423 40%, #8b5a2b 75%, #7a4a24 100%);
-    --grad-gold-hover: linear-gradient(135deg, #4e2e17 0%, #7a4a24 45%, #a9743f 80%, #8b5a2b 100%);
-    --grad-gold-subtle: linear-gradient(135deg, rgba(139, 90, 43, 0.1) 0%, rgba(169, 116, 63, 0.04) 100%);
+  /* Cocoa, Leather & Caramel Accent System */
+  --clr-gold: #6b4423;
+  --clr-gold-bright: #3e2314;
+  --clr-gold-dk: #8b5a2b;
+  --clr-gold-lt: rgba(139, 90, 43, 0.08);
+  --clr-gold-glow: rgba(139, 90, 43, 0.25);
+  --grad-gold: linear-gradient(135deg, #3e2314 0%, #6b4423 40%, #8b5a2b 75%, #7a4a24 100%);
+  --grad-gold-hover: linear-gradient(135deg, #4e2e17 0%, #7a4a24 45%, #a9743f 80%, #8b5a2b 100%);
+  --grad-gold-subtle: linear-gradient(135deg, rgba(139, 90, 43, 0.1) 0%, rgba(169, 116, 63, 0.04) 100%);
 
-    /* Warm Cream, Ice & Slate Neutrals (Warm Cream Foundation) */
-    --clr-bg: #fffdf9;
-    --clr-surface: #fffdf9;
-    --clr-surface2: #f7f0e8;
-    --clr-surface3: #efe5d9;
-    --clr-border: rgba(107, 68, 35, 0.16);
-    --clr-border-dk: rgba(107, 68, 35, 0.32);
-    --clr-border-hover: rgba(139, 90, 43, 0.55);
-    --clr-text: #2a1a10;
-    --clr-text-muted: #6b5646;
-    --clr-text-light: #a39080;
+  /* Warm Cream, Ice & Slate Neutrals (Warm Cream Foundation) */
+  --clr-bg: #fffdf9;
+  --clr-surface: #fffdf9;
+  --clr-surface2: #f7f0e8;
+  --clr-surface3: #efe5d9;
+  --clr-border: rgba(107, 68, 35, 0.16);
+  --clr-border-dk: rgba(107, 68, 35, 0.32);
+  --clr-border-hover: rgba(139, 90, 43, 0.55);
+  --clr-text: #2a1a10;
+  --clr-text-muted: #6b5646;
+  --clr-text-light: #a39080;
 
-    /* Luxury Status Tones */
-    --clr-danger: #dc2626;
-    --clr-danger-lt: rgba(220, 38, 38, 0.08);
-    --clr-warning: #d97706;
-    --clr-warning-lt: rgba(217, 119, 6, 0.08);
-    --clr-success: #059669;
-    --clr-success-lt: rgba(5, 150, 105, 0.08);
+  /* Luxury Status Tones */
+  --clr-danger: #dc2626;
+  --clr-danger-lt: rgba(220, 38, 38, 0.08);
+  --clr-warning: #d97706;
+  --clr-warning-lt: rgba(217, 119, 6, 0.08);
+  --clr-success: #059669;
+  --clr-success-lt: rgba(5, 150, 105, 0.08);
 
-    /* Premium Shadows — Clean Crisp Cocoa Depth */
-    --shadow-xs: 0 1px 3px rgba(42, 26, 16, 0.04);
-    --shadow-sm: 0 2px 8px rgba(139, 90, 43, 0.06), 0 1px 3px rgba(42, 26, 16, 0.04);
-    --shadow-md: 0 6px 20px rgba(139, 90, 43, 0.09), 0 2px 6px rgba(42, 26, 16, 0.04);
-    --shadow-lg: 0 12px 36px rgba(139, 90, 43, 0.13), 0 4px 14px rgba(42, 26, 16, 0.06);
-    --shadow-xl: 0 20px 52px rgba(139, 90, 43, 0.16), 0 8px 24px rgba(42, 26, 16, 0.08);
-    --shadow-gold: 0 4px 20px rgba(139, 90, 43, 0.28), 0 2px 6px rgba(42, 26, 16, 0.1);
-    --shadow-gold-intense: 0 8px 32px rgba(139, 90, 43, 0.4), 0 3px 10px rgba(139, 90, 43, 0.2);
+  /* Premium Shadows — Clean Crisp Cocoa Depth */
+  --shadow-xs: 0 1px 3px rgba(42, 26, 16, 0.04);
+  --shadow-sm: 0 2px 8px rgba(139, 90, 43, 0.06), 0 1px 3px rgba(42, 26, 16, 0.04);
+  --shadow-md: 0 6px 20px rgba(139, 90, 43, 0.09), 0 2px 6px rgba(42, 26, 16, 0.04);
+  --shadow-lg: 0 12px 36px rgba(139, 90, 43, 0.13), 0 4px 14px rgba(42, 26, 16, 0.06);
+  --shadow-xl: 0 20px 52px rgba(139, 90, 43, 0.16), 0 8px 24px rgba(42, 26, 16, 0.08);
+  --shadow-gold: 0 4px 20px rgba(139, 90, 43, 0.28), 0 2px 6px rgba(42, 26, 16, 0.1);
+  --shadow-gold-intense: 0 8px 32px rgba(139, 90, 43, 0.4), 0 3px 10px rgba(139, 90, 43, 0.2);
 
-    /* Luxury Radii */
-    --r-xs: 4px;
-    --r-sm: 8px;
-    --r-md: 12px;
-    --r-lg: 18px;
-    --r-xl: 24px;
-    --r-2xl: 32px;
-    --r-full: 999px;
+  /* Luxury Radii */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-2xl: 32px;
+  --r-full: 999px;
 
-    /* Silk Transitions */
-    --t: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    --t-fast: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    --t-slow: 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-    --t-luxe: 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  /* Silk Transitions */
+  --t: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --t-slow: 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  --t-luxe: 0.85s cubic-bezier(0.22, 1, 0.36, 1);
 
-    /* Typography */
-    --font: 'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif;
-    --font-display: 'Playfair Display', 'Outfit', serif;
+  /* Typography */
+  --font: 'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --font-display: 'Playfair Display', 'Outfit', serif;
 }
 
 /* ============================================================
    BODY & CANVASES — PURE CRISP WHITE
    ============================================================ */
 body {
-    background: #fffdf9 !important;
-    color: #2a1a10 !important;
-    font-family: var(--font) !important;
+  background: #fffdf9 !important;
+  color: #2a1a10 !important;
+  font-family: var(--font) !important;
 }
 
 /* ============================================================
    GOLDEN DUST & CARAMEL FLOATING PARTICLES
    ============================================================ */
 .sakura-container {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .sakura-petal {
-    background: radial-gradient(circle at 35% 35%, #dcc3a3 0%, #a9743f 50%, #6b4423 100%) !important;
-    border-radius: 50% !important;
-    opacity: 0.45 !important;
-    filter: drop-shadow(0 2px 6px rgba(139, 90, 43, 0.35)) !important;
-    width: 6px !important;
-    height: 6px !important;
+  background: radial-gradient(circle at 35% 35%, #dcc3a3 0%, #a9743f 50%, #6b4423 100%) !important;
+  border-radius: 50% !important;
+  opacity: 0.45 !important;
+  filter: drop-shadow(0 2px 6px rgba(139, 90, 43, 0.35)) !important;
+  width: 6px !important;
+  height: 6px !important;
 }
 
 .sakura-petal:nth-child(2n) {
-    background: radial-gradient(circle at 40% 40%, #fffdf9 0%, #c49a6c 60%, #8b5a2b 100%) !important;
-    width: 8px !important;
-    height: 8px !important;
-    opacity: 0.35 !important;
+  background: radial-gradient(circle at 40% 40%, #fffdf9 0%, #c49a6c 60%, #8b5a2b 100%) !important;
+  width: 8px !important;
+  height: 8px !important;
+  opacity: 0.35 !important;
 }
 
 .sakura-petal:nth-child(3n) {
-    opacity: 0.3 !important;
-    width: 5px !important;
-    height: 5px !important;
-    filter: drop-shadow(0 1px 4px rgba(139, 90, 43, 0.4)) blur(0.2px) !important;
+  opacity: 0.3 !important;
+  width: 5px !important;
+  height: 5px !important;
+  filter: drop-shadow(0 1px 4px rgba(139, 90, 43, 0.4)) blur(0.2px) !important;
 }
 
 .sakura-petal:nth-child(5n) {
-    opacity: 0.55 !important;
-    width: 7px !important;
-    height: 7px !important;
+  opacity: 0.55 !important;
+  width: 7px !important;
+  height: 7px !important;
 }
 
 /* ============================================================
    TOP ANNOUNCEMENT MARQUEE — Imperial Royal Blue
    ============================================================ */
 .announcement-bar {
-    background: linear-gradient(90deg, #1f120a 0%, #3e2314 35%, #6b4423 70%, #1f120a 100%) !important;
-    border-bottom: 1px solid rgba(196, 154, 108, 0.3) !important;
+  background: linear-gradient(90deg, #1f120a 0%, #3e2314 35%, #6b4423 70%, #1f120a 100%) !important;
+  border-bottom: 1px solid rgba(196, 154, 108, 0.3) !important;
 }
 
 .announcement-content {
-    color: #f1e4d3 !important;
-    font-family: var(--font) !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.16em !important;
-    font-size: 0.76rem !important;
+  color: #f1e4d3 !important;
+  font-family: var(--font) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.16em !important;
+  font-size: 0.76rem !important;
 }
 
 .announcement-content span {
-    color: #c49a6c !important;
+  color: #c49a6c !important;
 }
 
 /* ============================================================
    HEADER / NAVBAR — Warm Cream + Cocoa Trim
    ============================================================ */
 .site-header {
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(24px) saturate(150%) !important;
-    border-bottom: 1px solid rgba(107, 68, 35, 0.15) !important;
-    box-shadow: 0 2px 20px rgba(42, 26, 16, 0.05) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  border-bottom: 1px solid rgba(107, 68, 35, 0.15) !important;
+  box-shadow: 0 2px 20px rgba(42, 26, 16, 0.05) !important;
 }
 
 .logo-icon {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    box-shadow: 0 4px 14px rgba(107, 68, 35, 0.3) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  box-shadow: 0 4px 14px rgba(107, 68, 35, 0.3) !important;
 }
 
 .logo-icon svg {
-    fill: #fffdf9 !important;
+  fill: #fffdf9 !important;
 }
 
 .logo-name {
-    color: #2a1a10 !important;
-    font-family: 'Outfit', sans-serif !important;
-    font-weight: 800 !important;
-    letter-spacing: -0.01em !important;
+  color: #2a1a10 !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
 }
 
 .logo-tagline {
-    color: #8b5a2b !important;
-    letter-spacing: 0.14em !important;
-    font-weight: 700 !important;
+  color: #8b5a2b !important;
+  letter-spacing: 0.14em !important;
+  font-weight: 700 !important;
 }
 
 /* Search bar */
 .search-wrap {
-    background: #f7f0e8 !important;
-    border: 1px solid rgba(107, 68, 35, 0.2) !important;
-    box-shadow: 0 1px 4px rgba(42, 26, 16, 0.03) !important;
+  background: #f7f0e8 !important;
+  border: 1px solid rgba(107, 68, 35, 0.2) !important;
+  box-shadow: 0 1px 4px rgba(42, 26, 16, 0.03) !important;
 }
 
 .search-wrap:focus-within {
-    background: #fffdf9 !important;
-    border-color: #8b5a2b !important;
-    box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.15) !important;
+  background: #fffdf9 !important;
+  border-color: #8b5a2b !important;
+  box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.15) !important;
 }
 
 .search-wrap input {
-    color: #2a1a10 !important;
+  color: #2a1a10 !important;
 }
 
 .search-wrap input::placeholder {
-    color: #a39080 !important;
+  color: #a39080 !important;
 }
 
 /* Cart Bag Button */
 .cart-btn {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.25) !important;
-    color: #2a1a10 !important;
-    box-shadow: 0 2px 8px rgba(139, 90, 43, 0.08) !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.25) !important;
+  color: #2a1a10 !important;
+  box-shadow: 0 2px 8px rgba(139, 90, 43, 0.08) !important;
 }
 
 .cart-btn:hover {
-    background: #fbf5ee !important;
-    border-color: #8b5a2b !important;
-    color: #6b4423 !important;
+  background: #fbf5ee !important;
+  border-color: #8b5a2b !important;
+  color: #6b4423 !important;
 }
 
 .cart-btn-text {
-    color: #2a1a10 !important;
-    font-weight: 700 !important;
+  color: #2a1a10 !important;
+  font-weight: 700 !important;
 }
 
 .cart-badge {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    font-weight: 800 !important;
-    box-shadow: 0 2px 8px rgba(139, 90, 43, 0.4) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(139, 90, 43, 0.4) !important;
 }
 
 /* ============================================================
    HERO BANNER — Warm Cream & Cocoa Radiance
    ============================================================ */
 .hero-section {
-    background: linear-gradient(170deg, #fffdf9 0%, #faf3ea 50%, #eddcc8 100%) !important;
-    border-bottom: 1px solid rgba(107, 68, 35, 0.12) !important;
+  background: linear-gradient(170deg, #fffdf9 0%, #faf3ea 50%, #eddcc8 100%) !important;
+  border-bottom: 1px solid rgba(107, 68, 35, 0.12) !important;
 }
 
 .hero-section::before {
-    background: radial-gradient(ellipse at 50% 20%, rgba(139, 90, 43, 0.12) 0%, transparent 65%) !important;
+  background: radial-gradient(ellipse at 50% 20%, rgba(139, 90, 43, 0.12) 0%, transparent 65%) !important;
 }
 
 .hero-title {
-    font-family: 'Playfair Display', serif !important;
-    color: #2a1a10 !important;
-    font-weight: 800 !important;
+  font-family: 'Playfair Display', serif !important;
+  color: #2a1a10 !important;
+  font-weight: 800 !important;
 }
 
 .hero-subtitle {
-    color: #6b5646 !important;
-    font-size: 1.05rem !important;
+  color: #6b5646 !important;
+  font-size: 1.05rem !important;
 }
 
 .hero-badge {
-    background: rgba(139, 90, 43, 0.08) !important;
-    color: #6b4423 !important;
-    border: 1px solid rgba(139, 90, 43, 0.25) !important;
+  background: rgba(139, 90, 43, 0.08) !important;
+  color: #6b4423 !important;
+  border: 1px solid rgba(139, 90, 43, 0.25) !important;
 }
 
 .hero-cta-primary {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    border: none !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.06em !important;
-    box-shadow: var(--shadow-gold) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  border: none !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  box-shadow: var(--shadow-gold) !important;
 }
 
 .hero-cta-primary:hover {
-    background: var(--grad-gold-hover) !important;
-    box-shadow: var(--shadow-gold-intense) !important;
-    transform: translateY(-2px) !important;
+  background: var(--grad-gold-hover) !important;
+  box-shadow: var(--shadow-gold-intense) !important;
+  transform: translateY(-2px) !important;
 }
 
 .hero-cta-secondary {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.3) !important;
-    color: #6b4423 !important;
-    font-weight: 700 !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.3) !important;
+  color: #6b4423 !important;
+  font-weight: 700 !important;
 }
 
 .hero-cta-secondary:hover {
-    background: #f7f0e8 !important;
-    border-color: #8b5a2b !important;
+  background: #f7f0e8 !important;
+  border-color: #8b5a2b !important;
 }
 
 /* ============================================================
    PRODUCT CARDS — Warm Cream with Cocoa Trim
    ============================================================ */
 .product-card {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.14) !important;
-    box-shadow: 0 4px 18px rgba(42, 26, 16, 0.06), 0 1px 3px rgba(42, 26, 16, 0.03) !important;
-    border-radius: var(--r-md) !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.14) !important;
+  box-shadow: 0 4px 18px rgba(42, 26, 16, 0.06), 0 1px 3px rgba(42, 26, 16, 0.03) !important;
+  border-radius: var(--r-md) !important;
 }
 
 .product-card:hover {
-    border-color: rgba(139, 90, 43, 0.45) !important;
-    box-shadow: 0 12px 36px rgba(139, 90, 43, 0.16), 0 2px 8px rgba(42, 26, 16, 0.06) !important;
-    transform: translateY(-4px) !important;
+  border-color: rgba(139, 90, 43, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(139, 90, 43, 0.16), 0 2px 8px rgba(42, 26, 16, 0.06) !important;
+  transform: translateY(-4px) !important;
 }
 
 .product-card-body {
-    background: #fffdf9 !important;
+  background: #fffdf9 !important;
 }
 
 .product-title {
-    color: #2a1a10 !important;
-    font-family: 'Outfit', sans-serif !important;
-    font-weight: 700 !important;
+  color: #2a1a10 !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 700 !important;
 }
 
 .product-title a {
-    color: #2a1a10 !important;
+  color: #2a1a10 !important;
 }
 
 .product-title a:hover {
-    color: #8b5a2b !important;
+  color: #8b5a2b !important;
 }
 
 .product-price {
-    color: #6b4423 !important;
-    font-weight: 800 !important;
-    font-size: 1.15rem !important;
+  color: #6b4423 !important;
+  font-weight: 800 !important;
+  font-size: 1.15rem !important;
 }
 
 .original-price {
-    color: #a39080 !important;
+  color: #a39080 !important;
 }
 
 .discount-badge {
-    background: rgba(139, 90, 43, 0.08) !important;
-    color: #7a4a24 !important;
-    border: 1px solid rgba(139, 90, 43, 0.22) !important;
-    font-weight: 700 !important;
+  background: rgba(139, 90, 43, 0.08) !important;
+  color: #7a4a24 !important;
+  border: 1px solid rgba(139, 90, 43, 0.22) !important;
+  font-weight: 700 !important;
 }
 
 .btn-add-cart {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.05em !important;
-    border: none !important;
-    box-shadow: 0 3px 12px rgba(139, 90, 43, 0.3) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  border: none !important;
+  box-shadow: 0 3px 12px rgba(139, 90, 43, 0.3) !important;
 }
 
 .btn-add-cart:hover {
-    background: var(--grad-gold-hover) !important;
-    box-shadow: var(--shadow-gold) !important;
+  background: var(--grad-gold-hover) !important;
+  box-shadow: var(--shadow-gold) !important;
 }
 
 /* ============================================================
    CATEGORY FILTER PILLS
    ============================================================ */
 .cat-btn {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.2) !important;
-    color: #6b5646 !important;
-    font-weight: 600 !important;
-    box-shadow: 0 1px 4px rgba(42, 26, 16, 0.03) !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.2) !important;
+  color: #6b5646 !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 4px rgba(42, 26, 16, 0.03) !important;
 }
 
 .cat-btn:hover,
 .cat-btn.active {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    border-color: #6b4423 !important;
-    font-weight: 700 !important;
-    box-shadow: 0 3px 12px rgba(139, 90, 43, 0.3) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  border-color: #6b4423 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 3px 12px rgba(139, 90, 43, 0.3) !important;
 }
 
 /* ============================================================
    CART DRAWER — Warm Cream & Cocoa Atelier
    ============================================================ */
 .cart-drawer {
-    background: #fffdf9 !important;
-    border-left: 1px solid rgba(107, 68, 35, 0.2) !important;
-    box-shadow: -10px 0 40px rgba(42, 26, 16, 0.15) !important;
+  background: #fffdf9 !important;
+  border-left: 1px solid rgba(107, 68, 35, 0.2) !important;
+  box-shadow: -10px 0 40px rgba(42, 26, 16, 0.15) !important;
 }
 
 .cart-drawer-header {
-    border-bottom: 1px solid rgba(107, 68, 35, 0.14) !important;
-    background: #f7f0e8 !important;
+  border-bottom: 1px solid rgba(107, 68, 35, 0.14) !important;
+  background: #f7f0e8 !important;
 }
 
 .cart-drawer-header h2 {
-    color: #2a1a10 !important;
-    font-family: 'Outfit', sans-serif !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.02em !important;
+  color: #2a1a10 !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
 }
 
 .cart-close-btn {
-    color: #6b5646 !important;
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.2) !important;
+  color: #6b5646 !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.2) !important;
 }
 
 .cart-close-btn:hover {
-    color: #2a1a10 !important;
-    border-color: #8b5a2b !important;
+  color: #2a1a10 !important;
+  border-color: #8b5a2b !important;
 }
 
 .cart-item {
-    border-bottom: 1px solid rgba(107, 68, 35, 0.1) !important;
-    background: #fffdf9 !important;
+  border-bottom: 1px solid rgba(107, 68, 35, 0.1) !important;
+  background: #fffdf9 !important;
 }
 
 .cart-item-name {
-    color: #2a1a10 !important;
-    font-weight: 700 !important;
+  color: #2a1a10 !important;
+  font-weight: 700 !important;
 }
 
 .cart-item-price {
-    color: #6b4423 !important;
-    font-weight: 700 !important;
+  color: #6b4423 !important;
+  font-weight: 700 !important;
 }
 
 .cart-total-label {
-    color: #6b5646 !important;
-    letter-spacing: 0.06em !important;
-    font-weight: 700 !important;
+  color: #6b5646 !important;
+  letter-spacing: 0.06em !important;
+  font-weight: 700 !important;
 }
 
 .cart-total-amount {
-    color: #2a1a10 !important;
-    font-weight: 800 !important;
-    font-family: 'Outfit', sans-serif !important;
-    font-size: 1.35rem !important;
+  color: #2a1a10 !important;
+  font-weight: 800 !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 1.35rem !important;
 }
 
 .btn-checkout {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.06em !important;
-    box-shadow: var(--shadow-gold) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  box-shadow: var(--shadow-gold) !important;
 }
 
 .btn-checkout:hover {
-    background: var(--grad-gold-hover) !important;
-    box-shadow: var(--shadow-gold-intense) !important;
+  background: var(--grad-gold-hover) !important;
+  box-shadow: var(--shadow-gold-intense) !important;
 }
 
 .secure-note {
-    color: #a39080 !important;
+  color: #a39080 !important;
 }
 
 .cart-empty-msg h3 {
-    color: #2a1a10 !important;
-    font-family: 'Outfit', sans-serif !important;
+  color: #2a1a10 !important;
+  font-family: 'Outfit', sans-serif !important;
 }
 
 .empty-cart-desc {
-    color: #6b5646 !important;
+  color: #6b5646 !important;
 }
 
 /* ============================================================
    FOOTER — Deep Imperial Navy Blue
    ============================================================ */
 .site-footer {
-    background: #170d07 !important;
-    border-top: 2px solid #8b5a2b !important;
-    color: #efe5d9 !important;
+  background: #170d07 !important;
+  border-top: 2px solid #8b5a2b !important;
+  color: #efe5d9 !important;
 }
 
 .footer-logo-icon {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
 }
 
 .footer-logo-icon svg {
-    fill: #fffdf9 !important;
+  fill: #fffdf9 !important;
 }
 
 .footer-logo-name {
-    color: #fffdf9 !important;
-    font-family: 'Outfit', sans-serif !important;
-    font-weight: 800 !important;
+  color: #fffdf9 !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
 }
 
 .footer-tagline {
-    color: #c49a6c !important;
-    letter-spacing: 0.16em !important;
-    font-weight: 700 !important;
+  color: #c49a6c !important;
+  letter-spacing: 0.16em !important;
+  font-weight: 700 !important;
 }
 
 .footer-divider {
-    background: linear-gradient(90deg, transparent, rgba(196, 154, 108, 0.35), transparent) !important;
+  background: linear-gradient(90deg, transparent, rgba(196, 154, 108, 0.35), transparent) !important;
 }
 
 .footer-copy {
-    color: #a39080 !important;
+  color: #a39080 !important;
 }
 
 /* ============================================================
    FLASH MESSAGES
    ============================================================ */
 .flash-msg {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.25) !important;
-    color: #2a1a10 !important;
-    box-shadow: 0 8px 28px rgba(42, 26, 16, 0.12) !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.25) !important;
+  color: #2a1a10 !important;
+  box-shadow: 0 8px 28px rgba(42, 26, 16, 0.12) !important;
 }
 
 .flash-msg.success {
-    border-color: rgba(5, 150, 105, 0.4) !important;
-    border-left: 4px solid #059669 !important;
+  border-color: rgba(5, 150, 105, 0.4) !important;
+  border-left: 4px solid #059669 !important;
 }
 
 .flash-msg.error {
-    border-color: rgba(220, 38, 38, 0.4) !important;
-    border-left: 4px solid #dc2626 !important;
+  border-color: rgba(220, 38, 38, 0.4) !important;
+  border-left: 4px solid #dc2626 !important;
 }
 
 /* ============================================================
    PRODUCT DETAIL PAGE
    ============================================================ */
 .product-detail-section {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.14) !important;
-    border-radius: var(--r-lg) !important;
-    box-shadow: var(--shadow-md) !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.14) !important;
+  border-radius: var(--r-lg) !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
 .product-detail-title {
-    font-family: 'Outfit', sans-serif !important;
-    color: #2a1a10 !important;
-    font-weight: 800 !important;
+  font-family: 'Outfit', sans-serif !important;
+  color: #2a1a10 !important;
+  font-weight: 800 !important;
 }
 
 .detail-price {
-    color: #6b4423 !important;
-    font-weight: 800 !important;
-    font-size: 1.85rem !important;
+  color: #6b4423 !important;
+  font-weight: 800 !important;
+  font-size: 1.85rem !important;
 }
 
 .detail-original-price {
-    color: #a39080 !important;
+  color: #a39080 !important;
 }
 
 .detail-discount-badge {
-    background: rgba(139, 90, 43, 0.08) !important;
-    color: #7a4a24 !important;
-    border: 1px solid rgba(139, 90, 43, 0.25) !important;
+  background: rgba(139, 90, 43, 0.08) !important;
+  color: #7a4a24 !important;
+  border: 1px solid rgba(139, 90, 43, 0.25) !important;
 }
 
 .detail-description {
-    color: #6b5646 !important;
-    line-height: 1.7 !important;
+  color: #6b5646 !important;
+  line-height: 1.7 !important;
 }
 
 .variant-btn {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.22) !important;
-    color: #6b5646 !important;
-    font-weight: 600 !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.22) !important;
+  color: #6b5646 !important;
+  font-weight: 600 !important;
 }
 
 .variant-btn:hover,
 .variant-btn.active {
-    background: rgba(139, 90, 43, 0.1) !important;
-    border-color: #8b5a2b !important;
-    color: #6b4423 !important;
-    font-weight: 700 !important;
+  background: rgba(139, 90, 43, 0.1) !important;
+  border-color: #8b5a2b !important;
+  color: #6b4423 !important;
+  font-weight: 700 !important;
 }
 
 .btn-detail-add {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    font-weight: 700 !important;
-    box-shadow: var(--shadow-gold) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  font-weight: 700 !important;
+  box-shadow: var(--shadow-gold) !important;
 }
 
 .btn-detail-add:hover {
-    background: var(--grad-gold-hover) !important;
-    box-shadow: var(--shadow-gold-intense) !important;
+  background: var(--grad-gold-hover) !important;
+  box-shadow: var(--shadow-gold-intense) !important;
 }
 
 .btn-detail-whatsapp {
-    background: #fffdf9 !important;
-    border: 1px solid #25D366 !important;
-    color: #128C7E !important;
-    font-weight: 700 !important;
+  background: #fffdf9 !important;
+  border: 1px solid #25D366 !important;
+  color: #128C7E !important;
+  font-weight: 700 !important;
 }
 
 .btn-detail-whatsapp:hover {
-    background: rgba(37, 211, 102, 0.08) !important;
+  background: rgba(37, 211, 102, 0.08) !important;
 }
 
 /* ============================================================
    CHECKOUT PAGE
    ============================================================ */
 .checkout-card {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.16) !important;
-    box-shadow: var(--shadow-md) !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.16) !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
 .checkout-title {
-    font-family: 'Outfit', sans-serif !important;
-    color: #2a1a10 !important;
-    font-weight: 800 !important;
+  font-family: 'Outfit', sans-serif !important;
+  color: #2a1a10 !important;
+  font-weight: 800 !important;
 }
 
 .checkout-item-name {
-    color: #2a1a10 !important;
-    font-weight: 700 !important;
+  color: #2a1a10 !important;
+  font-weight: 700 !important;
 }
 
 .checkout-item-price {
-    color: #6b4423 !important;
-    font-weight: 700 !important;
+  color: #6b4423 !important;
+  font-weight: 700 !important;
 }
 
 .checkout-label {
-    color: #6b5646 !important;
-    font-weight: 700 !important;
+  color: #6b5646 !important;
+  font-weight: 700 !important;
 }
 
 .checkout-input,
 .checkout-select,
 .checkout-textarea {
-    background: #f7f0e8 !important;
-    border: 1px solid rgba(107, 68, 35, 0.2) !important;
-    color: #2a1a10 !important;
+  background: #f7f0e8 !important;
+  border: 1px solid rgba(107, 68, 35, 0.2) !important;
+  color: #2a1a10 !important;
 }
 
 .checkout-input:focus,
 .checkout-select:focus,
 .checkout-textarea:focus {
-    border-color: #8b5a2b !important;
-    box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.15) !important;
-    background: #fffdf9 !important;
+  border-color: #8b5a2b !important;
+  box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.15) !important;
+  background: #fffdf9 !important;
 }
 
 .checkout-input::placeholder,
 .checkout-textarea::placeholder {
-    color: #a39080 !important;
+  color: #a39080 !important;
 }
 
 .btn-place-order {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.06em !important;
-    box-shadow: var(--shadow-gold) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  box-shadow: var(--shadow-gold) !important;
 }
 
 .btn-place-order:hover {
-    background: var(--grad-gold-hover) !important;
-    box-shadow: var(--shadow-gold-intense) !important;
+  background: var(--grad-gold-hover) !important;
+  box-shadow: var(--shadow-gold-intense) !important;
 }
 
 /* ============================================================
    ORDER SUCCESS PAGE
    ============================================================ */
 .order-success-card {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.18) !important;
-    box-shadow: var(--shadow-lg) !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.18) !important;
+  box-shadow: var(--shadow-lg) !important;
 }
 
 .order-success-title {
-    font-family: 'Outfit', sans-serif !important;
-    color: #2a1a10 !important;
-    font-weight: 800 !important;
+  font-family: 'Outfit', sans-serif !important;
+  color: #2a1a10 !important;
+  font-weight: 800 !important;
 }
 
 .order-success-id {
-    color: #6b4423 !important;
-    font-weight: 800 !important;
+  color: #6b4423 !important;
+  font-weight: 800 !important;
 }
 
 /* ============================================================
    MAINTENANCE OVERLAY
    ============================================================ */
 .maintenance-overlay {
-    background: rgba(255, 255, 255, 0.96) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
 }
 
 .maintenance-modal {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.25) !important;
-    box-shadow: 0 24px 60px rgba(42, 26, 16, 0.18) !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.25) !important;
+  box-shadow: 0 24px 60px rgba(42, 26, 16, 0.18) !important;
 }
 
 .maintenance-modal h2 {
-    font-family: 'Outfit', sans-serif !important;
-    color: #2a1a10 !important;
-    font-weight: 800 !important;
+  font-family: 'Outfit', sans-serif !important;
+  color: #2a1a10 !important;
+  font-weight: 800 !important;
 }
 
 .maintenance-msg {
-    color: #6b5646 !important;
+  color: #6b5646 !important;
 }
 
 .btn-whatsapp {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    box-shadow: var(--shadow-gold) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  box-shadow: var(--shadow-gold) !important;
 }
 
 /* ============================================================
    CONCIERGE BANNER
    ============================================================ */
 .founder-ad-banner {
-    background: #fffdf9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.25) !important;
-    box-shadow: 0 10px 32px rgba(42, 26, 16, 0.14) !important;
+  background: #fffdf9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.25) !important;
+  box-shadow: 0 10px 32px rgba(42, 26, 16, 0.14) !important;
 }
 
 .founder-ad-badge {
-    background: rgba(139, 90, 43, 0.1) !important;
-    color: #6b4423 !important;
-    border: 1px solid rgba(139, 90, 43, 0.25) !important;
+  background: rgba(139, 90, 43, 0.1) !important;
+  color: #6b4423 !important;
+  border: 1px solid rgba(139, 90, 43, 0.25) !important;
 }
 
 .founder-ad-title {
-    color: #2a1a10 !important;
-    font-family: 'Outfit', sans-serif !important;
-    font-weight: 800 !important;
+  color: #2a1a10 !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
 }
 
 .founder-ad-desc {
-    color: #6b5646 !important;
+  color: #6b5646 !important;
 }
 
 .founder-ad-btn {
-    background: var(--grad-gold) !important;
-    color: #fffdf9 !important;
-    box-shadow: var(--shadow-gold) !important;
+  background: var(--grad-gold) !important;
+  color: #fffdf9 !important;
+  box-shadow: var(--shadow-gold) !important;
 }
 
 .founder-ad-btn:hover {
-    background: var(--grad-gold-hover) !important;
+  background: var(--grad-gold-hover) !important;
 }
 
 .founder-ad-close {
-    color: #a39080 !important;
+  color: #a39080 !important;
 }
 
 .founder-ad-close:hover {
-    color: #2a1a10 !important;
+  color: #2a1a10 !important;
 }
 
 /* ============================================================
    MOBILE SEARCH BAR
    ============================================================ */
 .mobile-search-bar {
-    background: #fffdf9 !important;
-    border-bottom: 1px solid rgba(107, 68, 35, 0.14) !important;
+  background: #fffdf9 !important;
+  border-bottom: 1px solid rgba(107, 68, 35, 0.14) !important;
 }
 
 .mobile-search-wrap {
-    background: #f7f0e8 !important;
-    border: 1px solid rgba(107, 68, 35, 0.18) !important;
+  background: #f7f0e8 !important;
+  border: 1px solid rgba(107, 68, 35, 0.18) !important;
 }
 
 .mobile-search-wrap input {
-    color: #2a1a10 !important;
+  color: #2a1a10 !important;
 }
 
 .mobile-search-wrap input::placeholder {
-    color: #a39080 !important;
+  color: #a39080 !important;
 }
 
 /* ============================================================
    SCROLLBAR & SELECTION
    ============================================================ */
 ::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f7f0e8;
+  background: #f7f0e8;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(107, 68, 35, 0.25);
-    border-radius: 4px;
+  background: rgba(107, 68, 35, 0.25);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 90, 43, 0.5);
+  background: rgba(139, 90, 43, 0.5);
 }
 
 ::selection {
-    background: rgba(139, 90, 43, 0.2);
-    color: #2a1a10;
+  background: rgba(139, 90, 43, 0.2);
+  color: #2a1a10;
 }
 
 /* ============================================================
    ADDITIONAL COMPONENT POLISH
    ============================================================ */
 .qty-btn {
-    background: #efe5d9 !important;
-    border: 1px solid rgba(107, 68, 35, 0.2) !important;
-    color: #2a1a10 !important;
+  background: #efe5d9 !important;
+  border: 1px solid rgba(107, 68, 35, 0.2) !important;
+  color: #2a1a10 !important;
 }
 
 .qty-btn:hover {
-    background: rgba(139, 90, 43, 0.12) !important;
+  background: rgba(139, 90, 43, 0.12) !important;
 }
 
 .qty-input {
-    color: #2a1a10 !important;
-    background: #fffdf9 !important;
+  color: #2a1a10 !important;
+  background: #fffdf9 !important;
 }
 
 .spinner {
-    border-color: rgba(107, 68, 35, 0.2) !important;
-    border-top-color: #8b5a2b !important;
+  border-color: rgba(107, 68, 35, 0.2) !important;
+  border-top-color: #8b5a2b !important;
 }

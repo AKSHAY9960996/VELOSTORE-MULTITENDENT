@@ -2,6 +2,8 @@ import os
 import json
 import sqlite3
 import hashlib
+import time
+from security import hash_password as _hash_password
 from collections.abc import Mapping
 import requests as _requests
 
@@ -506,7 +508,9 @@ def init_master_db():
     if cur.fetchone()['cnt'] == 0:
         default_pwd = os.environ.get('MASTER_ADMIN_PASSWORD', 'master123')
         default_user = os.environ.get('MASTER_ADMIN_USERNAME', 'master')
-        pwd_hash = hashlib.sha256(default_pwd.encode('utf-8')).hexdigest()
+        pwd_hash = _hash_password(default_pwd)
+        if not os.environ.get('MASTER_ADMIN_PASSWORD'):
+            print('[Security] WARNING: MASTER_ADMIN_PASSWORD is not set - using an insecure default. Set it in Render.', flush=True)
         cur.execute(
             "INSERT INTO master_admins (username, password_hash) VALUES (?, ?)",
             [default_user, pwd_hash]
@@ -522,22 +526,43 @@ def init_master_db():
 
     conn.commit()
     conn.close()
+    clear_tenant_cache()
 
 
 # ---------------------------------------------------------------------------
 # Tenant DB helpers
 # ---------------------------------------------------------------------------
 
+# Small in-memory cache so every page view doesn't hit the master database several times.
+# Entries expire after TENANT_CACHE_SECONDS (default 60) and are cleared whenever a store is
+# created, edited, suspended or deleted from this server.
+_TENANT_CACHE_TTL = int(os.environ.get('TENANT_CACHE_SECONDS', '60'))
+_tenant_cache = {}
+
+
+def clear_tenant_cache():
+    """Forget cached store lookups (call after changing the tenants table)."""
+    _tenant_cache.clear()
+
+
 def get_tenant_by_identifier(identifier: str):
-    """Looks up tenant by slug or custom_domain."""
+    """Looks up tenant by slug or custom_domain (cached for a short time)."""
+    now = time.time()
+    hit = _tenant_cache.get(identifier)
+    if hit and (now - hit[0]) < _TENANT_CACHE_TTL:
+        return hit[1]
+
     conn = get_master_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT * FROM tenants WHERE slug = ? OR custom_domain = ? LIMIT 1",
-        [identifier, identifier]
-    )
-    tenant = cur.fetchone()
-    conn.close()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT * FROM tenants WHERE slug = ? OR custom_domain = ? LIMIT 1",
+            [identifier, identifier]
+        )
+        tenant = cur.fetchone()
+    finally:
+        conn.close()
+    _tenant_cache[identifier] = (now, tenant)
     return tenant
 
 
@@ -553,14 +578,7 @@ def get_tenant_db_connection(tenant_slug: str):
         return Database().connect()
 
     try:
-        m_conn = get_master_db_connection()
-        cur = m_conn.cursor()
-        cur.execute(
-            "SELECT turso_db_url, turso_auth_token FROM tenants WHERE slug = ?",
-            [tenant_slug]
-        )
-        row = cur.fetchone()
-        m_conn.close()
+        row = get_tenant_by_identifier(tenant_slug)
 
         if row and row['turso_db_url'] and row['turso_auth_token'] and HAS_LIBSQL:
             return Database(
@@ -576,7 +594,7 @@ def get_tenant_db_connection(tenant_slug: str):
 
 def update_tenant_admin_password(slug: str, new_password: str):
     """Updates the admin_password for a tenant in their settings table."""
-    pwd_hash = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
+    pwd_hash = _hash_password(new_password)
     t_conn = get_tenant_db_connection(slug)
     t_conn.execute(
         "INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_password', ?)",
@@ -608,6 +626,7 @@ def delete_tenant(tenant_id: int):
 
     cur.execute("DELETE FROM tenants WHERE id = ?", [tenant_id])
     m_conn.commit()
+    clear_tenant_cache()
     m_conn.close()
 
     if tenant['turso_db_url']:
@@ -668,6 +687,7 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
           custom_domain or None, plan, theme or 'standard', max_products, flags_json,
           tenant_turso_url, tenant_turso_token])
     master_conn.commit()
+    clear_tenant_cache()
     master_conn.close()
 
     # Initialize tenant database (Turso or local SQLite)
@@ -683,7 +703,7 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
     _execute_schema(t_conn, schema_path)
 
     user_to_set = (admin_username or 'admin').strip() or 'admin'
-    pwd_hash = hashlib.sha256(admin_password.encode('utf-8')).hexdigest()
+    pwd_hash = _hash_password(admin_password)
     t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('shop_name', ?)", [store_name])
     t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_username', ?)", [user_to_set])
     t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_password', ?)", [pwd_hash])
