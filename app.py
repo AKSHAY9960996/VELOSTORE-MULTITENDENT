@@ -87,6 +87,27 @@ def diag():
         result['error'] = 'TIMEOUT: Turso connection did not respond within 10s'
     return jsonify(env=info, turso_test=result), 200
 
+def _render_landing():
+    """Marketing page for the platform itself (shown at / when no store is selected)."""
+    g.is_master = True  # skip per-store settings lookup in the context processor
+    stores = []
+    try:
+        conn = get_master_db_connection()
+        stores = conn.execute(
+            "SELECT slug, store_name FROM tenants WHERE is_active = 1 ORDER BY id LIMIT 6"
+        ).fetchall()
+        conn.close()
+    except Exception as e:
+        print(f"[Landing] could not load stores: {e}", flush=True)
+    demo_url = f"/s/{stores[0]['slug']}/" if stores else url_for('admin_login')
+    return render_template('landing.html', stores=stores, plans=DEFAULT_PLAN_CONFIG,
+                           demo_url=demo_url, now_year=datetime.utcnow().year)
+
+@app.route('/welcome')
+def welcome():
+    _ensure_master_db_ready()
+    return _render_landing()
+
 # ---------------------------------------------------------------------------
 # Multi-Tenant Middleware & Database Connection
 # ---------------------------------------------------------------------------
@@ -143,6 +164,10 @@ def resolve_tenant_context():
 
     if not tenant_slug:
         tenant_slug = session.get('active_tenant_slug')
+
+    # No store selected (no /s/slug, ?shop=, custom domain or earlier visit): show marketing page
+    if not tenant_slug and path == '/':
+        return _render_landing()
 
     tenant_info = get_tenant_by_identifier(tenant_slug) if tenant_slug else None
     if tenant_info:

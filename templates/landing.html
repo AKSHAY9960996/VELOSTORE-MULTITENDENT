@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>VeloStore | Your fashion store, without the DM chaos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="VeloStore turns Instagram and WhatsApp order DMs into a clean online store with live size availability, smart checkout and an admin dashboard.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f7f8fc;
+            --card: #ffffff;
+            --line: rgba(15, 23, 42, .10);
+            --text: #0f172a;
+            --muted: #5b6478;
+            --p: #6366f1;
+            --p2: #8b5cf6;
+            --ok: #059669
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            background: radial-gradient(900px 500px at 80% -10%, rgba(99, 102, 241, .14), transparent), radial-gradient(700px 400px at -10% 20%, rgba(139, 92, 246, .10), transparent), var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            line-height: 1.6
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 20px
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 0
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.4rem
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, var(--p), var(--p2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent
+        }
+
+        .links {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            font-size: .92rem;
+            color: var(--muted)
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: .95rem;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--text);
+            transition: .2s
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, var(--p), var(--p2));
+            border: 0;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, .30)
+        }
+
+        .btn:hover {
+            transform: translateY(-2px)
+        }
+
+        .hero {
+            text-align: center;
+            padding: 72px 0 56px
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 99px;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--muted);
+            font-size: .8rem;
+            margin-bottom: 22px
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: clamp(2.1rem, 6vw, 3.7rem);
+            line-height: 1.1;
+            margin-bottom: 18px
+        }
+
+        h1 em {
+            font-style: normal;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent
+        }
+
+        .hero p {
+            max-width: 620px;
+            margin: 0 auto 30px;
+            color: var(--muted);
+            font-size: 1.08rem
+        }
+
+        .cta {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap
+        }
+
+        section {
+            padding: 54px 0
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            text-align: center;
+            margin-bottom: 10px
+        }
+
+        .sub {
+            text-align: center;
+            color: var(--muted);
+            max-width: 560px;
+            margin: 0 auto 34px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, .04)
+        }
+
+        .card .ic {
+            font-size: 1.6rem;
+            margin-bottom: 10px
+        }
+
+        .card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 6px
+        }
+
+        .card p {
+            color: var(--muted);
+            font-size: .93rem
+        }
+
+        .vs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px
+        }
+
+        .vs .card ul {
+            list-style: none;
+            margin-top: 10px
+        }
+
+        .vs li {
+            padding: 6px 0;
+            color: var(--muted);
+            font-size: .93rem
+        }
+
+        .bad li::before {
+            content: "✕  ";
+            color: #dc2626
+        }
+
+        .good li::before {
+            content: "✓  ";
+            color: var(--ok)
+        }
+
+        .step b {
+            display: inline-flex;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--p), var(--p2));
+            margin-bottom: 10px;
+            font-family: 'Outfit', sans-serif
+        }
+
+        .plan h3 {
+            font-size: 1.3rem;
+            text-transform: capitalize
+        }
+
+        .plan .n {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 6px 0
+        }
+
+        .plan ul {
+            list-style: none;
+            margin-top: 10px
+        }
+
+        .plan li {
+            padding: 4px 0;
+            font-size: .9rem;
+            color: var(--muted)
+        }
+
+        .plan li.on::before {
+            content: "✓  ";
+            color: var(--ok)
+        }
+
+        .plan li.off {
+            opacity: .45
+        }
+
+        .plan li.off::before {
+            content: "–  "
+        }
+
+        .plan.hot {
+            border-color: var(--p);
+            box-shadow: 0 0 0 1px var(--p), 0 12px 40px rgba(99, 102, 241, .18)
+        }
+
+        .stores a.card {
+            display: block;
+            transition: .2s
+        }
+
+        .stores a.card:hover {
+            transform: translateY(-3px);
+            border-color: var(--p)
+        }
+
+        .stores small {
+            color: var(--p);
+            font-weight: 600
+        }
+
+        .final {
+            text-align: center;
+            background: linear-gradient(135deg, #eef0ff, #f5eefe);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 48px 20px;
+            margin: 20px 0 10px
+        }
+
+        footer {
+            padding: 30px 0 40px;
+            text-align: center;
+            color: var(--muted);
+            font-size: .85rem
+        }
+
+        footer a {
+            margin: 0 8px;
+            text-decoration: underline;
+            text-decoration-color: var(--line)
+        }
+
+        @media(max-width:640px) {
+            .links .hide {
+                display: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <nav>
+            <a href="/" class="logo">Velo<span>Store</span></a>
+            <div class="links">
+                <a class="hide" href="#features">Features</a>
+                <a class="hide" href="#how">How it works</a>
+                <a class="hide" href="#plans">Plans</a>
+                <a class="btn" href="{{ url_for('admin_login') }}">Store owner login</a>
+            </div>
+        </nav>
+
+        <header class="hero">
+            <span class="pill">Built for small fashion businesses</span>
+            <h1>Stop taking orders in DMs.<br>Start running a <em>real store</em>.</h1>
+            <p>VeloStore replaces Instagram and WhatsApp order chats with a clean online storefront, live size
+                availability and a simple dashboard for your stock and orders.</p>
+            <div class="cta">
+                <a class="btn primary" href="{{ demo_url }}">View a live store →</a>
+                <a class="btn" href="#plans">See plans</a>
+            </div>
+        </header>
+
+        <section id="why">
+            <h2>From chat chaos to clear orders</h2>
+            <p class="sub">The way most small sellers work today, and what changes with VeloStore.</p>
+            <div class="vs">
+                <div class="card bad">
+                    <h3>Selling through DMs</h3>
+                    <ul>
+                        <li>"Is this available in M?" asked 40 times a day</li>
+                        <li>Addresses and pincodes typed out in messy chats</li>
+                        <li>Orders lost between Instagram and WhatsApp</li>
+                        <li>Stock tracked in your head or a notebook</li>
+                    </ul>
+                </div>
+                <div class="card good">
+                    <h3>Selling with VeloStore</h3>
+                    <ul>
+                        <li>Customers see live size and stock before they order</li>
+                        <li>Checkout collects name, pincode, district and landmark</li>
+                        <li>Every order lands in one dashboard with a status</li>
+                        <li>Stock updates and items are held while an order is pending</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="features">
+            <h2>Everything a small store needs</h2>
+            <p class="sub">Simple on purpose. No complicated setup, no developer needed.</p>
+            <div class="grid">
+                <div class="card">
+                    <div class="ic">📏</div>
+                    <h3>Real-time size availability</h3>
+                    <p>Shoppers see which sizes are in stock, so you stop answering the same question.</p>
+                </div>
+                <div class="card">
+                    <div class="ic">🧾</div>
+                    <h3>Add-to-order checkout</h3>
+                    <p>Customers build an order and enter pincode, district, post office and landmark in one go.</p>
+                </div>
+                <div class="card">
+                    <div class="ic">💬</div>
+                    <h3>WhatsApp-friendly</h3>
+                    <p>Keep the conversation where your customers already are, with orders arriving in a structured
+                        form.</p>
+                </div>
+                <div class="card">
+                    <div class="ic">📦</div>
+                    <h3>Inventory and orders dashboard</h3>
+                    <p>Add products, update stock, and move orders from new to delivered from your phone or laptop.</p>
+                </div>
+                <div class="card">
+                    <div class="ic">🖼️</div>
+                    <h3>Fast product photos</h3>
+                    <p>Images are optimised automatically so your catalogue loads quickly on mobile data.</p>
+                </div>
+                <div class="card">
+                    <div class="ic">🏬</div>
+                    <h3>Your own branded store</h3>
+                    <p>Your shop name, logo and theme, with a private dashboard and its own database.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="how">
+            <h2>Live in three steps</h2>
+            <p class="sub">Go from Instagram page to online store in an afternoon.</p>
+            <div class="grid">
+                <div class="card step"><b>1</b>
+                    <h3>Get your store</h3>
+                    <p>We set up your store with your name, logo and admin login.</p>
+                </div>
+                <div class="card step"><b>2</b>
+                    <h3>Add your products</h3>
+                    <p>Upload photos, set prices, sizes and stock from the dashboard.</p>
+                </div>
+                <div class="card step"><b>3</b>
+                    <h3>Share your link</h3>
+                    <p>Put it in your Instagram bio and WhatsApp status, and let orders come in.</p>
+                </div>
+            </div>
+        </section>
+
+        {% if stores %}
+        <section id="stores" class="stores">
+            <h2>Stores on VeloStore</h2>
+            <p class="sub">See how real shops look to their customers.</p>
+            <div class="grid">
+                {% for s in stores %}
+                <a class="card" href="/s/{{ s['slug'] }}/">
+                    <h3>{{ s['store_name'] }}</h3>
+                    <p>Browse the storefront</p><small>Visit store →</small>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section id="plans">
+            <h2>Pick a plan that fits</h2>
+            <p class="sub">Start small and upgrade as your catalogue grows. Contact us for pricing.</p>
+            <div class="grid">
+                {% for name, p in plans.items() %}
+                <div class="card plan {% if name == 'basic' %}hot{% endif %}">
+                    <h3>{{ name }}</h3>
+                    <div class="n">{{ p.max_products }}</div>
+                    <p>products</p>
+                    <ul>
+                        <li class="{{ 'on' if p.features.whatsapp_checkout else 'off' }}">WhatsApp checkout</li>
+                        <li class="{{ 'on' if p.features.discount_codes else 'off' }}">Discount codes</li>
+                        <li class="{{ 'on' if p.features.pos_receipt else 'off' }}">Printable receipts</li>
+                        <li class="{{ 'on' if p.features.export_csv else 'off' }}">Export orders to CSV</li>
+                        <li class="{{ 'on' if p.features.analytics else 'off' }}">Sales analytics</li>
+                        <li class="{{ 'on' if p.features.custom_domain else 'off' }}">Custom domain</li>
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div class="final">
+            <h2>Ready to get your orders out of the DMs?</h2>
+            <p class="sub">Take a look at a live store, then get yours set up.</p>
+            <div class="cta">
+                <a class="btn primary" href="{{ demo_url }}">View a live store →</a>
+                <a class="btn" href="{{ url_for('admin_login') }}">Store owner login</a>
+            </div>
+        </div>
+
+        <footer>
+            <div>© {{ now_year }} VeloStore</div>
+            <div style="margin-top:8px"><a href="{{ url_for('admin_login') }}">Store owner login</a><a
+                    href="{{ url_for('master_login') }}">Platform admin</a></div>
+        </footer>
+    </div>
+</body>
+
+</html>
