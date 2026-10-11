@@ -111,6 +111,14 @@ def welcome():
 # ---------------------------------------------------------------------------
 # Multi-Tenant Middleware & Database Connection
 # ---------------------------------------------------------------------------
+@app.url_defaults
+def _add_shop_to_home_links(endpoint, values):
+    """Links to the storefront home keep the current store, since '/' alone is the marketing page."""
+    if endpoint == 'index' and 'shop' not in values:
+        slug = getattr(g, 'tenant_slug', None)
+        if slug and not getattr(g, 'is_master', False) and slug != 'master':
+            values['shop'] = slug
+
 @app.before_request
 def resolve_tenant_context():
     """
@@ -162,12 +170,16 @@ def resolve_tenant_context():
             if t_info:
                 tenant_slug = t_info['slug']
 
+    # Marketing page at '/': shown whenever no store is explicitly named in the request
+    # (no /s/slug, ?shop=, header or custom domain). The remembered session store is ignored
+    # here. Storefront searches/filters on '/' still use the session store.
+    _store_filter_args = {'q', 'category', 'min_price', 'max_price'}
+    if (not tenant_slug and path == '/'
+            and not (_store_filter_args & set(request.args.keys()))):
+        return _render_landing()
+
     if not tenant_slug:
         tenant_slug = session.get('active_tenant_slug')
-
-    # No store selected (no /s/slug, ?shop=, custom domain or earlier visit): show marketing page
-    if not tenant_slug and path == '/':
-        return _render_landing()
 
     tenant_info = get_tenant_by_identifier(tenant_slug) if tenant_slug else None
     if tenant_info:
