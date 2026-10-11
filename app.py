@@ -568,7 +568,7 @@ def index():
     products = query_db(query, args)
 
     # Distinct categories for the filter bar (only from visible products)
-    cat_query = 'SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != ""'
+    cat_query = 'SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != \'\''
     if show_oos == '0':
         cat_query += ' AND stock > 0'
     cat_query += ' ORDER BY category'
@@ -965,7 +965,7 @@ def admin_products():
     q += ' ORDER BY created_at DESC'
     products = query_db(q, args)
     categories = [row['category'] for row in
-                  query_db('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != "" ORDER BY category')]
+                  query_db('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != \'\' ORDER BY category')]
     return render_template('admin/products.html',
                            products=products,
                            categories=categories,
@@ -989,7 +989,7 @@ def admin_purchases():
     q += ' ORDER BY name ASC'
     products = query_db(q, args)
     categories = [row['category'] for row in
-                  query_db('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != "" ORDER BY category')]
+                  query_db('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != \'\' ORDER BY category')]
     return render_template('admin/purchases.html',
                            products=products,
                            categories=categories,
@@ -1025,7 +1025,7 @@ def api_product_sales(product_id):
 @login_required
 def admin_add_product():
     categories = [row['category'] for row in
-                  query_db('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != "" ORDER BY category')]
+                  query_db('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != \'\' ORDER BY category')]
     if request.method == 'POST':
         name        = request.form.get('name', '').strip()
         description = request.form.get('description', '').strip()
@@ -1079,7 +1079,7 @@ def admin_edit_product(product_id):
         flash('Product not found.', 'error')
         return redirect(url_for('admin_products'))
     categories = [row['category'] for row in
-                  query_db('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != "" ORDER BY category')]
+                  query_db('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != \'\' ORDER BY category')]
     if request.method == 'POST':
         name        = request.form.get('name', '').strip()
         description = request.form.get('description', '').strip()
@@ -1290,7 +1290,7 @@ def admin_cancel_order_item(order_id, item_id):
     curr = get_setting('currency_symbol', '₹')
 
     if remaining_items == 0:
-        db.execute('UPDATE orders SET total = 0, status = "Cancelled", reserved_until = NULL WHERE id = ?', [order_id])
+        db.execute('UPDATE orders SET total = 0, status = \'Cancelled\', reserved_until = NULL WHERE id = ?', [order_id])
         db.commit()
         flash(f'Cancelled "{pname}". All items cancelled, so Order #{order_id} is now Cancelled. Stock restored (+{cancel_qty}). 🔄', 'warning')
     else:
