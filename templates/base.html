@@ -16,7 +16,9 @@
     rel="stylesheet">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.1" />
-  {% if tenant_theme == 'luxury' or (tenant and tenant.theme == 'luxury') %}
+  {% if tenant_theme == 'cocoa' or (tenant and tenant.theme == 'cocoa') %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_cocoa.css') }}?v=1.0" />
+  {% elif tenant_theme == 'luxury' or (tenant and tenant.theme == 'luxury') %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_luxury.css') }}?v=1.0" />
   {% endif %}
   {% block head %}{% endblock %}
@@ -86,7 +88,7 @@
   <!-- ===== TOP ANNOUNCEMENT MARQUEE ===== -->
   <div class="announcement-bar">
     <div class="announcement-content">
-      {% if tenant_theme == 'luxury' %}
+      {% if is_luxury %}
       <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
       <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
       <span></span>
@@ -114,7 +116,7 @@
           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
         </svg>
       </div>
-      <h2 id="maintenanceTitle">{% if tenant_theme == 'luxury' %}STORE NOTICE 💎{% else %}SAKURA ATELIER NOTICE 🌸{%
+      <h2 id="maintenanceTitle">{% if is_luxury %}STORE NOTICE 💎{% else %}SAKURA ATELIER NOTICE 🌸{%
         endif %}</h2>
       <div class="maintenance-msg">
         {{ settings.get('maintenance_message', 'We are currently curating our exclusive stock. Kindly visit later!') |
@@ -151,7 +153,7 @@
         </div>
         <div class="logo-text">
           <span class="logo-name">{{ settings.get('shop_name','My Shop') }}</span>
-          <span class="logo-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif tenant_theme == 'luxury' %}💎 ROYAL ATELIER · LUXURY EDITION{% else %}🌸 YUMEI ATELIER · 夢の美{% endif %}</span>
+          <span class="logo-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY EDITION{% else %}🌸 YUMEI ATELIER · 夢の美{% endif %}</span>
         </div>
       </a>
 
@@ -177,7 +179,7 @@
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
-          <span class="cart-btn-text">{% if tenant_theme == 'luxury' %}💎 Bag{% else %}🌸 Bag{% endif %}</span>
+          <span class="cart-btn-text">{% if is_luxury %}💎 Bag{% else %}🌸 Bag{% endif %}</span>
           <span class="cart-badge" id="cartBadge">0</span>
         </button>
       </div>
@@ -213,7 +215,7 @@
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <path d="M16 10a4 4 0 0 1-8 0"></path>
         </svg>
-        <h2>{% if tenant_theme == 'luxury' %}SHOPPING BAG 💎{% else %}YUMEI BAG 🌸{% endif %}</h2>
+        <h2>{% if is_luxury %}SHOPPING BAG 💎{% else %}YUMEI BAG 🌸{% endif %}</h2>
       </div>
       <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close cart">✕</button>
     </div>
@@ -228,7 +230,7 @@
           </svg>
         </div>
         <h3>Your Bag is Empty</h3>
-        <p class="empty-cart-desc">{% if tenant_theme == 'luxury' %}Discover our exclusive curated luxury creations.{%
+        <p class="empty-cart-desc">{% if is_luxury %}Discover our exclusive curated luxury creations.{%
           else %}Discover our handpicked Yumei creations 🌸.{% endif %}</p>
       </div>
       <div id="cartItemsContainer"></div>
@@ -307,12 +309,12 @@
           {% endif %}
         </div>
         <span class="footer-logo-name">{{ settings.get('shop_name','My Shop') }}</span>
-        <span class="footer-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif tenant_theme == 'luxury' %}💎 ROYAL ATELIER · LUXURY FINE SELECTIONS{% else %}🌸 YUMEI ATELIER · 夢の美 · FINE SELECTIONS{% endif %}</span>
+        <span class="footer-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY FINE SELECTIONS{% else %}🌸 YUMEI ATELIER · 夢の美 · FINE SELECTIONS{% endif %}</span>
       </div>
       <div class="footer-divider"></div>
       <div class="footer-bottom">
         <p class="footer-copy">
-          © 2026 {{ settings.get('shop_name','My Shop') }}. All Rights Reserved. {% if tenant_theme == 'luxury'
+          © 2026 {{ settings.get('shop_name','My Shop') }}. All Rights Reserved. {% if is_luxury
           %}Crafted with Royal Elegance 💎{% else %}Crafted with Yumei Elegance 🌸{% endif %}.
         </p>
       </div>
@@ -333,7 +335,7 @@
   <div id="founderAdBanner" class="founder-ad-banner" style="display: none;">
     <button class="founder-ad-close" id="closeFounderAd" aria-label="Close concierge banner">✕</button>
     <div class="founder-ad-content">
-      <div class="founder-ad-badge">{% if tenant_theme == 'luxury' %}💎 CONCIERGE{% else %}🌸 YUMEI CONCIERGE{% endif %}
+      <div class="founder-ad-badge">{% if is_luxury %}💎 CONCIERGE{% else %}🌸 YUMEI CONCIERGE{% endif %}
       </div>
       <div class="founder-ad-text">
         <p class="founder-ad-title">Desire a custom storefront?</p>

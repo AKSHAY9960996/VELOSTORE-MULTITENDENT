@@ -20,7 +20,7 @@
       <div class="a-form-group" style="margin-top:16px">
         <label for="shop_slogan">Shop Hero Slogan / Subtitle</label>
         <textarea id="shop_slogan" name="shop_slogan" rows="3" style="width:100%;resize:vertical;padding:10px;border-radius:8px;background:var(--a-surface2);border:1px solid var(--a-border-md);color:var(--a-text);"
-                  placeholder="{% if tenant_theme == 'luxury' %}Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.{% else %}Where Yumei grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance — curated for the discerning wardrobe.{% endif %}">{{ settings.get('shop_slogan','') }}</textarea>
+                  placeholder="{% if is_luxury %}Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.{% else %}Where Yumei grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance — curated for the discerning wardrobe.{% endif %}">{{ settings.get('shop_slogan','') }}</textarea>
         <p style="font-size:0.72rem;color:var(--a-text-muted);margin-top:4px">
           Featured hero slogan displayed on your storefront homepage. Leave blank to use theme default.
         </p>
@@ -30,7 +30,7 @@
         <label for="shop_tagline">Header & Footer Logo Tagline</label>
         <input type="text" id="shop_tagline" name="shop_tagline"
                value="{{ settings.get('shop_tagline','') }}"
-               placeholder="{% if tenant_theme == 'luxury' %}💎 ROYAL ATELIER · LUXURY EDITION{% else %}🌸 YUMEI ATELIER · 夢の美{% endif %}" />
+               placeholder="{% if is_luxury %}💎 ROYAL ATELIER · LUXURY EDITION{% else %}🌸 YUMEI ATELIER · 夢の美{% endif %}" />
         <p style="font-size:0.72rem;color:var(--a-text-muted);margin-top:4px">
           Custom tagline displayed underneath your shop name in the header and footer.
         </p>
@@ -45,7 +45,7 @@
             {% if settings.get('shop_logo') %}
               <img id="logoPreviewImg" src="{{ img_url(settings.get('shop_logo')) }}" alt="Shop Logo" style="width:100%;height:100%;object-fit:cover;" />
             {% else %}
-              <div id="logoPreviewDefault" style="font-size:1.8rem;line-height:1">{% if tenant_theme == 'luxury' %}💎{% else %}🌸{% endif %}</div>
+              <div id="logoPreviewDefault" style="font-size:1.8rem;line-height:1">{% if is_luxury %}💎{% else %}🌸{% endif %}</div>
               <img id="logoPreviewImg" src="" alt="Shop Logo" style="width:100%;height:100%;object-fit:cover;display:none;" />
             {% endif %}
           </div>
@@ -60,7 +60,7 @@
             <div style="margin-top:8px">
               <label style="font-size:0.78rem;color:var(--a-danger);display:inline-flex;align-items:center;gap:6px;cursor:pointer">
                 <input type="checkbox" name="remove_logo" value="1" id="remove_logo" onchange="handleRemoveLogoToggle(this)" />
-                Remove custom logo (restore default {% if tenant_theme == 'luxury' %}Luxury Diamond{% else %}Sakura{% endif %} icon)
+                Remove custom logo (restore default {% if is_luxury %}Luxury Diamond{% else %}Sakura{% endif %} icon)
               </label>
             </div>
             {% endif %}

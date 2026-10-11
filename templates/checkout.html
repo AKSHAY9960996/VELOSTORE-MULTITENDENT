@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{% if tenant_theme == 'luxury' %}💎 Checkout — {{ settings.get('shop_name','My Shop') }}{% else %}🌸 Yumei Checkout — {{ settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
+{% block title %}{% if is_luxury %}💎 Checkout — {{ settings.get('shop_name','My Shop') }}{% else %}🌸 Yumei Checkout — {{ settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
 {% block description %}Complete your order at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
 
 {% block content %}
@@ -9,11 +9,11 @@
   <nav class="breadcrumb" style="margin-top:24px" aria-label="Breadcrumb">
     <a href="{{ url_for('index') }}">Home</a>
     <span class="breadcrumb-sep">›</span>
-    <span class="breadcrumb-current">{% if tenant_theme == 'luxury' %}💎 Checkout{% else %}🌸 Yumei Checkout{% endif %}</span>
+    <span class="breadcrumb-current">{% if is_luxury %}💎 Checkout{% else %}🌸 Yumei Checkout{% endif %}</span>
   </nav>
 
   <h1 class="checkout-main-title">
-    {% if tenant_theme == 'luxury' %}Complete Your Order 💎{% else %}Complete Your Yumei Order 🌸{% endif %}
+    {% if is_luxury %}Complete Your Order 💎{% else %}Complete Your Yumei Order 🌸{% endif %}
   </h1>
 
   <div class="checkout-wrap">
@@ -29,7 +29,7 @@
             <line x1="16" y1="17" x2="8" y2="17"></line>
             <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
-          <h3>{% if tenant_theme == 'luxury' %}💎 Order Summary{% else %}🌸 Yumei Order Summary{% endif %}</h3>
+          <h3>{% if is_luxury %}💎 Order Summary{% else %}🌸 Yumei Order Summary{% endif %}</h3>
         </div>
         <div class="order-summary-body">
           <div id="checkoutSummary">
@@ -80,7 +80,7 @@
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          <h2>{% if tenant_theme == 'luxury' %}💎 Delivery Details{% else %}🌸 White-Glove Delivery Details{% endif %}</h2>
+          <h2>{% if is_luxury %}💎 Delivery Details{% else %}🌸 White-Glove Delivery Details{% endif %}</h2>
         </div>
 
         <div class="checkout-notice-alert">
@@ -152,7 +152,7 @@
           </div>
 
           <button type="submit" class="btn-place-order" id="placeOrderBtn">
-            <span>{% if tenant_theme == 'luxury' %}PLACE ORDER 💎{% else %}PLACE YUMEI ORDER 🌸{% endif %}</span>
+            <span>{% if is_luxury %}PLACE ORDER 💎{% else %}PLACE YUMEI ORDER 🌸{% endif %}</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>

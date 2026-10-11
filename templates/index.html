@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ settings.get('shop_name','My Shop') }} — {% if tenant_theme == 'luxury' %}💎 Luxury Collection{% else %}🌸 夢 Yumei Luxury Atelier{% endif %}{% endblock %}
+{% block title %}{{ settings.get('shop_name','My Shop') }} — {% if is_luxury %}💎 Luxury Collection{% else %}🌸 夢 Yumei Luxury Atelier{% endif %}{% endblock %}
 {% block description %}Discover handpicked luxury goods at {{ settings.get('shop_name','My Shop') }}. Authentic premium quality.{% endblock %}
 
 {% block content %}
@@ -9,12 +9,12 @@
 <section class="hero-section">
   <div class="hero-overlay-glow"></div>
   <div class="hero-content">
-    <div class="hero-badge">{% if tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}🌸 夢 YUMEI BLOOM COLLECTION — SPRING 2026 🌸{% endif %}</div>
+    <div class="hero-badge">{% if tenant_theme == 'cocoa' %}🤎 HERITAGE COCOA LUXURY COLLECTION 2026 🤎{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}🌸 夢 YUMEI BLOOM COLLECTION — SPRING 2026 🌸{% endif %}</div>
     <h1 class="hero-title">{{ settings.get('shop_name','My Shop') }}</h1>
     <p class="hero-subtitle">
       {% if settings.get('shop_slogan') %}
       {{ settings.get('shop_slogan') }}
-      {% elif tenant_theme == 'luxury' %}
+      {% elif is_luxury %}
       Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.
       {% else %}
       Where Yumei grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance —
@@ -23,7 +23,7 @@
     </p>
     <div class="hero-divider">
       <span class="divider-line"></span>
-      <span class="divider-diamond">{% if tenant_theme == 'luxury' %}💎{% else %}🌸{% endif %}</span>
+      <span class="divider-diamond">{% if is_luxury %}💎{% else %}🌸{% endif %}</span>
       <span class="divider-line"></span>
     </div>
   </div>
@@ -49,7 +49,7 @@
   <!-- Category Filter Strip -->
   {% if categories %}
   <div class="filter-strip" role="navigation" aria-label="Product categories">
-    <span class="filter-strip-label">{% if tenant_theme == 'luxury' %}💎 COLLECTION:{% else %}🌸 COLLECTION:{% endif %}</span>
+    <span class="filter-strip-label">{% if is_luxury %}💎 COLLECTION:{% else %}🌸 COLLECTION:{% endif %}</span>
     <a href="{{ url_for('index') }}" class="category-tag {% if not active_category %}active{% endif %}">
       All Selections
     </a>
@@ -127,11 +127,11 @@
         {% elif active_category %}
         {{ active_category }}
         {% else %}
-        {% if tenant_theme == 'luxury' %}Featured Luxury Pieces{% else %}Featured Yumei Pieces{% endif %}
+        {% if is_luxury %}Featured Luxury Pieces{% else %}Featured Yumei Pieces{% endif %}
         {% endif %}
       </h2>
       <div class="section-count">
-        {{ products|length }} {{ 'piece' if products|length == 1 else 'pieces' }} available {% if tenant_theme == 'luxury' %}· 💎{% else %}· 🌸{% endif %}
+        {{ products|length }} {{ 'piece' if products|length == 1 else 'pieces' }} available {% if is_luxury %}· 💎{% else %}· 🌸{% endif %}
         {% if max_price %}
         · <span class="price-filter-active-tag">Under {{ settings.get('currency_symbol','₹') }}{{ max_price }}</span>
         {% endif %}
@@ -170,7 +170,7 @@
               <path
                 d="M12 2c-.8 2.2-2.8 3.5-5 3.5 1.5 1.8 1.5 4.5 0 6.3 2.2 0 4.2 1.3 5 3.5.8-2.2 2.8-3.5 5-3.5-1.5-1.8-1.5-4.5 0-6.3-2.2 0-4.2-1.3-5-3.5zm0 5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
             </svg>
-            <p>{% if tenant_theme == 'luxury' %}LUXURY PIECE 💎{% else %}YUMEI PIECE 🌸{% endif %}</p>
+            <p>{% if is_luxury %}LUXURY PIECE 💎{% else %}YUMEI PIECE 🌸{% endif %}</p>
           </div>
           {% endif %}
 
@@ -190,7 +190,7 @@
       <div class="product-info">
         {% if product.category or ('size' in product.keys() and product.size) %}
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">
-          {% if product.category %}<div class="product-category" style="margin-bottom:0">{% if tenant_theme == 'luxury' %}💎{% else %}🌸{% endif %} {{ product.category }}</div>
+          {% if product.category %}<div class="product-category" style="margin-bottom:0">{% if is_luxury %}💎{% else %}🌸{% endif %} {{ product.category }}</div>
           {% else %}<div></div>{% endif %}
           {% if 'size' in product.keys() and product.size %}
           <span
@@ -211,7 +211,7 @@
 
         {% if product.stock > 0 %}
         <div class="product-stock {% if product.stock <= 2 %}low{% endif %}">
-          {% if product.stock <= 2 %} {% if tenant_theme == 'luxury' %}💎 Only {{ product.stock }} available{% else %}🌸 Only {{ product.stock }} available in Yumei Atelier{% endif %} {% else %} ✓ In Stock {% endif %} </div>
+          {% if product.stock <= 2 %} {% if is_luxury %}💎 Only {{ product.stock }} available{% else %}🌸 Only {{ product.stock }} available in Yumei Atelier{% endif %} {% else %} ✓ In Stock {% endif %} </div>
             {% else %}
             <div class="product-stock oos">✕ Exhausted / Out of Stock</div>
             {% endif %}

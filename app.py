@@ -542,7 +542,8 @@ def inject_settings():
             tenant_theme = tenant['theme'] if 'theme' in tenant.keys() else 'standard'
         except Exception:
             tenant_theme = 'standard'
-    ctx = dict(settings=settings, now_year=datetime.utcnow().year, tenant=tenant, tenant_features=features, tenant_theme=tenant_theme)
+    ctx = dict(settings=settings, now_year=datetime.utcnow().year, tenant=tenant, tenant_features=features, tenant_theme=tenant_theme,
+                 is_luxury=(tenant_theme in ('luxury', 'cocoa')))
 
     if request.path.startswith('/admin'):
         ctx['storage_stats'] = get_storage_stats()

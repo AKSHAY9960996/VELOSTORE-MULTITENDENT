@@ -123,7 +123,7 @@
 
         {% set cur_theme = tenant.theme if tenant and tenant.theme else 'standard' %}
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px;">
           
           <!-- Theme 1: Standard Sakura Blossom -->
           <label style="position: relative; display: block; background: rgba(255,255,255,0.02); border: 2px solid {% if cur_theme == 'standard' %}var(--primary){% else %}var(--border-color){% endif %}; border-radius: var(--radius-md); padding: 18px; cursor: pointer; transition: all 0.2s ease;" class="theme-card">
@@ -154,6 +154,22 @@
             <div style="height: 28px; border-radius: 6px; background: linear-gradient(90deg, #ffffff, #f0f7ff, #1e40af, #2563eb); border: 1px solid rgba(37, 99, 235, 0.35); margin-bottom: 10px;"></div>
             <div style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.4;">
               Crisp 100% pure white canvas with royal sapphire accents, deep imperial azure trim, crystal blue particles, and bold luxury typography.
+            </div>
+          </label>
+
+          <!-- Theme 3: Heritage Cocoa Brown -->
+          <label style="position: relative; display: block; background: rgba(255,255,255,0.02); border: 2px solid {% if cur_theme == 'cocoa' %}#8b5a2b{% else %}var(--border-color){% endif %}; border-radius: var(--radius-md); padding: 18px; cursor: pointer; transition: all 0.2s ease;" class="theme-card">
+            <input type="radio" name="theme" value="cocoa" {% if cur_theme == 'cocoa' %}checked{% endif %} style="position: absolute; top: 16px; right: 16px; accent-color: #8b5a2b;" onchange="updateThemeSelection()" />
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <span style="font-size: 1.5rem;">🤎</span>
+              <div>
+                <div style="font-weight: 800; color: #fff; font-size: 0.95rem;">Cocoa (Heritage Brown)</div>
+                <div style="font-size: 0.74rem; color: #c49a6c;">Warm Cream & Rich Cocoa Brown</div>
+              </div>
+            </div>
+            <div style="height: 28px; border-radius: 6px; background: linear-gradient(90deg, #fffdf9, #efe5d9, #8b5a2b, #3e2314); border: 1px solid rgba(139, 90, 43, 0.4); margin-bottom: 10px;"></div>
+            <div style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.4;">
+              Warm cream canvas with espresso, leather and caramel accents. A timeless heritage look for premium and luxury shops.
             </div>
           </label>
 
@@ -357,6 +373,9 @@ function updateThemeSelection() {
       if (radio.value === 'luxury') {
         card.style.borderColor = '#2563eb';
         card.style.background = 'rgba(37, 99, 235, 0.08)';
+      } else if (radio.value === 'cocoa') {
+        card.style.borderColor = '#8b5a2b';
+        card.style.background = 'rgba(139, 90, 43, 0.10)';
       } else {
         card.style.borderColor = 'var(--primary)';
         card.style.background = 'rgba(99, 102, 241, 0.06)';
