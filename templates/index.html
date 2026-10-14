@@ -11,6 +11,22 @@
   {% if is_cocoa and hero_banner_url %}style="--hero-banner-url: url('{{ hero_banner_url }}');"{% endif %}>
   <div class="hero-overlay-glow"></div>
   {% if is_cocoa and hero_banner_url %}<div class="hero-banner-img" aria-hidden="true"></div>{% endif %}
+  {% if is_cocoa %}
+  <div class="hero-panel-badge" aria-hidden="true">
+    <div class="hero-panel-badge-ring">
+      {% if settings.get('shop_logo') %}
+      <img src="{{ img_url(settings.get('shop_logo')) }}" alt="" style="width:60%;height:60%;object-fit:contain;border-radius:50%;opacity:0.85;" />
+      {% else %}
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+      {% endif %}
+    </div>
+    <span class="hero-panel-badge-name">{{ settings.get('shop_name','My Shop') }}</span>
+  </div>
+  {% endif %}
   <div class="hero-content">
     <div class="hero-badge">{% if is_cocoa %}{{ settings.get('shop_name','My Shop')|upper }}{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}{{ flower }} {{ brand|upper }} · NEW COLLECTION {{ now_year }} {{ flower }}{% endif %}</div>
     <h1 class="hero-title">{% if is_cocoa %}{{ settings.get('shop_tagline') or settings.get('shop_name','My Shop') }}{% else %}{{ settings.get('shop_name','My Shop') }}{% endif %}</h1>

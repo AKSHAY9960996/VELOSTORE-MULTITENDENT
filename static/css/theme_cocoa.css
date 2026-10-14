@@ -77,63 +77,85 @@ body { background: var(--cream); }
 
 /* ---------- hero banner ---------- */
 /*
-  Universal geometric pattern — clean diagonal grid of small squares.
-  No thematic imagery: works for clothing, toys, electronics, home goods, etc.
-  The shop identity comes entirely from the shop name, slogan, and CTA.
+  Two-tone split hero: cream left (text) + solid cocoa-brown right (decoration).
+  No thematic imagery — works for any shop type.
+  All identity comes from shop name, tagline, and CTA text.
 */
 .hero-section {
   position: relative; overflow: hidden; text-align: left; display: flex; align-items: center;
   margin: 18px 16px 0; padding: 36px 26px 34px; min-height: 300px;
-  border: 1px solid var(--clr-border); border-radius: 18px;
-  background:
-    radial-gradient(ellipse 70% 90% at 15% 50%, rgba(255, 255, 255, 0.82), transparent 65%),
-    linear-gradient(135deg, #f7eee3 0%, #f0e2d1 45%, #ede0cc 100%);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--clr-border-dk); border-radius: 18px;
+  background: #f7eee3;
+  box-shadow: var(--shadow-md);
 }
 
-/* Right-side decorative panel — pure geometry, brand-neutral */
+/* Solid brown right panel — strong, clean split */
 .hero-section::after {
   content: '';
   position: absolute;
   top: 0; right: 0;
-  width: 46%;
+  width: 42%;
   height: 100%;
-  background:
-    linear-gradient(to right, rgba(247,238,227,1) 0%, rgba(247,238,227,0) 30%),
-    repeating-linear-gradient(
-      45deg,
-      rgba(107, 58, 36, 0.055) 0px,
-      rgba(107, 58, 36, 0.055) 1px,
-      transparent 1px,
-      transparent 18px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      rgba(107, 58, 36, 0.055) 0px,
-      rgba(107, 58, 36, 0.055) 1px,
-      transparent 1px,
-      transparent 18px
-    ),
-    linear-gradient(135deg, #f0e2d1 0%, #e8d5be 100%);
+  background: var(--cocoa);
   border-radius: 0 17px 17px 0;
   pointer-events: none;
   z-index: 1;
 }
 
-/* Right-side accent square — a simple bag/box silhouette built from CSS, no SVG */
+/* Subtle dot grid over the brown panel for texture */
 .hero-section::before {
   content: '';
   position: absolute;
-  right: 8%;
-  top: 50%;
-  transform: translateY(-50%);
-  width: clamp(80px, 20vw, 130px);
-  height: clamp(80px, 20vw, 130px);
-  border: 2.5px solid rgba(107, 58, 36, 0.22);
-  border-radius: 14px;
-  background: rgba(251, 246, 239, 0.55);
-  box-shadow: 0 8px 28px rgba(79, 42, 26, 0.10);
+  top: 0; right: 0;
+  width: 42%;
+  height: 100%;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+  border-radius: 0 17px 17px 0;
+  pointer-events: none;
   z-index: 2;
+}
+
+/* Shop logo / name monogram badge on the brown panel */
+.hero-panel-badge {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 42%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 3;
+  pointer-events: none;
+}
+.hero-panel-badge-ring {
+  width: clamp(72px, 18vw, 110px);
+  height: clamp(72px, 18vw, 110px);
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-panel-badge-ring svg {
+  width: 36%; height: 36%;
+  stroke: rgba(255,255,255,0.85);
+  fill: none;
+  stroke-width: 1.5;
+}
+.hero-panel-badge-name {
+  font-family: var(--font-display);
+  font-size: clamp(0.48rem, 1.2vw, 0.62rem);
+  letter-spacing: 0.28em;
+  color: rgba(255,255,255,0.75);
+  text-align: center;
+  text-transform: uppercase;
+  max-width: 80%;
+  line-height: 1.6;
 }
 
 .hero-overlay-glow { display: none; }
@@ -249,10 +271,8 @@ body { background: var(--cream); }
 /* ---------- desktop ---------- */
 @media (min-width: 769px) {
   .hero-section { width: min(1320px, calc(100% - 80px)); margin: 28px auto 0; padding: 78px 64px; min-height: 420px; border-radius: 24px; }
-  .hero-section::before {
-    right: 11%;
-    width: 160px; height: 160px;
-  }
+  .hero-section::after { border-radius: 0 23px 23px 0; }
+  .hero-section::before { border-radius: 0 23px 23px 0; }
   .hero-content { max-width: 520px; }
   .hero-title { font-size: 4.4rem; margin-bottom: 14px; }
   .hero-badge { font-size: 0.76rem; margin-bottom: 20px; }
@@ -278,11 +298,7 @@ body { background: var(--cream); }
   .mobile-search-bar { padding: 4px 16px 14px; }
   .mobile-search-bar input[type="search"] { font-family: var(--font-display); font-style: italic; font-size: 1.1rem; padding: 15px 20px 15px 50px; border-radius: 16px; background: rgba(255, 253, 249, 0.9); border: 1px solid var(--clr-border-dk); }
   .hero-section { margin: 6px 12px 0; padding: 36px 24px 32px; min-height: 290px; }
-  .hero-section::before {
-    width: 70px; height: 70px;
-    right: 5%;
-  }
-  .hero-content { max-width: 62%; }
+  .hero-content { max-width: 56%; }
   .hero-title { font-size: clamp(1.7rem, 7.4vw, 2.3rem); margin-bottom: 10px; letter-spacing: 0.03em; }
   .hero-subtitle { display: block; font-size: 0.74rem; max-width: 220px; }
   .hero-badge { font-size: 0.6rem; letter-spacing: 0.22em; padding: 0; margin-bottom: 14px; }
