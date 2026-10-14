@@ -121,7 +121,7 @@
           Choose the design system and aesthetic palette for this tenant's storefront.
         </p>
 
-        {% set cur_theme = tenant.theme if tenant and tenant.theme else 'standard' %}
+        {% set cur_theme = (tenant.get('theme') if tenant else None) or 'standard' %}
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px;">
           

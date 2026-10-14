@@ -436,14 +436,22 @@ DEFAULT_PLAN_CONFIG = {
 }
 
 
+def _tenant_get(tenant, key, default=None):
+    """Safe column access for sqlite3.Row / libsql Row objects."""
+    try:
+        return tenant[key]
+    except (IndexError, KeyError, TypeError):
+        return default
+
+
 def get_tenant_feature_flags(tenant) -> dict:
     if not tenant:
         return DEFAULT_PLAN_CONFIG['free']['features'].copy()
 
-    plan = (tenant['plan'] if 'plan' in tenant.keys() else 'free') or 'free'
+    plan = (_tenant_get(tenant, 'plan') or 'free')
     base_features = DEFAULT_PLAN_CONFIG.get(plan, DEFAULT_PLAN_CONFIG['free'])['features'].copy()
 
-    raw_flags = tenant['feature_flags'] if 'feature_flags' in tenant.keys() else None
+    raw_flags = _tenant_get(tenant, 'feature_flags')
     if raw_flags:
         try:
             overrides = json.loads(raw_flags) if isinstance(raw_flags, str) else raw_flags

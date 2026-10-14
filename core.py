@@ -19,7 +19,8 @@ from db import (Database, get_connection, is_turso, init_master_db,
                 get_master_db_connection, get_tenant_by_identifier,
                 get_tenant_db_connection, provision_new_tenant,
                 get_tenant_feature_flags, update_tenant_admin_password,
-                delete_tenant, DEFAULT_PLAN_CONFIG, clear_tenant_cache)
+                delete_tenant, DEFAULT_PLAN_CONFIG, clear_tenant_cache,
+                _tenant_get)
 import cloudinary_helper
 
 # ---------------------------------------------------------------------------
@@ -560,12 +561,7 @@ def inject_settings():
     settings = get_all_settings()
     tenant = getattr(g, 'tenant', None)
     features = getattr(g, 'tenant_features', {}) or (get_tenant_feature_flags(tenant) if tenant else {})
-    tenant_theme = 'standard'
-    if tenant:
-        try:
-            tenant_theme = tenant['theme'] if 'theme' in tenant.keys() else 'standard'
-        except Exception:
-            tenant_theme = 'standard'
+    tenant_theme = (_tenant_get(tenant, 'theme') or 'standard') if tenant else 'standard'
     brand = (settings.get('shop_name') or '').strip()
     if not brand and tenant:
         try:

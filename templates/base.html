@@ -16,9 +16,9 @@
     rel="stylesheet">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.1" />
-  {% if tenant_theme == 'cocoa' or (tenant and tenant.theme == 'cocoa') %}
+  {% if tenant_theme == 'cocoa' %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_cocoa.css') }}?v=1.0" />
-  {% elif tenant_theme == 'luxury' or (tenant and tenant.theme == 'luxury') %}
+  {% elif tenant_theme == 'luxury' %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_luxury.css') }}?v=1.0" />
   {% endif %}
   {% block head %}{% endblock %}
