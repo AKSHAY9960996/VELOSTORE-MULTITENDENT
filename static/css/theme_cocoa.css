@@ -214,8 +214,8 @@ body {
   border-radius: inherit;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
-  filter: brightness(1.04) contrast(1.06) saturate(1.08);
-  transform: translateZ(0); /* GPU compositing layer for sharper rendering */
+  filter: brightness(1.06) contrast(1.10) saturate(1.12);
+  transform: translateZ(0); /* GPU compositing — sharper rendering */
 }
 
 /* Default decorative banner when no image is uploaded */
@@ -248,13 +248,13 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  /* Lighter overlay — only guards text readability on the left, image stays vivid on the right */
+  /* Minimal scrim — just protects left-side text, photo is fully vivid everywhere else */
   background: linear-gradient(
     to right,
-    rgba(247, 238, 227, 0.82) 0%,
-    rgba(247, 238, 227, 0.52) 22%,
-    rgba(247, 238, 227, 0.12) 44%,
-    transparent 60%
+    rgba(247, 238, 227, 0.60) 0%,
+    rgba(247, 238, 227, 0.25) 18%,
+    rgba(247, 238, 227, 0.04) 34%,
+    transparent 48%
   );
   border-radius: inherit;
 }
