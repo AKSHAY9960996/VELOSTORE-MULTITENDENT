@@ -76,19 +76,68 @@ body { background: var(--cream); }
 .mobile-search-bar { background: transparent; border: 0; }
 
 /* ---------- hero banner ---------- */
+/*
+  Universal geometric pattern — clean diagonal grid of small squares.
+  No thematic imagery: works for clothing, toys, electronics, home goods, etc.
+  The shop identity comes entirely from the shop name, slogan, and CTA.
+*/
 .hero-section {
   position: relative; overflow: hidden; text-align: left; display: flex; align-items: center;
   margin: 18px 16px 0; padding: 36px 26px 34px; min-height: 300px;
   border: 1px solid var(--clr-border); border-radius: 18px;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 230 300%22%3E%3Cpath d=%22M214 300C206 226 188 170 138 112 112 82 92 50 84 8%22 fill=%22none%22 stroke=%22%237a6849%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M158 150C176 130 198 116 226 110%22 fill=%22none%22 stroke=%22%237a6849%22 stroke-width=%222.4%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M118 92C98 84 80 86 62 98%22 fill=%22none%22 stroke=%22%237a6849%22 stroke-width=%222.2%22 stroke-linecap=%22round%22/%3E%3Cpath transform=%22translate(176,176) rotate(-50) scale(1.1)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%238d7b58%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(196,214) rotate(-120) scale(1.0)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%23a08d68%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(150,132) rotate(-200) scale(1.0)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%237f6e4d%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(108,70) rotate(-160) scale(0.9)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%23a08d68%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(132,110) rotate(-20) scale(0.9)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%238d7b58%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(96,34) rotate(-100) scale(0.8)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%238d7b58%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(212,118) rotate(-160) scale(0.8)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%23a08d68%22 opacity=%22.9%22/%3E%3Cg transform=%22translate(112,84) scale(1.25)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Cg transform=%22translate(168,134) scale(1.1)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Cg transform=%22translate(86,34) scale(0.95)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Cg transform=%22translate(66,100) scale(0.85)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Cg transform=%22translate(214,112) scale(0.75)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Ccircle cx=%22132%22 cy=%2258%22 r=%226%22 fill=%22%23ecd2c4%22/%3E%3Ccircle cx=%22148%22 cy=%2296%22 r=%225%22 fill=%22%23e3c3b2%22/%3E%3Ccircle cx=%2260%22 cy=%2268%22 r=%224.5%22 fill=%22%23ecd2c4%22/%3E%3C/svg%3E") no-repeat right -6px bottom -6px / auto 98%,
-    radial-gradient(ellipse 60% 80% at 20% 15%, rgba(255, 255, 255, 0.75), transparent 70%),
-    linear-gradient(118deg, #f7eee3 0%, #f0e2d1 42%, #f8f0e6 70%, #efe0cd 100%);
+    radial-gradient(ellipse 70% 90% at 15% 50%, rgba(255, 255, 255, 0.82), transparent 65%),
+    linear-gradient(135deg, #f7eee3 0%, #f0e2d1 45%, #ede0cc 100%);
   box-shadow: var(--shadow-sm);
 }
-.hero-section::before, .hero-section::after { display: none; }
+
+/* Right-side decorative panel — pure geometry, brand-neutral */
+.hero-section::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 46%;
+  height: 100%;
+  background:
+    linear-gradient(to right, rgba(247,238,227,1) 0%, rgba(247,238,227,0) 30%),
+    repeating-linear-gradient(
+      45deg,
+      rgba(107, 58, 36, 0.055) 0px,
+      rgba(107, 58, 36, 0.055) 1px,
+      transparent 1px,
+      transparent 18px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(107, 58, 36, 0.055) 0px,
+      rgba(107, 58, 36, 0.055) 1px,
+      transparent 1px,
+      transparent 18px
+    ),
+    linear-gradient(135deg, #f0e2d1 0%, #e8d5be 100%);
+  border-radius: 0 17px 17px 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Right-side accent square — a simple bag/box silhouette built from CSS, no SVG */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  right: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(80px, 20vw, 130px);
+  height: clamp(80px, 20vw, 130px);
+  border: 2.5px solid rgba(107, 58, 36, 0.22);
+  border-radius: 14px;
+  background: rgba(251, 246, 239, 0.55);
+  box-shadow: 0 8px 28px rgba(79, 42, 26, 0.10);
+  z-index: 2;
+}
+
 .hero-overlay-glow { display: none; }
-.hero-content { max-width: 64%; margin: 0; animation: none; position: relative; z-index: 2; }
+.hero-content { max-width: 58%; margin: 0; animation: none; position: relative; z-index: 3; }
 
 /* ---- Custom hero banner image (set via admin settings) ---- */
 .hero-section.hero-has-banner {
@@ -97,6 +146,8 @@ body { background: var(--cream); }
   overflow: hidden;
   min-height: 300px;
 }
+.hero-section.hero-has-banner::before,
+.hero-section.hero-has-banner::after { display: none; }
 .hero-section.hero-has-banner .hero-content {
   max-width: 56%;
   padding: 36px 28px 34px;
@@ -133,6 +184,8 @@ body { background: var(--cream); }
     border-radius: 0 0 17px 17px;
   }
 }
+
+/* ---- hero text ---- */
 .hero-badge {
   display: block; background: none; border: 0; padding: 0; margin: 0 0 14px;
   font-size: 0.7rem; letter-spacing: 0.34em; color: var(--cocoa-dk); font-weight: 600; backdrop-filter: none;
@@ -196,6 +249,10 @@ body { background: var(--cream); }
 /* ---------- desktop ---------- */
 @media (min-width: 769px) {
   .hero-section { width: min(1320px, calc(100% - 80px)); margin: 28px auto 0; padding: 78px 64px; min-height: 420px; border-radius: 24px; }
+  .hero-section::before {
+    right: 11%;
+    width: 160px; height: 160px;
+  }
   .hero-content { max-width: 520px; }
   .hero-title { font-size: 4.4rem; margin-bottom: 14px; }
   .hero-badge { font-size: 0.76rem; margin-bottom: 20px; }
@@ -221,7 +278,11 @@ body { background: var(--cream); }
   .mobile-search-bar { padding: 4px 16px 14px; }
   .mobile-search-bar input[type="search"] { font-family: var(--font-display); font-style: italic; font-size: 1.1rem; padding: 15px 20px 15px 50px; border-radius: 16px; background: rgba(255, 253, 249, 0.9); border: 1px solid var(--clr-border-dk); }
   .hero-section { margin: 6px 12px 0; padding: 36px 24px 32px; min-height: 290px; }
-  .hero-content { max-width: 78%; }
+  .hero-section::before {
+    width: 70px; height: 70px;
+    right: 5%;
+  }
+  .hero-content { max-width: 62%; }
   .hero-title { font-size: clamp(1.7rem, 7.4vw, 2.3rem); margin-bottom: 10px; letter-spacing: 0.03em; }
   .hero-subtitle { display: block; font-size: 0.74rem; max-width: 220px; }
   .hero-badge { font-size: 0.6rem; letter-spacing: 0.22em; padding: 0; margin-bottom: 14px; }

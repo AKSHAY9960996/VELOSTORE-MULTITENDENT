@@ -12,15 +12,15 @@
   <div class="hero-overlay-glow"></div>
   {% if is_cocoa and hero_banner_url %}<div class="hero-banner-img" aria-hidden="true"></div>{% endif %}
   <div class="hero-content">
-    <div class="hero-badge">{% if is_cocoa %}{{ brand|upper }} COLLECTION{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}{{ flower }} {{ brand|upper }} · NEW COLLECTION {{ now_year }} {{ flower }}{% endif %}</div>
-    <h1 class="hero-title">{% if is_cocoa %}{{ season_label }}{% else %}{{ settings.get('shop_name','My Shop') }}{% endif %}</h1>
+    <div class="hero-badge">{% if is_cocoa %}{{ settings.get('shop_name','My Shop')|upper }}{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}{{ flower }} {{ brand|upper }} · NEW COLLECTION {{ now_year }} {{ flower }}{% endif %}</div>
+    <h1 class="hero-title">{% if is_cocoa %}{{ settings.get('shop_tagline') or settings.get('shop_name','My Shop') }}{% else %}{{ settings.get('shop_name','My Shop') }}{% endif %}</h1>
     <p class="hero-subtitle">
       {% if settings.get('shop_slogan') %}
       {{ settings.get('shop_slogan') }}
       {% elif is_luxury %}
       Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.
       {% elif is_cocoa %}
-      Warm. Timeless. Uniquely you.
+      Quality products, carefully selected for you.
       {% else %}
       Where grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance —
       curated for the discerning wardrobe.
