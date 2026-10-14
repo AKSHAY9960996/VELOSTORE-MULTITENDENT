@@ -212,10 +212,9 @@ body {
   background-repeat: no-repeat;
   z-index: 1;
   border-radius: inherit;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  filter: brightness(1.06) contrast(1.10) saturate(1.12);
-  transform: translateZ(0); /* GPU compositing — sharper rendering */
+  image-rendering: auto; /* smooth bicubic interpolation — no pixelation */
+  filter: brightness(1.03) contrast(1.04) saturate(1.06);
+  transform: translateZ(0);
 }
 
 /* Default decorative banner when no image is uploaded */
