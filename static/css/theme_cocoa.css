@@ -212,9 +212,11 @@ body {
   background-repeat: no-repeat;
   z-index: 1;
   border-radius: inherit;
-  image-rendering: auto; /* smooth bicubic interpolation — no pixelation */
-  filter: brightness(1.03) contrast(1.04) saturate(1.06);
+  image-rendering: auto;
+  filter: brightness(1.05) contrast(1.18) saturate(1.10) sharpen(1);
   transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Default decorative banner when no image is uploaded */
@@ -247,13 +249,13 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  /* Minimal scrim — just protects left-side text, photo is fully vivid everywhere else */
+  /* Only a tiny scrim on the far-left — right side is completely clear */
   background: linear-gradient(
     to right,
-    rgba(247, 238, 227, 0.60) 0%,
-    rgba(247, 238, 227, 0.25) 18%,
-    rgba(247, 238, 227, 0.04) 34%,
-    transparent 48%
+    rgba(247, 238, 227, 0.55) 0%,
+    rgba(247, 238, 227, 0.20) 15%,
+    rgba(247, 238, 227, 0.02) 28%,
+    transparent 38%
   );
   border-radius: inherit;
 }
