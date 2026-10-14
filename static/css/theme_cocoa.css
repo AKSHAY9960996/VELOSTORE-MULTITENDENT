@@ -209,8 +209,13 @@ body {
   background-image: var(--hero-banner-url);
   background-size: cover;
   background-position: center right;
+  background-repeat: no-repeat;
   z-index: 1;
   border-radius: inherit;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  filter: brightness(1.04) contrast(1.06) saturate(1.08);
+  transform: translateZ(0); /* GPU compositing layer for sharper rendering */
 }
 
 /* Default decorative banner when no image is uploaded */
@@ -243,7 +248,14 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(247, 238, 227, 0.92) 0%, rgba(247, 238, 227, 0.72) 30%, rgba(247, 238, 227, 0.25) 55%, transparent 75%);
+  /* Lighter overlay — only guards text readability on the left, image stays vivid on the right */
+  background: linear-gradient(
+    to right,
+    rgba(247, 238, 227, 0.82) 0%,
+    rgba(247, 238, 227, 0.52) 22%,
+    rgba(247, 238, 227, 0.12) 44%,
+    transparent 60%
+  );
   border-radius: inherit;
 }
 
