@@ -67,6 +67,45 @@
           </div>
         </div>
       </div>
+      <!-- Hero Banner Image Upload (Cocoa theme) -->
+      {% if is_cocoa %}
+      <div class="a-form-group" style="margin-top:16px">
+        <label>Hero Banner Image <span style="font-size:0.72rem;color:var(--a-text-muted);font-weight:400">(Cocoa theme only)</span></label>
+        <p style="font-size:0.72rem;color:var(--a-text-muted);margin:2px 0 10px">
+          This image is shown as the background of the hero card on your storefront. Landscape photos work best (e.g. 1200×600 px).
+        </p>
+        <div style="display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap">
+          <!-- Banner Preview -->
+          <div id="bannerPreviewContainer" style="width:160px;height:90px;border-radius:10px;border:2px dashed var(--a-border-md);background:var(--a-surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;flex-shrink:0;">
+            {% if settings.get('hero_banner') %}
+              <img id="bannerPreviewImg" src="{{ img_url(settings.get('hero_banner')) }}" alt="Hero Banner" style="width:100%;height:100%;object-fit:cover;" />
+            {% else %}
+              <div id="bannerPreviewDefault" style="font-size:1.6rem;opacity:0.4">🖼️</div>
+              <img id="bannerPreviewImg" src="" alt="Hero Banner" style="width:100%;height:100%;object-fit:cover;display:none;" />
+            {% endif %}
+          </div>
+
+          <div style="flex:1;min-width:210px">
+            <input type="file" id="hero_banner" name="hero_banner" accept="image/*"
+              style="font-size:0.82rem;color:var(--a-text);width:100%;"
+              onchange="handleBannerSelect(event)" />
+            <p style="font-size:0.72rem;color:var(--a-text-muted);margin-top:4px">
+              PNG, JPG or WEBP. Recommended: 1200×500 px landscape. The left side will show your text overlay.
+            </p>
+            {% if settings.get('hero_banner') %}
+            <div style="margin-top:8px">
+              <label style="font-size:0.78rem;color:var(--a-danger);display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="checkbox" name="remove_hero_banner" value="1" id="remove_hero_banner"
+                  onchange="handleRemoveBannerToggle(this)" />
+                Remove banner image (restore default illustrated background)
+              </label>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
       <div class="a-form-group">
         <label for="whatsapp_number">WhatsApp Number (with country code)</label>
         <input type="text" id="whatsapp_number" name="whatsapp_number"
@@ -480,6 +519,24 @@ function handleRemoveLogoToggle(cb) {
   if (img) {
     img.style.opacity = cb.checked ? '0.2' : '1';
   }
+}
+
+function handleBannerSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.getElementById('bannerPreviewImg');
+    const def = document.getElementById('bannerPreviewDefault');
+    if (img) { img.src = e.target.result; img.style.display = 'block'; }
+    if (def) def.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleRemoveBannerToggle(cb) {
+  const img = document.getElementById('bannerPreviewImg');
+  if (img) img.style.opacity = cb.checked ? '0.2' : '1';
 }
 
 function confirmClear(type) {

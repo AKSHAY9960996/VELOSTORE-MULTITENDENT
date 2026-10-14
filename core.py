@@ -372,6 +372,7 @@ def init_db():
         ('maintenance_mode', '0'),  # '0' = normal, '1' = storefront offline (maintenance mode)
         ('maintenance_message', 'We are currently updating our stock. Kindly visit later!'),
         ('shop_logo', ''),
+        ('hero_banner', ''),
     ]
     for key, value in defaults:
         db.execute(

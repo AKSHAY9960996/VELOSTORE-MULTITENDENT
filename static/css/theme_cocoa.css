@@ -89,6 +89,50 @@ body { background: var(--cream); }
 .hero-section::before, .hero-section::after { display: none; }
 .hero-overlay-glow { display: none; }
 .hero-content { max-width: 64%; margin: 0; animation: none; position: relative; z-index: 2; }
+
+/* ---- Custom hero banner image (set via admin settings) ---- */
+.hero-section.hero-has-banner {
+  background: linear-gradient(118deg, #f7eee3 0%, #f0e2d1 42%, #f8f0e6 70%, #efe0cd 100%) !important;
+  padding: 0 !important;
+  overflow: hidden;
+  min-height: 300px;
+}
+.hero-section.hero-has-banner .hero-content {
+  max-width: 56%;
+  padding: 36px 28px 34px;
+  z-index: 3;
+  position: relative;
+}
+.hero-banner-img {
+  position: absolute;
+  top: 0; right: 0;
+  width: 52%;
+  height: 100%;
+  background-image: var(--hero-banner-url);
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+  border-radius: 0 17px 17px 0;
+}
+.hero-banner-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(247,238,227,1) 0%, rgba(247,238,227,0.55) 30%, transparent 70%);
+  border-radius: 0 17px 17px 0;
+}
+@media (max-width: 520px) {
+  .hero-section.hero-has-banner { min-height: 240px; }
+  .hero-section.hero-has-banner .hero-content { max-width: 100%; padding: 28px 22px 110px; }
+  .hero-banner-img {
+    width: 100%; height: 50%; top: auto; bottom: 0;
+    border-radius: 0 0 17px 17px;
+  }
+  .hero-banner-img::after {
+    background: linear-gradient(to bottom, rgba(247,238,227,1) 0%, rgba(247,238,227,0.5) 40%, transparent 80%);
+    border-radius: 0 0 17px 17px;
+  }
+}
 .hero-badge {
   display: block; background: none; border: 0; padding: 0; margin: 0 0 14px;
   font-size: 0.7rem; letter-spacing: 0.34em; color: var(--cocoa-dk); font-weight: 600; backdrop-filter: none;
