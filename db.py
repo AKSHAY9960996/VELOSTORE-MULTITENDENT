@@ -45,6 +45,15 @@ def _turso_is_platform_configured() -> bool:
     return bool(os.environ.get('TURSO_API_TOKEN') and os.environ.get('TURSO_ORG_NAME'))
 
 
+_last_turso_error = ''
+
+
+def _set_turso_error(msg: str):
+    global _last_turso_error
+    _last_turso_error = msg
+    print(f"[Turso] {msg}", flush=True)
+
+
 def _create_turso_tenant_db(slug: str):
     """
     Creates a dedicated Turso database for a tenant via the Turso Platform API.
@@ -64,8 +73,14 @@ def _create_turso_tenant_db(slug: str):
             json={'name': db_name, 'group': 'default'},
             timeout=20
         )
+        if resp.status_code == 409 or (resp.status_code >= 400 and 'already exists' in resp.text.lower()):
+            # A previous attempt already created it - reuse it and just mint a new token.
+            resp = _requests.get(
+                f'https://api.turso.tech/v1/organizations/{org}/databases/{db_name}',
+                headers=headers, timeout=20
+            )
         if resp.status_code not in (200, 201):
-            print(f"[Turso] DB create failed ({resp.status_code}): {resp.text}")
+            _set_turso_error(f"create database failed (HTTP {resp.status_code}): {resp.text[:300]}")
             return None, None
 
         db_data = resp.json()
@@ -75,12 +90,12 @@ def _create_turso_tenant_db(slug: str):
             db_data.get('hostname')
         )
         if not hostname:
-            print(f"[Turso] No hostname in create response: {db_data}")
+            _set_turso_error(f"no hostname in Turso response: {str(db_data)[:300]}")
             return None, None
 
         db_url = f"libsql://{hostname}"
     except Exception as e:
-        print(f"[Turso] DB create exception: {e}")
+        _set_turso_error(f"request error: {e}")
         return None, None
 
     try:
@@ -90,15 +105,15 @@ def _create_turso_tenant_db(slug: str):
             timeout=20
         )
         if token_resp.status_code not in (200, 201):
-            print(f"[Turso] Token create failed ({token_resp.status_code}): {token_resp.text}")
+            _set_turso_error(f"token create failed (HTTP {token_resp.status_code}): {token_resp.text[:300]}")
             return None, None
 
         auth_token = token_resp.json().get('jwt')
         if not auth_token:
-            print(f"[Turso] No jwt in token response: {token_resp.json()}")
+            _set_turso_error("no jwt in token response")
             return None, None
     except Exception as e:
-        print(f"[Turso] Token create exception: {e}")
+        _set_turso_error(f"token request error: {e}")
         return None, None
 
     print(f"[Turso] Created DB for tenant '{slug}': {db_url}")
@@ -678,7 +693,7 @@ def migrate_tenant_to_turso(slug: str):
     url, token = _create_turso_tenant_db(slug)
     if not url:
         m_conn.close()
-        raise RuntimeError("Could not create the Turso database (see Render logs for the Turso error).")
+        raise RuntimeError(f"Turso said: {_last_turso_error or 'unknown error'}")
 
     t_conn = _connect_turso(url, token)
     _execute_schema(t_conn, os.path.join(os.path.dirname(__file__), 'schema.sql'))
@@ -807,6 +822,12 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
 
     # Try to create a dedicated Turso database for this tenant
     tenant_turso_url, tenant_turso_token = _create_turso_tenant_db(slug)
+
+    # On Render the local disk is wiped on every deploy, so never create a store without its own DB.
+    if not tenant_turso_url and os.environ.get('FLASK_ENV') == 'production':
+        master_conn.close()
+        reason = _last_turso_error or 'TURSO_API_TOKEN / TURSO_ORG_NAME are not set in Render'
+        raise ValueError(f"Store NOT created - could not create its permanent database. Turso said: {reason}")
 
     m_cur.execute("""
     INSERT INTO tenants (slug, store_name, owner_name, owner_email, owner_phone,
