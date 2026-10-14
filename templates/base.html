@@ -96,12 +96,12 @@
       <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
       <span></span>
       {% else %}
-      <span>🌸</span> PREMIUM COLLECTIONS <span>🌸</span> LIMITED DROPS <span>🌸</span> ONE OF A KIND FINDS
-      <span>🌸</span> PREMIUM COLLECTIONS <span>🌸</span> LIMITED DROPS <span>🌸</span> ONE OF A KIND FINDS
-      <span>🌸</span>
-      <span>🌸</span> PREMIUM COLLECTIONS <span>🌸</span> LIMITED DROPS <span>🌸</span> ONE OF A KIND FINDS
-      <span>🌸</span> PREMIUM COLLECTIONS <span>🌸</span> LIMITED DROPS <span>🌸</span> ONE OF A KIND FINDS
-      <span>🌸</span>
+      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
+      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
+      <span>{{ flower }}</span>
+      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
+      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
+      <span>{{ flower }}</span>
       {% endif %}
     </div>
   </div>
@@ -116,7 +116,7 @@
           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
         </svg>
       </div>
-      <h2 id="maintenanceTitle">{% if is_luxury %}STORE NOTICE 💎{% else %}STORE NOTICE 🌸{%
+      <h2 id="maintenanceTitle">{% if is_luxury %}STORE NOTICE 💎{% else %}STORE NOTICE {{ flower }}{%
         endif %}</h2>
       <div class="maintenance-msg">
         {{ settings.get('maintenance_message', 'We are currently curating our exclusive stock. Kindly visit later!') |
@@ -153,7 +153,7 @@
         </div>
         <div class="logo-text">
           <span class="logo-name">{{ settings.get('shop_name','My Shop') }}</span>
-          <span class="logo-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY EDITION{% else %}🌸 CURATED FASHION{% endif %}</span>
+          <span class="logo-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY EDITION{% else %}{{ flower }} CURATED FASHION{% endif %}</span>
         </div>
       </a>
 
@@ -179,7 +179,7 @@
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
-          <span class="cart-btn-text">{% if is_luxury %}💎 Bag{% else %}🌸 Bag{% endif %}</span>
+          <span class="cart-btn-text">{% if is_luxury %}💎 Bag{% else %}{{ flower }} Bag{% endif %}</span>
           <span class="cart-badge" id="cartBadge">0</span>
         </button>
       </div>
@@ -215,7 +215,7 @@
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <path d="M16 10a4 4 0 0 1-8 0"></path>
         </svg>
-        <h2>{% if is_luxury %}SHOPPING BAG 💎{% else %}YOUR BAG 🌸{% endif %}</h2>
+        <h2>{% if is_luxury %}SHOPPING BAG 💎{% else %}YOUR BAG {{ flower }}{% endif %}</h2>
       </div>
       <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close cart">✕</button>
     </div>
@@ -231,7 +231,7 @@
         </div>
         <h3>Your Bag is Empty</h3>
         <p class="empty-cart-desc">{% if is_luxury %}Discover our exclusive curated luxury creations.{%
-          else %}Discover our handpicked creations 🌸.{% endif %}</p>
+          else %}Discover our handpicked creations {{ flower }}.{% endif %}</p>
       </div>
       <div id="cartItemsContainer"></div>
     </div>
@@ -309,13 +309,13 @@
           {% endif %}
         </div>
         <span class="footer-logo-name">{{ settings.get('shop_name','My Shop') }}</span>
-        <span class="footer-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY FINE SELECTIONS{% else %}🌸 CURATED FASHION · FINE SELECTIONS{% endif %}</span>
+        <span class="footer-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY FINE SELECTIONS{% else %}{{ flower }} CURATED FASHION · FINE SELECTIONS{% endif %}</span>
       </div>
       <div class="footer-divider"></div>
       <div class="footer-bottom">
         <p class="footer-copy">
           © 2026 {{ settings.get('shop_name','My Shop') }}. All Rights Reserved. {% if is_luxury
-          %}Crafted with Royal Elegance 💎{% else %}Crafted with Elegance 🌸{% endif %}.
+          %}Crafted with Royal Elegance 💎{% else %}Crafted with Elegance {{ flower }}{% endif %}.
         </p>
       </div>
     </div>
@@ -335,7 +335,7 @@
   <div id="founderAdBanner" class="founder-ad-banner" style="display: none;">
     <button class="founder-ad-close" id="closeFounderAd" aria-label="Close concierge banner">✕</button>
     <div class="founder-ad-content">
-      <div class="founder-ad-badge">{% if is_luxury %}💎 CONCIERGE{% else %}🌸 CONCIERGE{% endif %}
+      <div class="founder-ad-badge">{% if is_luxury %}💎 CONCIERGE{% else %}{{ flower }} CONCIERGE{% endif %}
       </div>
       <div class="founder-ad-text">
         <p class="founder-ad-title">Desire a custom storefront?</p>

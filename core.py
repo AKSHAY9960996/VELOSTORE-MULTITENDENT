@@ -91,6 +91,15 @@ def _render_landing():
 # ---------------------------------------------------------------------------
 # Friendly error pages (rendered without touching the database, so they work even if it is down)
 # ---------------------------------------------------------------------------
+def _season_label():
+    """Auto hero title for the Cocoa theme, e.g. 'FESTIVE 2026' (India-friendly seasons)."""
+    now = datetime.utcnow()
+    m = now.month
+    season = ('WINTER' if m in (12, 1, 2) else 'SUMMER' if m in (3, 4, 5)
+              else 'MONSOON' if m in (6, 7, 8, 9) else 'FESTIVE')
+    return f"{season} {now.year}"
+
+
 def _error_page(code, title, message, error_id=None):
     home_url = '/'
     try:
@@ -565,7 +574,9 @@ def inject_settings():
             brand = ''
     brand = brand or 'My Shop'
     ctx = dict(settings=settings, now_year=datetime.utcnow().year, tenant=tenant, tenant_features=features, tenant_theme=tenant_theme,
-                 is_luxury=(tenant_theme in ('luxury', 'cocoa')), brand=brand)
+                 is_luxury=(tenant_theme == 'luxury'), is_cocoa=(tenant_theme == 'cocoa'),
+                 flower=('' if tenant_theme == 'cocoa' else '🌸'),
+                 season_label=_season_label(), brand=brand)
 
     if request.path.startswith('/admin'):
         ctx['storage_stats'] = get_storage_stats()
