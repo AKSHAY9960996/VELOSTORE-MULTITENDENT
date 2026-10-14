@@ -7,54 +7,48 @@
 
 <!-- ===== HERO SECTION ===== -->
 {% set hero_banner_url = img_url(settings.get('hero_banner','')) %}
-{% if is_cocoa %}
-{# ── COCOA HERO: clean split layout, universal for any shop type ── #}
-<section class="hero-section hero-cocoa-split{% if hero_banner_url %} hero-has-banner{% endif %}"
-  {% if hero_banner_url %}style="--hero-banner-url: url('{{ hero_banner_url }}');"{% endif %}>
-
-  {# Left: text content #}
-  <div class="hero-content">
-    {% if settings.get('shop_tagline') %}
-    <p class="hero-cocoa-tagline">{{ settings.get('shop_tagline')|upper }}</p>
-    {% endif %}
-    <h1 class="hero-title">{{ settings.get('shop_name', brand)|upper }}</h1>
-    {% if settings.get('shop_tagline') %}
-    <div class="hero-cocoa-rule"></div>
-    {% endif %}
-    {% if settings.get('shop_slogan') %}
-    <p class="hero-subtitle">{{ settings.get('shop_slogan') }}</p>
-    {% endif %}
-    <a href="#collection" class="hero-cta">SHOP NOW
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </a>
-  </div>
-
-  {# Right: banner image or empty warm-toned placeholder #}
-  <div class="hero-banner-img" aria-hidden="true"></div>
-
-</section>
-
-{% else %}
-{# ── DEFAULT / LUXURY HERO ── #}
-<section class="hero-section">
+<section class="hero-section{% if is_cocoa %} hero-has-banner{% endif %}"
+  {% if is_cocoa and hero_banner_url %}style="--hero-banner-url: url('{{ hero_banner_url }}');"{% endif %}>
   <div class="hero-overlay-glow"></div>
+  {% if is_cocoa %}
+    {% if hero_banner_url %}
+      <div class="hero-banner-img" aria-hidden="true"></div>
+    {% else %}
+      <div class="hero-banner-img hero-banner-default" aria-hidden="true"></div>
+    {% endif %}
+  {% endif %}
   <div class="hero-content">
-    <div class="hero-badge">{% if tenant_theme == 'luxury' %}💎 {{ brand|upper }} · LUXURY COLLECTION {{ now_year }} 💎{% else %}{{ flower }} {{ brand|upper }} · NEW COLLECTION {{ now_year }} {{ flower }}{% endif %}</div>
-    <h1 class="hero-title">{{ settings.get('shop_name','My Shop') }}</h1>
+    <div class="hero-badge">{% if is_cocoa %}{{ brand|upper }} COLLECTION{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}{{ flower }} {{ brand|upper }} · NEW COLLECTION {{ now_year }} {{ flower }}{% endif %}</div>
+    <h1 class="hero-title">{% if is_cocoa %}{{ settings.get('shop_name', brand) }}{% else %}{{ settings.get('shop_name','My Shop') }}{% endif %}</h1>
+    <p class="hero-subtitle-small">{% if is_cocoa %}ONE OF A KIND FINDS{% endif %}</p>
     <p class="hero-subtitle">
-      {% if settings.get('shop_slogan') %}{{ settings.get('shop_slogan') }}
-      {% elif tenant_theme == 'luxury' %}Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.
-      {% else %}Where grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance — curated for the discerning wardrobe.
+      {% if settings.get('shop_slogan') %}
+      {{ settings.get('shop_slogan') }}
+      {% elif is_luxury %}
+      Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.
+      {% elif is_cocoa %}
+      Quality products for your everyday life.
+      {% else %}
+      Where grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance —
+      curated for the discerning wardrobe.
       {% endif %}
     </p>
+    {% if is_cocoa %}
+    <a href="#collection" class="hero-cta">SHOP NOW
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <div class="hero-slider-dots">
+      <span class="hero-dot active"></span>
+      <span class="hero-dot"></span>
+      <span class="hero-dot"></span>
+    </div>
+    {% endif %}
     <div class="hero-divider">
       <span class="divider-line"></span>
-      <span class="divider-diamond">{% if tenant_theme == 'luxury' %}💎{% else %}{{ flower }}{% endif %}</span>
+      <span class="divider-diamond">{% if is_luxury %}💎{% else %}{{ flower }}{% endif %}</span>
       <span class="divider-line"></span>
     </div>
   </div>
 </section>
-{% endif %}
 
 <!-- ===== SHOP SECTION ===== -->
 <div class="shop-section" id="collection">

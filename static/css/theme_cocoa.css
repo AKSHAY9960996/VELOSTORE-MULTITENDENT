@@ -76,161 +76,148 @@ body { background: var(--cream); }
 .mobile-search-bar { background: transparent; border: 0; }
 
 /* ---------- hero banner ---------- */
-/* ==========================================================
-   COCOA HERO — clean split layout, universal (any shop type)
-   Left: text content  |  Right: uploaded banner photo
-   ========================================================== */
-
-/* Hide standard hero decorations */
+.hero-section {
+  position: relative; overflow: hidden; text-align: left; display: flex; align-items: center;
+  margin: 18px 16px 0; padding: 36px 26px 34px; min-height: 300px;
+  border: 1px solid var(--clr-border); border-radius: 18px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 230 300%22%3E%3Cpath d=%22M214 300C206 226 188 170 138 112 112 82 92 50 84 8%22 fill=%22none%22 stroke=%22%237a6849%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M158 150C176 130 198 116 226 110%22 fill=%22none%22 stroke=%22%237a6849%22 stroke-width=%222.4%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M118 92C98 84 80 86 62 98%22 fill=%22none%22 stroke=%22%237a6849%22 stroke-width=%222.2%22 stroke-linecap=%22round%22/%3E%3Cpath transform=%22translate(176,176) rotate(-50) scale(1.1)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%238d7b58%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(196,214) rotate(-120) scale(1.0)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%23a08d68%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(150,132) rotate(-200) scale(1.0)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%237f6e4d%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(108,70) rotate(-160) scale(0.9)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%23a08d68%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(132,110) rotate(-20) scale(0.9)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%238d7b58%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(96,34) rotate(-100) scale(0.8)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%238d7b58%22 opacity=%22.9%22/%3E%3Cpath transform=%22translate(212,118) rotate(-160) scale(0.8)%22 d=%22M0 0 C10 -14 28 -16 40 -6 C28 8 10 10 0 0Z%22 fill=%22%23a08d68%22 opacity=%22.9%22/%3E%3Cg transform=%22translate(112,84) scale(1.25)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Cg transform=%22translate(168,134) scale(1.1)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Cg transform=%22translate(86,34) scale(0.95)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Cg transform=%22translate(66,100) scale(0.85)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Cg transform=%22translate(214,112) scale(0.75)%22%3E%3Ccircle cx=%220.0%22 cy=%22-14.0%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%2213.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%228.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-8.2%22 cy=%2211.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle cx=%22-13.3%22 cy=%22-4.3%22 r=%2211.5%22 fill=%22%23f1ddd2%22 stroke=%22%23e2c3b3%22 stroke-width=%221%22/%3E%3Ccircle r=%225.5%22 fill=%22%23cf9b82%22/%3E%3Ccircle r=%222%22 fill=%22%23a8705a%22/%3E%3C/g%3E%3Ccircle cx=%22132%22 cy=%2258%22 r=%226%22 fill=%22%23ecd2c4%22/%3E%3Ccircle cx=%22148%22 cy=%2296%22 r=%225%22 fill=%22%23e3c3b2%22/%3E%3Ccircle cx=%2260%22 cy=%2268%22 r=%224.5%22 fill=%22%23ecd2c4%22/%3E%3C/svg%3E") no-repeat right -6px bottom -6px / auto 98%,
+    radial-gradient(ellipse 60% 80% at 20% 15%, rgba(255, 255, 255, 0.75), transparent 70%),
+    linear-gradient(118deg, #f7eee3 0%, #f0e2d1 42%, #f8f0e6 70%, #efe0cd 100%);
+  box-shadow: var(--shadow-sm);
+}
 .hero-section::before, .hero-section::after { display: none; }
 .hero-overlay-glow { display: none; }
-.hero-divider { display: none; }
+.hero-content { max-width: 64%; margin: 0; animation: none; position: relative; z-index: 2; }
 
-/* ── Split container ── */
-.hero-section.hero-cocoa-split {
-  position: relative;
-  display: flex;
-  align-items: stretch;
+/* ---- Hero banner image panel (custom upload OR default illustration) ---- */
+.hero-section.hero-has-banner {
+  background: linear-gradient(118deg, #f7eee3 0%, #f0e2d1 42%, #f8f0e6 70%, #efe0cd 100%) !important;
+  padding: 0 !important;
   overflow: hidden;
-  margin: 16px 16px 0;
-  min-height: 220px;
-  border-radius: 18px;
-  border: 1px solid var(--clr-border);
-  background: linear-gradient(115deg, #f7eee3 0%, #ede0ce 55%, #e8d8c4 100%);
-  box-shadow: var(--shadow-sm);
-  padding: 0;
-  text-align: left;
-  animation: none;
+  min-height: 300px;
 }
-
-/* ── Left text panel ── */
-.hero-cocoa-split .hero-content {
-  position: relative;
+.hero-section.hero-has-banner .hero-content {
+  max-width: 56%;
+  padding: 36px 28px 34px;
   z-index: 3;
-  flex: 0 0 55%;
-  max-width: 55%;
-  padding: 32px 24px 32px 28px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  animation: none;
+  position: relative;
 }
-
-/* Small tagline above name (e.g. "ONE OF A KIND FINDS") */
-.hero-cocoa-tagline {
-  font-family: var(--font);
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.26em;
-  color: var(--cocoa);
-  margin: 0 0 8px;
-  opacity: 0.82;
-}
-
-/* Thin rule after tagline */
-.hero-cocoa-rule {
-  width: 32px;
-  height: 1.5px;
-  background: var(--cocoa);
-  opacity: 0.45;
-  margin: 0 0 12px;
-  border: 0;
-}
-
-/* Big shop name */
-.hero-cocoa-split .hero-title {
-  font-family: var(--font-display);
-  font-size: clamp(1.25rem, 4vw, 2rem);
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  color: var(--cocoa);
-  line-height: 1.1;
-  margin: 0 0 10px;
-  white-space: normal;
-}
-
-/* Slogan / small message */
-.hero-cocoa-split .hero-subtitle {
-  font-family: var(--font);
-  font-size: 0.78rem;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  color: var(--clr-text);
-  line-height: 1.6;
-  margin: 0 0 22px;
-  max-width: 200px;
-  display: block;
-  font-style: normal;
-}
-
-/* Shop Now button */
-.hero-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  background: var(--cocoa);
-  color: #f9ede2;
-  padding: 12px 22px;
-  border-radius: 999px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  box-shadow: 0 6px 18px rgba(79, 42, 26, 0.22);
-  transition: transform .22s, background .22s;
-  align-self: flex-start;
-}
-.hero-cta:hover { background: var(--cocoa-dk); transform: translateY(-2px); }
-
-/* ── Right image panel ── */
 .hero-banner-img {
   position: absolute;
   top: 0; right: 0;
-  width: 50%;
+  width: 52%;
   height: 100%;
-  z-index: 1;
-  border-radius: 0 17px 17px 0;
-  /* Warm-tone gradient placeholder when no image uploaded */
-  background: linear-gradient(135deg, #e8d5be 0%, #d4b896 40%, #c4a07a 100%);
-}
-/* When banner image is set */
-.hero-has-banner .hero-banner-img {
   background-image: var(--hero-banner-url);
   background-size: cover;
-  background-position: center top;
+  background-position: center;
+  z-index: 1;
+  border-radius: 0 17px 17px 0;
 }
-/* Left-side fade so text stays readable */
+/* Default decorative banner when no image is uploaded */
+.hero-banner-default {
+  background-image: none !important;
+  background:
+    radial-gradient(ellipse 70% 60% at 70% 45%, #e8d5c0 0%, #d4b896 40%, #c4a07a 100%);
+}
+.hero-banner-default::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0 17px 17px 0;
+  background:
+    radial-gradient(circle 80px at 65% 35%, rgba(255,245,235,0.5) 0%, transparent 70%),
+    radial-gradient(circle 50px at 75% 65%, rgba(200,160,110,0.4) 0%, transparent 60%);
+}
+/* Shopping bag SVG illustration for default banner */
+.hero-banner-default::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0 17px 17px 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 240'%3E%3Crect x='35' y='70' width='130' height='140' rx='8' ry='8' fill='%235c3d1e' opacity='0.92'/%3E%3Cpath d='M68 70 C68 45 132 45 132 70' fill='none' stroke='%235c3d1e' stroke-width='6' stroke-linecap='round' opacity='0.92'/%3E%3Crect x='55' y='130' width='90' height='52' rx='4' fill='%23f5e8d8' opacity='0.18'/%3E%3Ccircle cx='100' cy='156' r='18' fill='none' stroke='%23f5e8d8' stroke-width='2' opacity='0.6'/%3E%3Cpath d='M92 156 L98 162 L110 150' fill='none' stroke='%23f5e8d8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'/%3E%3Ctext x='100' y='118' text-anchor='middle' font-family='Georgia,serif' font-size='9' fill='%23f5e8d8' opacity='0.9' letter-spacing='1.5'%3EYUMEI PREMIUM%3C/text%3E%3Ctext x='100' y='128' text-anchor='middle' font-family='Georgia,serif' font-size='5.5' fill='%23f5e8d8' opacity='0.7' letter-spacing='1'%3EONE OF A KIND FINDS%3C/text%3E%3C/svg%3E");
+  background-size: 55%;
+  background-repeat: no-repeat;
+  background-position: center 55%;
+}
 .hero-banner-img::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to right,
-    #f2e8da 0%,
-    rgba(242, 232, 218, 0.75) 25%,
-    rgba(242, 232, 218, 0.1) 55%,
-    transparent 100%
-  );
+  background: linear-gradient(to right, rgba(247,238,227,1) 0%, rgba(247,238,227,0.55) 30%, transparent 70%);
   border-radius: 0 17px 17px 0;
 }
+.hero-banner-default::after {
+  background: linear-gradient(to right, rgba(247,238,227,1) 0%, rgba(247,238,227,0.45) 28%, transparent 65%);
+}
 
-/* ── Mobile: stack vertically ── */
-@media (max-width: 540px) {
-  .hero-section.hero-cocoa-split { flex-direction: column; min-height: unset; }
-  .hero-cocoa-split .hero-content { flex: none; max-width: 100%; padding: 28px 22px 20px; }
-  .hero-cocoa-split .hero-subtitle { max-width: 100%; }
-  .hero-banner-img { position: relative; width: 100%; height: 160px; border-radius: 0 0 17px 17px; }
-  .hero-banner-img::after {
-    background: linear-gradient(to bottom, #f2e8da 0%, rgba(242,232,218,0.5) 30%, transparent 70%);
-    border-radius: 0 0 17px 17px;
+/* ---- Subtitle small line (ONE OF A KIND FINDS) ---- */
+.hero-subtitle-small {
+  display: block;
+  font-size: 0.58rem;
+  letter-spacing: 0.32em;
+  color: var(--cocoa-dk);
+  font-weight: 600;
+  margin: -8px 0 14px;
+  text-transform: uppercase;
+}
+
+/* ---- Carousel dots ---- */
+.hero-slider-dots {
+  display: flex;
+  gap: 7px;
+  margin-top: 18px;
+}
+.hero-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(92, 61, 30, 0.22);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.hero-dot.active {
+  background: var(--cocoa);
+  width: 22px;
+  border-radius: 99px;
+}
+
+@media (max-width: 520px) {
+  .hero-section.hero-has-banner { min-height: 240px; }
+  .hero-section.hero-has-banner .hero-content { max-width: 60%; padding: 24px 18px 24px; }
+  .hero-banner-img {
+    width: 48%; height: 100%; top: 0; bottom: auto;
+    border-radius: 0 17px 17px 0;
   }
+  .hero-banner-img::after, .hero-banner-default::after {
+    background: linear-gradient(to right, rgba(247,238,227,1) 0%, rgba(247,238,227,0.5) 35%, transparent 75%);
+    border-radius: 0 17px 17px 0;
+  }
+  .hero-subtitle-small { display: none; }
+  .hero-slider-dots { margin-top: 14px; }
+  .hero-dot { width: 7px; height: 7px; }
+  .hero-dot.active { width: 18px; }
 }
-@media (min-width: 900px) {
-  .hero-section.hero-cocoa-split { margin: 24px 24px 0; }
-  .hero-cocoa-split .hero-content { padding: 44px 32px 44px 40px; }
+.hero-badge {
+  display: block; background: none; border: 0; padding: 0; margin: 0 0 14px;
+  font-size: 0.7rem; letter-spacing: 0.34em; color: var(--cocoa-dk); font-weight: 600; backdrop-filter: none;
 }
+.hero-badge::before, .hero-badge::after { display: none; }
+.hero-badge { overflow: visible; }
+.hero-title { font-size: 2.1rem; font-weight: 700; letter-spacing: 0.04em; color: var(--cocoa); margin-bottom: 6px; line-height: 1.08; white-space: normal; }
+.hero-subtitle {
+  display: block; font-family: var(--font); font-style: normal; font-weight: 500;
+  font-size: 0.78rem; letter-spacing: 0.14em; color: var(--clr-text); margin: 0 0 20px; max-width: 260px; line-height: 1.7;
+}
+.hero-divider { display: none; }
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--cocoa); color: #f9ede2; padding: 14px 24px; border-radius: 999px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(79, 42, 26, 0.25); transition: transform .25s, background .25s;
+}
+.hero-cta:hover { background: var(--cocoa-dk); transform: translateY(-2px); }
 
+/* ---------- notice, category pills, price filter ---------- */
 .store-notice-bar { background: var(--blush); border-color: var(--clr-border-dk); color: var(--cocoa-dk); }
 .filter-strip { border-bottom: 0; }
 .category-tag { color: var(--clr-text-muted); border-color: var(--clr-border-dk); background: rgba(255, 253, 249, 0.6); font-size: 0.72rem; letter-spacing: 0.12em; padding: 11px 22px; }
@@ -273,6 +260,8 @@ body { background: var(--cream); }
 /* ---------- desktop ---------- */
 @media (min-width: 769px) {
   .hero-section { width: min(1320px, calc(100% - 80px)); margin: 28px auto 0; padding: 78px 64px; min-height: 420px; border-radius: 24px; }
+  .hero-section.hero-has-banner { padding: 0 !important; }
+  .hero-section.hero-has-banner .hero-content { padding: 60px 48px; max-width: 52%; }
   .hero-content { max-width: 520px; }
   .hero-title { font-size: 4.4rem; margin-bottom: 14px; }
   .hero-badge { font-size: 0.76rem; margin-bottom: 20px; }
@@ -298,6 +287,8 @@ body { background: var(--cream); }
   .mobile-search-bar { padding: 4px 16px 14px; }
   .mobile-search-bar input[type="search"] { font-family: var(--font-display); font-style: italic; font-size: 1.1rem; padding: 15px 20px 15px 50px; border-radius: 16px; background: rgba(255, 253, 249, 0.9); border: 1px solid var(--clr-border-dk); }
   .hero-section { margin: 6px 12px 0; padding: 36px 24px 32px; min-height: 290px; }
+  .hero-section.hero-has-banner { padding: 0 !important; min-height: 260px; }
+  .hero-section.hero-has-banner .hero-content { padding: 26px 22px 26px; }
   .hero-content { max-width: 78%; }
   .hero-title { font-size: clamp(1.7rem, 7.4vw, 2.3rem); margin-bottom: 10px; letter-spacing: 0.03em; }
   .hero-subtitle { display: block; font-size: 0.74rem; max-width: 220px; }
