@@ -416,13 +416,18 @@ def get_all_settings():
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def _tenant_cloud_folder(kind):
+    """Per-store Cloudinary folder, e.g. velostore/yumei/products, so shops never share media."""
+    slug = getattr(g, 'tenant_slug', None) or 'default'
+    return f"velostore/{slug}/{kind}"
+
 def save_image(file):
     """Upload image to Cloudinary. Local static/uploads/ fallback is development-only."""
     if not file or not allowed_file(file.filename):
         return None
     url = None
     try:
-        url = cloudinary_helper.upload_image(file, folder="products")
+        url = cloudinary_helper.upload_image(file, folder=_tenant_cloud_folder("products"))
     except Exception as e:
         print(f"[Cloudinary] upload exception: {e}")
     if url:
@@ -449,7 +454,7 @@ def save_logo_image(file):
         return None
     url = None
     try:
-        url = cloudinary_helper.upload_logo(file, folder="branding")
+        url = cloudinary_helper.upload_logo(file, folder=_tenant_cloud_folder("branding"))
     except Exception as e:
         print(f"[Cloudinary] logo upload exception: {e}")
     if url:

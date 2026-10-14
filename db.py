@@ -628,10 +628,98 @@ def get_tenant_db_connection(tenant_slug: str):
     except Exception as e:
         print(f"[DB] Could not fetch Turso credentials for '{tenant_slug}': {e}")
 
+    if os.environ.get('FLASK_ENV') == 'production' and tenant_slug not in _warned_ephemeral:
+        _warned_ephemeral.add(tenant_slug)
+        print(f"[DB] WARNING: store '{tenant_slug}' has NO Turso database, so it is using a local "
+              f"SQLite file that Render wipes on every deploy (products, images, orders will be lost). "
+              f"Set TURSO_API_TOKEN + TURSO_ORG_NAME and use 'Move to permanent DB' in the master panel.",
+              flush=True)
+
     tenant_db_path = os.path.join(TENANTS_DIR, f"{tenant_slug}.db")
     conn = Database(local_path=tenant_db_path).connect()
     _ensure_tenant_schema(conn, tenant_slug)
     return conn
+
+
+_warned_ephemeral = set()
+
+
+def tenant_has_permanent_db(tenant) -> bool:
+    """True if the store (a tenants row) has its own Turso DB. The default store uses TURSO_DB_URL."""
+    if _tenant_get(tenant, 'slug') == 'default':
+        return bool(_config.TURSO_DB_URL and _config.TURSO_AUTH_TOKEN)
+    return bool(_tenant_get(tenant, 'turso_db_url') and _tenant_get(tenant, 'turso_auth_token'))
+
+
+def migrate_tenant_to_turso(slug: str):
+    """
+    Give a store that is running on a local (ephemeral) SQLite file its own Turso database.
+    Copies any rows still in the local file; if the file was already wiped, seeds a fresh store
+    with a temporary admin password. Returns (copied_rows, temp_password_or_None).
+    """
+    import secrets
+    if slug == 'default':
+        raise ValueError("The default store uses TURSO_DB_URL and does not need migration.")
+    if not HAS_LIBSQL:
+        raise RuntimeError("libsql is not installed on this server.")
+    if not _turso_is_platform_configured():
+        raise RuntimeError("Set TURSO_API_TOKEN and TURSO_ORG_NAME in Render first.")
+
+    m_conn = get_master_db_connection()
+    row = m_conn.execute("SELECT * FROM tenants WHERE slug = ?", [slug]).fetchone()
+    if not row:
+        m_conn.close()
+        raise ValueError("Store not found.")
+    if row['turso_db_url'] and row['turso_auth_token']:
+        m_conn.close()
+        raise ValueError("This store already has a permanent database.")
+    store_name = row['store_name']
+
+    url, token = _create_turso_tenant_db(slug)
+    if not url:
+        m_conn.close()
+        raise RuntimeError("Could not create the Turso database (see Render logs for the Turso error).")
+
+    t_conn = _connect_turso(url, token)
+    _execute_schema(t_conn, os.path.join(os.path.dirname(__file__), 'schema.sql'))
+    _ensure_tenant_schema(t_conn, slug)
+
+    copied = 0
+    local_path = os.path.join(TENANTS_DIR, f"{slug}.db")
+    if os.path.exists(local_path):
+        src = sqlite3.connect(local_path)
+        src.row_factory = sqlite3.Row
+        tables = [r['name'] for r in src.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")]
+        for tbl in tables:
+            try:
+                rows = src.execute(f'SELECT * FROM "{tbl}"').fetchall()
+                for r in rows:
+                    cols = r.keys()
+                    t_conn.execute(
+                        f'INSERT OR REPLACE INTO "{tbl}" ({",".join(chr(34)+c+chr(34) for c in cols)}) '
+                        f'VALUES ({",".join("?" * len(cols))})', list(r))
+                    copied += 1
+            except Exception as e:
+                print(f"[Migrate] skipped table {tbl}: {e}", flush=True)
+        src.close()
+
+    temp_pw = None
+    has_admin = t_conn.execute("SELECT 1 FROM settings WHERE key='admin_password'").fetchone()
+    if not has_admin:
+        temp_pw = secrets.token_urlsafe(8)
+        t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('shop_name', ?)", [store_name])
+        t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_username', 'admin')")
+        t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_password', ?)",
+                       [_hash_password(temp_pw)])
+    t_conn.commit()
+    t_conn.close()
+
+    m_conn.execute("UPDATE tenants SET turso_db_url = ?, turso_auth_token = ? WHERE slug = ?", [url, token, slug])
+    m_conn.commit()
+    m_conn.close()
+    clear_tenant_cache()
+    return copied, temp_pw
 
 
 def update_tenant_admin_password(slug: str, new_password: str):
@@ -783,6 +871,3 @@ def get_connection():
 def is_turso() -> bool:
     """Check if the default DB is using Turso."""
     return _default_db.is_turso
-
-
-

@@ -8,7 +8,9 @@ from db import (
     get_master_db_connection,
     get_tenant_db_connection,
     get_tenant_feature_flags,
+    migrate_tenant_to_turso,
     provision_new_tenant,
+    tenant_has_permanent_db,
     update_tenant_admin_password,
 )
 from flask import flash, redirect, render_template, request, session, url_for
@@ -118,6 +120,7 @@ def master_dashboard():
             pass
 
         t['admin_username'] = adm_usr
+        t['permanent_db'] = tenant_has_permanent_db(t)
 
         t['product_count'] = p_cnt
         t['order_count'] = o_cnt
@@ -287,6 +290,26 @@ def master_tenant_edit(tenant_id):
 
     tenant_features = get_tenant_feature_flags(tenant)
     return render_template('master/tenant_form.html', tenant=tenant, tenant_features=tenant_features, current_admin_username=current_admin_username, default_plans=DEFAULT_PLAN_CONFIG, action='Edit')
+
+@app.route('/master/tenants/<int:tenant_id>/migrate-db', methods=['POST'])
+@master_login_required
+def master_migrate_tenant_db(tenant_id):
+    """Move a store off Render's wiped disk onto its own permanent Turso database."""
+    m_conn = get_master_db_connection()
+    row = m_conn.execute("SELECT slug, store_name FROM tenants WHERE id = ?", [tenant_id]).fetchone()
+    m_conn.close()
+    if not row:
+        flash("Store tenant not found.", "error")
+        return redirect(url_for('master_dashboard'))
+    try:
+        copied, temp_pw = migrate_tenant_to_turso(row['slug'])
+        msg = f"'{row['store_name']}' now has its own permanent database ({copied} rows carried over)."
+        if temp_pw:
+            msg += f" Its data was already wiped, so admin login was reset to: admin / {temp_pw} (change it after logging in)."
+        flash(msg, 'success')
+    except Exception as e:
+        flash(f"Could not move '{row['store_name']}' to a permanent database: {e}", 'error')
+    return redirect(url_for('master_dashboard'))
 
 @app.route('/master/tenants/<int:tenant_id>/toggle-status', methods=['POST'])
 @master_login_required
