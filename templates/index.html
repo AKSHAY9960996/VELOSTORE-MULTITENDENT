@@ -70,9 +70,9 @@
   <!-- Category Filter Strip -->
   {% if categories %}
   <div class="filter-strip" role="navigation" aria-label="Product categories">
-    <span class="filter-strip-label">{% if is_luxury %}💎 COLLECTION:{% else %}{{ flower }} COLLECTION:{% endif %}</span>
+    {% if not is_cocoa %}<span class="filter-strip-label">{% if is_luxury %}💎 COLLECTION:{% else %}{{ flower }} COLLECTION:{% endif %}</span>{% endif %}
     <a href="{{ url_for('index') }}" class="category-tag {% if not active_category %}active{% endif %}">
-      All Selections
+      {% if is_cocoa %}ALL{% else %}All Selections{% endif %}
     </a>
     {% for cat in categories %}
     <a href="{{ url_for('index', category=cat, q=search) }}"
@@ -147,14 +147,20 @@
         Results for "{{ search }}"
         {% elif active_category %}
         {{ active_category }}
+        {% elif is_cocoa %}
+        FEATURED PRODUCTS
         {% else %}
         {% if is_luxury %}Featured Luxury Pieces{% else %}Featured Pieces{% endif %}
         {% endif %}
       </h2>
       <div class="section-count">
+        {% if is_cocoa %}
+        {{ products|length }} PRODUCTS AVAILABLE{% if max_price %} · Under {{ settings.get('currency_symbol','₹') }}{{ max_price }}{% endif %}
+        {% else %}
         {{ products|length }} {{ 'piece' if products|length == 1 else 'pieces' }} available {% if is_luxury %}· 💎{% elif flower %}· {{ flower }}{% endif %}
         {% if max_price %}
         · <span class="price-filter-active-tag">Under {{ settings.get('currency_symbol','₹') }}{{ max_price }}</span>
+        {% endif %}
         {% endif %}
       </div>
     </div>
@@ -171,9 +177,13 @@
         <!-- Stock Badges -->
         {% if product.stock == 0 %}
         <span class="product-badge badge-oos">EXHAUSTED</span>
-        {% elif product.stock <= 2 %} <span class="product-badge badge-low">LIMITED — ONLY {{ product.stock }}
-          LEFT</span>
-          {% endif %}
+        {% elif product.stock <= 2 %}<span class="product-badge badge-low">ONLY {{ product.stock }} LEFT</span>{% endif %}
+        {% if is_cocoa %}
+        <button class="wishlist-btn" aria-label="Save to wishlist" title="Save to wishlist"
+          onclick="this.classList.toggle('wishlisted')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        {% endif %}
 
           {% if product.image %}
           <img src="{{ img_url(product.image) }}" alt="{{ product.name }}"
@@ -211,7 +221,7 @@
       <div class="product-info">
         {% if product.category or ('size' in product.keys() and product.size) %}
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">
-          {% if product.category %}<div class="product-category" style="margin-bottom:0">{% if is_luxury %}💎{% else %}{{ flower }}{% endif %} {{ product.category }}</div>
+          {% if product.category %}<div class="product-category" style="margin-bottom:0">{% if is_cocoa %}{{ product.category }}{% elif is_luxury %}💎 {{ product.category }}{% else %}{{ flower }} {{ product.category }}{% endif %}</div>
           {% else %}<div></div>{% endif %}
           {% if 'size' in product.keys() and product.size %}
           <span class="size-tag"
@@ -227,9 +237,15 @@
           <span class="product-price">
             {{ settings.get('currency_symbol','₹') }}{{ "%.2f"|format(product.price) }}
           </span>
-          <span class="delivery-charge-tag">+ Express Shipping</span>
+          <span class="delivery-charge-tag">+ EXPRESS SHIPPING</span>
         </div>
 
+        {% if is_cocoa and product.stock > 0 %}
+        <div class="cocoa-shop-avail">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          Only {{ product.stock }} available in {{ settings.get('shop_name', brand) }}
+        </div>
+        {% endif %}
         {% if product.stock > 0 %}
         <div class="product-stock {% if product.stock <= 2 %}low{% endif %}">
           {% if product.stock <= 2 %} {% if is_luxury %}💎 Only {{ product.stock }} available{% else %}{{ flower }} Only {{ product.stock }} left{% endif %} {% else %} ✓ In Stock {% endif %} </div>

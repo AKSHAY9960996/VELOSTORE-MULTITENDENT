@@ -423,6 +423,10 @@ body {
   border-bottom: 0;
 }
 
+.filter-strip-label {
+  display: none;
+}
+
 .category-tag {
   color: var(--clr-text-muted);
   border-color: var(--clr-border-dk);
@@ -461,15 +465,17 @@ body {
 
 .section-title {
   color: var(--cocoa-dk);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .section-count {
   color: var(--clr-text-muted);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   font-weight: 600;
   font-size: 0.64rem;
+  text-transform: uppercase;
 }
 
 /* ---------- product cards ---------- */
@@ -571,23 +577,114 @@ body {
 }
 
 .btn-add-cart {
-  background: var(--blush);
-  color: var(--cocoa-dk);
-  border: 1px solid rgba(107, 58, 36, 0.12);
+  background: var(--cocoa);
+  color: #f9ede2;
+  border: 1px solid var(--cocoa);
   border-radius: 12px;
   padding: 14px;
   letter-spacing: 0.2em;
   margin-top: auto;
+  width: 100%;
 }
 
 .btn-add-cart:hover:not(:disabled) {
-  background: var(--cocoa);
+  background: var(--cocoa-dk);
   color: #f9ede2;
-  border-color: var(--cocoa);
+  border-color: var(--cocoa-dk);
+  transform: translateY(-1px);
 }
 
 .btn-add-cart:disabled {
   opacity: .55;
+}
+
+/* ---- Cocoa hamburger nav button (mobile only) ---- */
+.cocoa-nav-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--cocoa-dk);
+  border-radius: 10px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.cocoa-nav-btn:hover {
+  background: rgba(107, 58, 36, 0.06);
+}
+
+/* ---- Wishlist heart button ---- */
+.wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 253, 249, 0.92);
+  border: 1px solid var(--clr-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  color: var(--clr-text-muted);
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.wishlist-btn:hover,
+.wishlist-btn.wishlisted {
+  color: #c0392b;
+  border-color: rgba(192, 57, 43, 0.25);
+  background: rgba(255, 248, 248, 0.95);
+}
+
+.wishlist-btn.wishlisted svg {
+  fill: #c0392b;
+  stroke: #c0392b;
+}
+
+/* ---- Shop availability row in product card ---- */
+.cocoa-shop-avail {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.63rem;
+  color: var(--clr-text-muted);
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.cocoa-shop-avail svg {
+  flex-shrink: 0;
+  color: var(--cocoa-lt);
+}
+
+/* ---- Mobile search filter button ---- */
+.mobile-search-filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 253, 249, 0.9);
+  border: 1px solid var(--clr-border-dk);
+  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  color: var(--cocoa-dk);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.mobile-search-filter-btn:hover {
+  background: var(--blush);
 }
 
 /* ---------- small promo popup ---------- */
@@ -660,44 +757,59 @@ body {
 
   .header-inner {
     height: auto;
-    padding: 14px 16px;
-    gap: 12px;
+    padding: 12px 16px;
+    gap: 4px;
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+  }
+
+  .header-search {
+    display: none;
   }
 
   .logo-icon {
-    width: 64px;
-    height: 64px;
-  }
-
-  .logo-icon svg {
-    width: 26px;
-    height: 26px;
+    display: none !important;
   }
 
   .site-logo {
-    gap: 12px;
+    gap: 0;
     min-width: 0;
-    flex: 1 1 auto;
+    flex: unset;
+    justify-content: center;
+  }
+
+  .logo-text {
+    text-align: center;
   }
 
   .logo-name {
-    font-size: 1.32rem;
-    letter-spacing: 0.13em;
+    font-size: 1.18rem;
+    letter-spacing: 0.18em;
     white-space: normal;
     line-height: 1.12;
+    text-align: center;
+    display: block;
   }
 
   .logo-tagline {
     display: block;
-    font-size: 0.48rem;
+    font-size: 0.42rem;
     letter-spacing: 0.26em;
-    margin-top: 6px;
+    margin-top: 4px;
     white-space: normal;
     line-height: 1.5;
+    text-align: center;
   }
 
   .header-actions {
-    margin-left: auto;
+    margin-left: 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .cocoa-nav-btn {
+    display: flex;
   }
 
   .cart-btn {

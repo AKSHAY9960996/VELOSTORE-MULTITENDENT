@@ -95,6 +95,9 @@
       <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
       <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
       <span></span>
+      {% elif is_cocoa %}
+      <span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span> FREE SHIPPING ON ALL ORDERS <span></span> <span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> GENUINE &amp; PREMIUM QUALITY <span></span>
+      <span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span> FREE SHIPPING ON ALL ORDERS <span></span> <span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> GENUINE &amp; PREMIUM QUALITY <span></span>
       {% else %}
       <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
       <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
@@ -139,6 +142,15 @@
   <!-- ===== HEADER / NAVBAR ===== -->
   <header class="site-header">
     <div class="header-inner">
+      {% if is_cocoa %}
+      <button class="cocoa-nav-btn" id="cocoaMenuBtn" aria-label="Open menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      {% endif %}
       <a href="{{ url_for('index') }}" class="site-logo">
         <div class="logo-icon">
           {% if settings.get('shop_logo') %}
@@ -196,10 +208,19 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </span>
-        <input type="search" name="q" id="mobileSearchInput" placeholder="Search collection..."
+        <input type="search" name="q" id="mobileSearchInput"
+          placeholder="{% if is_cocoa %}Search {{ settings.get('shop_name', brand) }} collection...{% else %}Search collection...{% endif %}"
           value="{{ request.args.get('q','') }}" autocomplete="off" />
         {% if request.args.get('q') %}
         <a href="{{ url_for('index') }}" class="mobile-search-clear" aria-label="Clear search">✕</a>
+        {% endif %}
+        {% if is_cocoa %}
+        <button class="mobile-search-filter-btn" type="button" aria-label="Filter"
+          onclick="document.getElementById('priceFilterToggle') && document.getElementById('priceFilterToggle').click(); document.getElementById('priceFilterWrap') && document.getElementById('priceFilterWrap').scrollIntoView({behavior:'smooth'});">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+          </svg>
+        </button>
         {% endif %}
       </div>
     </form>
