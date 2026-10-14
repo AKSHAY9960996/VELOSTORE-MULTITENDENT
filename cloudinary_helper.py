@@ -84,6 +84,38 @@ def upload_image(file, folder: str = "products", max_width: int = 800,
         return None
 
 
+def upload_hero_banner(file, folder: str = "banners") -> str | None:
+    """
+    Upload hero banner — same pipeline as products but wider and higher quality.
+    Products: 800×800, auto:good. Hero: 1600×900, auto:best.
+    """
+    if not _is_configured():
+        return None
+
+    if not file or not hasattr(file, 'filename') or not file.filename:
+        return None
+
+    try:
+        result = cloudinary.uploader.upload(
+            file,
+            folder=folder,
+            resource_type="image",
+            transformation=[{
+                "width": 1600,
+                "height": 900,
+                "crop": "limit",
+                "quality": "auto:best",
+                "fetch_format": "auto"
+            }],
+            overwrite=False,
+            unique_filename=True,
+        )
+        return result.get('secure_url')
+    except Exception as e:
+        print(f"[Cloudinary] Hero banner upload error: {e}")
+        return None
+
+
 def upload_logo(file, folder: str = "branding") -> str | None:
     """Upload a shop logo with transparency preservation."""
     if not _is_configured():
@@ -110,6 +142,9 @@ def upload_logo(file, folder: str = "branding") -> str | None:
     except Exception as e:
         print(f"[Cloudinary] Logo upload error: {e}")
         return None
+
+
+
 
 
 # ---------------------------------------------------------------------------

@@ -7,10 +7,13 @@
 
 <!-- ===== HERO SECTION ===== -->
 {% set hero_banner_url = img_url(settings.get('hero_banner','')) %}
-<section class="hero-section{% if is_cocoa and hero_banner_url %} hero-has-banner{% endif %}"
-  {% if is_cocoa and hero_banner_url %}style="--hero-banner-url: url('{{ hero_banner_url }}');"{% endif %}>
+<section class="hero-section{% if is_cocoa and hero_banner_url %} hero-has-banner{% endif %}">
   <div class="hero-overlay-glow"></div>
-  {% if is_cocoa and hero_banner_url %}<div class="hero-banner-img" aria-hidden="true"></div>{% endif %}
+  {% if is_cocoa and hero_banner_url %}
+  <div class="hero-banner-img" aria-hidden="true">
+    <img src="{{ hero_banner_url }}" alt="" loading="eager" decoding="async" fetchpriority="high" />
+  </div>
+  {% endif %}
   {% if is_cocoa %}
   <div class="hero-panel-badge" aria-hidden="true">
     <div class="hero-panel-badge-ring">

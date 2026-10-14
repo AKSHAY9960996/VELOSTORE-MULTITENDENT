@@ -163,7 +163,7 @@ body { background: var(--cream); }
 
 /* ---- Custom hero banner image (set via admin settings) ---- */
 .hero-section.hero-has-banner {
-  background: linear-gradient(118deg, #f7eee3 0%, #f0e2d1 42%, #f8f0e6 70%, #efe0cd 100%) !important;
+  background: #f7eee3 !important;
   padding: 0 !important;
   overflow: hidden;
   min-height: 300px;
@@ -176,33 +176,42 @@ body { background: var(--cream); }
   z-index: 3;
   position: relative;
 }
+
+/* Use <img> tag for hero so browser renders at native quality */
 .hero-banner-img {
   position: absolute;
   top: 0; right: 0;
   width: 52%;
   height: 100%;
-  background-image: var(--hero-banner-url);
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
   z-index: 1;
   border-radius: 0 17px 17px 0;
+}
+.hero-banner-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  image-rendering: high-quality;
+  /* No filter, no opacity reduction — full crisp rendering */
 }
 .hero-banner-img::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(247,238,227,1) 0%, rgba(247,238,227,0.55) 30%, transparent 70%);
+  background: linear-gradient(to right, rgba(247,238,227,1) 0%, rgba(247,238,227,0.6) 28%, rgba(247,238,227,0.1) 55%, transparent 75%);
   border-radius: 0 17px 17px 0;
 }
 @media (max-width: 520px) {
   .hero-section.hero-has-banner { min-height: 240px; }
-  .hero-section.hero-has-banner .hero-content { max-width: 100%; padding: 28px 22px 110px; }
+  .hero-section.hero-has-banner .hero-content { max-width: 100%; padding: 28px 22px 120px; }
   .hero-banner-img {
-    width: 100%; height: 50%; top: auto; bottom: 0;
+    width: 100%; height: 52%; top: auto; bottom: 0;
     border-radius: 0 0 17px 17px;
   }
   .hero-banner-img::after {
-    background: linear-gradient(to bottom, rgba(247,238,227,1) 0%, rgba(247,238,227,0.5) 40%, transparent 80%);
+    background: linear-gradient(to bottom, rgba(247,238,227,1) 0%, rgba(247,238,227,0.55) 35%, transparent 80%);
     border-radius: 0 0 17px 17px;
   }
 }
