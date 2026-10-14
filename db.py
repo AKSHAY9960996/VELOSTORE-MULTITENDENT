@@ -574,6 +574,34 @@ def get_tenant_by_identifier(identifier: str):
     return tenant
 
 
+def _ensure_tenant_schema(conn, slug: str):
+    """Auto-init tenant schema if the orders table is missing (e.g. wiped Turso DB)."""
+    try:
+        conn.execute("SELECT 1 FROM orders LIMIT 1")
+    except Exception:
+        print(f"[DB] Tenant '{slug}' schema missing — auto-initialising.", flush=True)
+        base_dir = os.path.dirname(__file__)
+        schema_path = os.path.join(base_dir, 'schema.sql')
+        _execute_schema(conn, schema_path)
+        # Run migrations too
+        for migration in [
+            "ALTER TABLE orders ADD COLUMN reserved_until TEXT",
+            "ALTER TABLE customers ADD COLUMN post_office TEXT",
+            "ALTER TABLE customers ADD COLUMN district TEXT",
+            "ALTER TABLE customers ADD COLUMN landmark TEXT",
+            "ALTER TABLE products ADD COLUMN image2 TEXT",
+            "ALTER TABLE products ADD COLUMN size TEXT",
+        ]:
+            try:
+                conn.execute(migration)
+            except Exception:
+                pass
+        try:
+            conn.commit()
+        except Exception:
+            pass
+
+
 def get_tenant_db_connection(tenant_slug: str):
     """
     Returns a connection to the specific tenant's database.
@@ -583,21 +611,27 @@ def get_tenant_db_connection(tenant_slug: str):
       3. Local SQLite fallback (local dev only)
     """
     if not tenant_slug or tenant_slug == 'default':
-        return Database().connect()
+        conn = Database().connect()
+        _ensure_tenant_schema(conn, 'default')
+        return conn
 
     try:
         row = get_tenant_by_identifier(tenant_slug)
 
         if row and row['turso_db_url'] and row['turso_auth_token'] and HAS_LIBSQL:
-            return Database(
+            conn = Database(
                 turso_url=row['turso_db_url'],
                 auth_token=row['turso_auth_token']
             ).connect()
+            _ensure_tenant_schema(conn, tenant_slug)
+            return conn
     except Exception as e:
         print(f"[DB] Could not fetch Turso credentials for '{tenant_slug}': {e}")
 
     tenant_db_path = os.path.join(TENANTS_DIR, f"{tenant_slug}.db")
-    return Database(local_path=tenant_db_path).connect()
+    conn = Database(local_path=tenant_db_path).connect()
+    _ensure_tenant_schema(conn, tenant_slug)
+    return conn
 
 
 def update_tenant_admin_password(slug: str, new_password: str):

@@ -296,6 +296,10 @@ def get_db():
             g.cleaning_reservations = True
             try:
                 check_expired_reservations(g.db)
+            except Exception as _resv_err:
+                # Silently ignore if schema hasn't been initialised yet
+                # (e.g. brand-new tenant DB that hasn't run init_db yet)
+                print(f"[Reservations] skipped cleanup ({type(_resv_err).__name__}: {_resv_err})", flush=True)
             finally:
                 g.cleaning_reservations = False
     return g.db
