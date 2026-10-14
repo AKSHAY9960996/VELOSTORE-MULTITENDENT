@@ -85,23 +85,44 @@
   </div>
   {% endif %}
 
-  <!-- ===== TOP ANNOUNCEMENT MARQUEE ===== -->
+  <!-- ===== TOP ANNOUNCEMENT BAR ===== -->
   <div class="announcement-bar">
-    <div class="announcement-content">
-      {% if is_luxury %}
-      <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
-      <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
-      <span></span>
-      <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
-      <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
-      <span></span>
+    <div class="announcement-static">
+      {% set bar_text = settings.get('announcement_bar', '') %}
+      {% if '|' in bar_text %}
+      {% set parts = bar_text.split('|') %}
+      <span class="ann-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+        {{ parts[0].strip() }}
+      </span>
+      <span class="ann-sep">|</span>
+      <span class="ann-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+        </svg>
+        {{ parts[1].strip() }}
+      </span>
+      {% elif bar_text %}
+      <span class="ann-item">{{ bar_text }}</span>
       {% else %}
-      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
-      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
-      <span>{{ flower }}</span>
-      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
-      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
-      <span>{{ flower }}</span>
+      <span class="ann-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="1" y="3" width="15" height="13" />
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+          <circle cx="5.5" cy="18.5" r="2.5" />
+          <circle cx="18.5" cy="18.5" r="2.5" />
+        </svg>
+        Free Shipping on All Orders
+      </span>
+      <span class="ann-sep">|</span>
+      <span class="ann-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+        </svg>
+        Genuine &amp; Premium Quality
+      </span>
       {% endif %}
     </div>
   </div>
@@ -153,7 +174,8 @@
         </div>
         <div class="logo-text">
           <span class="logo-name">{{ settings.get('shop_name','My Shop') }}</span>
-          <span class="logo-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY EDITION{% else %}{{ flower }} CURATED FASHION{% endif %}</span>
+          <span class="logo-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% else %}{{
+            settings.get('shop_name', brand)|upper }}{% endif %}</span>
         </div>
       </a>
 
@@ -179,7 +201,7 @@
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
-          <span class="cart-btn-text">{% if is_luxury %}💎 Bag{% else %}{{ flower }} Bag{% endif %}</span>
+          <span class="cart-btn-text">Bag</span>
           <span class="cart-badge" id="cartBadge">0</span>
         </button>
       </div>
@@ -230,8 +252,7 @@
           </svg>
         </div>
         <h3>Your Bag is Empty</h3>
-        <p class="empty-cart-desc">{% if is_luxury %}Discover our exclusive curated luxury creations.{%
-          else %}Discover our handpicked creations {{ flower }}.{% endif %}</p>
+        <p class="empty-cart-desc">Browse our collection and add your favourite pieces.</p>
       </div>
       <div id="cartItemsContainer"></div>
     </div>
@@ -309,13 +330,13 @@
           {% endif %}
         </div>
         <span class="footer-logo-name">{{ settings.get('shop_name','My Shop') }}</span>
-        <span class="footer-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY FINE SELECTIONS{% else %}{{ flower }} CURATED FASHION · FINE SELECTIONS{% endif %}</span>
+        <span class="footer-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% else %}{{
+          settings.get('shop_name', brand)|upper }}{% endif %}</span>
       </div>
       <div class="footer-divider"></div>
       <div class="footer-bottom">
         <p class="footer-copy">
-          © 2026 {{ settings.get('shop_name','My Shop') }}. All Rights Reserved. {% if is_luxury
-          %}Crafted with Royal Elegance 💎{% else %}Crafted with Elegance {{ flower }}{% endif %}.
+          © {{ now_year }} {{ settings.get('shop_name','My Shop') }}. All Rights Reserved.
         </p>
       </div>
     </div>
@@ -335,7 +356,7 @@
   <div id="founderAdBanner" class="founder-ad-banner" style="display: none;">
     <button class="founder-ad-close" id="closeFounderAd" aria-label="Close concierge banner">✕</button>
     <div class="founder-ad-content">
-      <div class="founder-ad-badge">{% if is_luxury %}💎 CONCIERGE{% else %}{{ flower }} CONCIERGE{% endif %}
+      <div class="founder-ad-badge">✦ CONCIERGE
       </div>
       <div class="founder-ad-text">
         <p class="founder-ad-title">Desire a custom storefront?</p>
