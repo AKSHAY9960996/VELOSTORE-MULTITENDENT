@@ -76,168 +76,161 @@ body { background: var(--cream); }
 .mobile-search-bar { background: transparent; border: 0; }
 
 /* ---------- hero banner ---------- */
-/*
-  Two-tone split hero: cream left (text) + solid cocoa-brown right (decoration).
-  No thematic imagery — works for any shop type.
-  All identity comes from shop name, tagline, and CTA text.
-*/
-.hero-section {
-  position: relative; overflow: hidden; text-align: left; display: flex; align-items: center;
-  margin: 18px 16px 0; padding: 36px 26px 34px; min-height: 300px;
-  border: 1px solid var(--clr-border-dk); border-radius: 18px;
-  background: #f7eee3;
-  box-shadow: var(--shadow-md);
+/* ==========================================================
+   COCOA HERO — clean split layout, universal (any shop type)
+   Left: text content  |  Right: uploaded banner photo
+   ========================================================== */
+
+/* Hide standard hero decorations */
+.hero-section::before, .hero-section::after { display: none; }
+.hero-overlay-glow { display: none; }
+.hero-divider { display: none; }
+
+/* ── Split container ── */
+.hero-section.hero-cocoa-split {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  margin: 16px 16px 0;
+  min-height: 220px;
+  border-radius: 18px;
+  border: 1px solid var(--clr-border);
+  background: linear-gradient(115deg, #f7eee3 0%, #ede0ce 55%, #e8d8c4 100%);
+  box-shadow: var(--shadow-sm);
+  padding: 0;
+  text-align: left;
+  animation: none;
 }
 
-/* Solid brown right panel — strong, clean split */
-.hero-section::after {
-  content: '';
-  position: absolute;
-  top: 0; right: 0;
-  width: 42%;
-  height: 100%;
-  background: var(--cocoa);
-  border-radius: 0 17px 17px 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Subtle dot grid over the brown panel for texture */
-.hero-section::before {
-  content: '';
-  position: absolute;
-  top: 0; right: 0;
-  width: 42%;
-  height: 100%;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1.5px, transparent 1.5px);
-  background-size: 20px 20px;
-  border-radius: 0 17px 17px 0;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* Shop logo / name monogram badge on the brown panel */
-.hero-panel-badge {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 42%;
-  height: 100%;
+/* ── Left text panel ── */
+.hero-cocoa-split .hero-content {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 55%;
+  max-width: 55%;
+  padding: 32px 24px 32px 28px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: 10px;
-  z-index: 3;
-  pointer-events: none;
+  animation: none;
 }
-.hero-panel-badge-ring {
-  width: clamp(72px, 18vw, 110px);
-  height: clamp(72px, 18vw, 110px);
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.10);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+/* Small tagline above name (e.g. "ONE OF A KIND FINDS") */
+.hero-cocoa-tagline {
+  font-family: var(--font);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  color: var(--cocoa);
+  margin: 0 0 8px;
+  opacity: 0.82;
 }
-.hero-panel-badge-ring svg {
-  width: 36%; height: 36%;
-  stroke: rgba(255,255,255,0.85);
-  fill: none;
-  stroke-width: 1.5;
+
+/* Thin rule after tagline */
+.hero-cocoa-rule {
+  width: 32px;
+  height: 1.5px;
+  background: var(--cocoa);
+  opacity: 0.45;
+  margin: 0 0 12px;
+  border: 0;
 }
-.hero-panel-badge-name {
+
+/* Big shop name */
+.hero-cocoa-split .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(0.48rem, 1.2vw, 0.62rem);
-  letter-spacing: 0.28em;
-  color: rgba(255,255,255,0.75);
-  text-align: center;
-  text-transform: uppercase;
-  max-width: 80%;
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--cocoa);
+  line-height: 1.1;
+  margin: 0 0 10px;
+  white-space: normal;
+}
+
+/* Slogan / small message */
+.hero-cocoa-split .hero-subtitle {
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--clr-text);
   line-height: 1.6;
+  margin: 0 0 22px;
+  max-width: 200px;
+  display: block;
+  font-style: normal;
 }
 
-.hero-overlay-glow { display: none; }
-.hero-content { max-width: 58%; margin: 0; animation: none; position: relative; z-index: 3; }
-
-/* ---- Custom hero banner image (set via admin settings) ---- */
-.hero-section.hero-has-banner {
-  background: #f7eee3 !important;
-  padding: 0 !important;
-  overflow: hidden;
-  min-height: 300px;
+/* Shop Now button */
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--cocoa);
+  color: #f9ede2;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(79, 42, 26, 0.22);
+  transition: transform .22s, background .22s;
+  align-self: flex-start;
 }
-.hero-section.hero-has-banner::before,
-.hero-section.hero-has-banner::after { display: none; }
-.hero-section.hero-has-banner .hero-content {
-  max-width: 56%;
-  padding: 36px 28px 34px;
-  z-index: 3;
-  position: relative;
-}
+.hero-cta:hover { background: var(--cocoa-dk); transform: translateY(-2px); }
 
-/* Use <img> tag for hero so browser renders at native quality */
+/* ── Right image panel ── */
 .hero-banner-img {
   position: absolute;
   top: 0; right: 0;
-  width: 52%;
+  width: 50%;
   height: 100%;
-  overflow: hidden;
   z-index: 1;
   border-radius: 0 17px 17px 0;
+  /* Warm-tone gradient placeholder when no image uploaded */
+  background: linear-gradient(135deg, #e8d5be 0%, #d4b896 40%, #c4a07a 100%);
 }
-.hero-banner-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  image-rendering: high-quality;
-  /* No filter, no opacity reduction — full crisp rendering */
+/* When banner image is set */
+.hero-has-banner .hero-banner-img {
+  background-image: var(--hero-banner-url);
+  background-size: cover;
+  background-position: center top;
 }
+/* Left-side fade so text stays readable */
 .hero-banner-img::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(247,238,227,1) 0%, rgba(247,238,227,0.6) 28%, rgba(247,238,227,0.1) 55%, transparent 75%);
+  background: linear-gradient(
+    to right,
+    #f2e8da 0%,
+    rgba(242, 232, 218, 0.75) 25%,
+    rgba(242, 232, 218, 0.1) 55%,
+    transparent 100%
+  );
   border-radius: 0 17px 17px 0;
 }
-@media (max-width: 520px) {
-  .hero-section.hero-has-banner { min-height: 240px; }
-  .hero-section.hero-has-banner .hero-content { max-width: 100%; padding: 28px 22px 120px; }
-  .hero-banner-img {
-    width: 100%; height: 52%; top: auto; bottom: 0;
-    border-radius: 0 0 17px 17px;
-  }
+
+/* ── Mobile: stack vertically ── */
+@media (max-width: 540px) {
+  .hero-section.hero-cocoa-split { flex-direction: column; min-height: unset; }
+  .hero-cocoa-split .hero-content { flex: none; max-width: 100%; padding: 28px 22px 20px; }
+  .hero-cocoa-split .hero-subtitle { max-width: 100%; }
+  .hero-banner-img { position: relative; width: 100%; height: 160px; border-radius: 0 0 17px 17px; }
   .hero-banner-img::after {
-    background: linear-gradient(to bottom, rgba(247,238,227,1) 0%, rgba(247,238,227,0.55) 35%, transparent 80%);
+    background: linear-gradient(to bottom, #f2e8da 0%, rgba(242,232,218,0.5) 30%, transparent 70%);
     border-radius: 0 0 17px 17px;
   }
 }
+@media (min-width: 900px) {
+  .hero-section.hero-cocoa-split { margin: 24px 24px 0; }
+  .hero-cocoa-split .hero-content { padding: 44px 32px 44px 40px; }
+}
 
-/* ---- hero text ---- */
-.hero-badge {
-  display: block; background: none; border: 0; padding: 0; margin: 0 0 14px;
-  font-size: 0.7rem; letter-spacing: 0.34em; color: var(--cocoa-dk); font-weight: 600; backdrop-filter: none;
-}
-.hero-badge::before, .hero-badge::after { display: none; }
-.hero-badge { overflow: visible; }
-.hero-title { font-size: 2.35rem; font-weight: 500; letter-spacing: 0.04em; color: var(--cocoa); margin-bottom: 10px; line-height: 1.05; white-space: nowrap; }
-.hero-subtitle {
-  display: block; font-family: var(--font); font-style: normal; font-weight: 500;
-  font-size: 0.78rem; letter-spacing: 0.14em; color: var(--clr-text); margin: 0 0 20px; max-width: 260px; line-height: 1.7;
-}
-.hero-divider { display: none; }
-.hero-cta {
-  display: inline-flex; align-items: center; gap: 10px;
-  background: var(--cocoa); color: #f9ede2; padding: 14px 24px; border-radius: 999px;
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; white-space: nowrap;
-  box-shadow: 0 8px 20px rgba(79, 42, 26, 0.25); transition: transform .25s, background .25s;
-}
-.hero-cta:hover { background: var(--cocoa-dk); transform: translateY(-2px); }
-
-/* ---------- notice, category pills, price filter ---------- */
 .store-notice-bar { background: var(--blush); border-color: var(--clr-border-dk); color: var(--cocoa-dk); }
 .filter-strip { border-bottom: 0; }
 .category-tag { color: var(--clr-text-muted); border-color: var(--clr-border-dk); background: rgba(255, 253, 249, 0.6); font-size: 0.72rem; letter-spacing: 0.12em; padding: 11px 22px; }
@@ -280,8 +273,6 @@ body { background: var(--cream); }
 /* ---------- desktop ---------- */
 @media (min-width: 769px) {
   .hero-section { width: min(1320px, calc(100% - 80px)); margin: 28px auto 0; padding: 78px 64px; min-height: 420px; border-radius: 24px; }
-  .hero-section::after { border-radius: 0 23px 23px 0; }
-  .hero-section::before { border-radius: 0 23px 23px 0; }
   .hero-content { max-width: 520px; }
   .hero-title { font-size: 4.4rem; margin-bottom: 14px; }
   .hero-badge { font-size: 0.76rem; margin-bottom: 20px; }
@@ -307,7 +298,7 @@ body { background: var(--cream); }
   .mobile-search-bar { padding: 4px 16px 14px; }
   .mobile-search-bar input[type="search"] { font-family: var(--font-display); font-style: italic; font-size: 1.1rem; padding: 15px 20px 15px 50px; border-radius: 16px; background: rgba(255, 253, 249, 0.9); border: 1px solid var(--clr-border-dk); }
   .hero-section { margin: 6px 12px 0; padding: 36px 24px 32px; min-height: 290px; }
-  .hero-content { max-width: 56%; }
+  .hero-content { max-width: 78%; }
   .hero-title { font-size: clamp(1.7rem, 7.4vw, 2.3rem); margin-bottom: 10px; letter-spacing: 0.03em; }
   .hero-subtitle { display: block; font-size: 0.74rem; max-width: 220px; }
   .hero-badge { font-size: 0.6rem; letter-spacing: 0.22em; padding: 0; margin-bottom: 14px; }

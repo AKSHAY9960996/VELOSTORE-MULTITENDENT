@@ -469,33 +469,6 @@ def save_logo_image(file):
         print(f"[Local Logo Save] error: {e}")
         return None
 
-
-def save_hero_banner(file):
-    """Upload hero banner at higher quality than product images."""
-    if not file or not allowed_file(file.filename):
-        return None
-    url = None
-    try:
-        url = cloudinary_helper.upload_hero_banner(file, folder="banners")
-    except Exception as e:
-        print(f"[Cloudinary] hero banner upload exception: {e}")
-    if url:
-        return url
-    if not LOCAL_UPLOADS_ALLOWED:
-        flash('⚠️ Hero banner upload failed. Please check Cloudinary settings and try again.', 'error')
-        return None
-    try:
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        filename = f"hero_{secrets.token_hex(6)}.{ext}"
-        upload_dir = os.path.join(BASE_DIR, 'static', 'uploads')
-        os.makedirs(upload_dir, exist_ok=True)
-        file.seek(0)
-        file.save(os.path.join(upload_dir, filename))
-        return filename
-    except Exception as e:
-        print(f"[Local Hero Save] error: {e}")
-        return None
-
 def delete_image(url):
     """Delete an image from Cloudinary."""
     if url:

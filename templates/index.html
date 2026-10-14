@@ -7,55 +7,54 @@
 
 <!-- ===== HERO SECTION ===== -->
 {% set hero_banner_url = img_url(settings.get('hero_banner','')) %}
-<section class="hero-section{% if is_cocoa and hero_banner_url %} hero-has-banner{% endif %}">
-  <div class="hero-overlay-glow"></div>
-  {% if is_cocoa and hero_banner_url %}
-  <div class="hero-banner-img" aria-hidden="true">
-    <img src="{{ hero_banner_url }}" alt="" loading="eager" decoding="async" fetchpriority="high" />
-  </div>
-  {% endif %}
-  {% if is_cocoa %}
-  <div class="hero-panel-badge" aria-hidden="true">
-    <div class="hero-panel-badge-ring">
-      {% if settings.get('shop_logo') %}
-      <img src="{{ img_url(settings.get('shop_logo')) }}" alt="" style="width:60%;height:60%;object-fit:contain;border-radius:50%;opacity:0.85;" />
-      {% else %}
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <path d="M16 10a4 4 0 0 1-8 0"/>
-      </svg>
-      {% endif %}
-    </div>
-    <span class="hero-panel-badge-name">{{ settings.get('shop_name','My Shop') }}</span>
-  </div>
-  {% endif %}
+{% if is_cocoa %}
+{# ── COCOA HERO: clean split layout, universal for any shop type ── #}
+<section class="hero-section hero-cocoa-split{% if hero_banner_url %} hero-has-banner{% endif %}"
+  {% if hero_banner_url %}style="--hero-banner-url: url('{{ hero_banner_url }}');"{% endif %}>
+
+  {# Left: text content #}
   <div class="hero-content">
-    <div class="hero-badge">{% if is_cocoa %}{{ settings.get('shop_name','My Shop')|upper }}{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}{{ flower }} {{ brand|upper }} · NEW COLLECTION {{ now_year }} {{ flower }}{% endif %}</div>
-    <h1 class="hero-title">{% if is_cocoa %}{{ settings.get('shop_tagline') or settings.get('shop_name','My Shop') }}{% else %}{{ settings.get('shop_name','My Shop') }}{% endif %}</h1>
+    {% if settings.get('shop_tagline') %}
+    <p class="hero-cocoa-tagline">{{ settings.get('shop_tagline')|upper }}</p>
+    {% endif %}
+    <h1 class="hero-title">{{ settings.get('shop_name', brand)|upper }}</h1>
+    {% if settings.get('shop_tagline') %}
+    <div class="hero-cocoa-rule"></div>
+    {% endif %}
+    {% if settings.get('shop_slogan') %}
+    <p class="hero-subtitle">{{ settings.get('shop_slogan') }}</p>
+    {% endif %}
+    <a href="#collection" class="hero-cta">SHOP NOW
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+
+  {# Right: banner image or empty warm-toned placeholder #}
+  <div class="hero-banner-img" aria-hidden="true"></div>
+
+</section>
+
+{% else %}
+{# ── DEFAULT / LUXURY HERO ── #}
+<section class="hero-section">
+  <div class="hero-overlay-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">{% if tenant_theme == 'luxury' %}💎 {{ brand|upper }} · LUXURY COLLECTION {{ now_year }} 💎{% else %}{{ flower }} {{ brand|upper }} · NEW COLLECTION {{ now_year }} {{ flower }}{% endif %}</div>
+    <h1 class="hero-title">{{ settings.get('shop_name','My Shop') }}</h1>
     <p class="hero-subtitle">
-      {% if settings.get('shop_slogan') %}
-      {{ settings.get('shop_slogan') }}
-      {% elif is_luxury %}
-      Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.
-      {% elif is_cocoa %}
-      Quality products, carefully selected for you.
-      {% else %}
-      Where grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance —
-      curated for the discerning wardrobe.
+      {% if settings.get('shop_slogan') %}{{ settings.get('shop_slogan') }}
+      {% elif tenant_theme == 'luxury' %}Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.
+      {% else %}Where grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance — curated for the discerning wardrobe.
       {% endif %}
     </p>
-    {% if is_cocoa %}
-    <a href="#collection" class="hero-cta">EXPLORE COLLECTION
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    {% endif %}
     <div class="hero-divider">
       <span class="divider-line"></span>
-      <span class="divider-diamond">{% if is_luxury %}💎{% else %}{{ flower }}{% endif %}</span>
+      <span class="divider-diamond">{% if tenant_theme == 'luxury' %}💎{% else %}{{ flower }}{% endif %}</span>
       <span class="divider-line"></span>
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- ===== SHOP SECTION ===== -->
 <div class="shop-section" id="collection">

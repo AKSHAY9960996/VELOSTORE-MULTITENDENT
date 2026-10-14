@@ -17,7 +17,6 @@ from core import (
     query_db,
     save_image,
     save_logo_image,
-    save_hero_banner,
     set_setting,
     to_ist_filter,
 )
@@ -658,7 +657,7 @@ def admin_settings():
                 delete_image(old_banner)
             set_setting('hero_banner', '')
         elif banner_file and banner_file.filename:
-            new_banner = save_hero_banner(banner_file)
+            new_banner = save_logo_image(banner_file)
             if new_banner:
                 old_banner = get_setting('hero_banner', '')
                 if old_banner and old_banner != new_banner:
