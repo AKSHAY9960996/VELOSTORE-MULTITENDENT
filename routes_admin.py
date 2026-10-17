@@ -2,14 +2,20 @@
 
 import csv
 import io
+import os
 import re
+import secrets
 from datetime import datetime, timedelta
 from db import get_master_db_connection, get_tenant_db_connection
 from flask import Response, flash, g, jsonify, redirect, render_template, request, session, url_for
 from security import hash_password, needs_rehash, verify_password, validate_new_password
 import ratelimit
+import cloudinary_helper
 from core import (
     app,
+    BASE_DIR,
+    LOCAL_UPLOADS_ALLOWED,
+    allowed_file,
     client_ip,
     rows_affected,
     delete_image,
@@ -23,6 +29,31 @@ from core import (
     set_setting,
     to_ist_filter,
 )
+
+def save_hero_image(file):
+    """Upload a wide homepage banner (up to 1600x1000). Local fallback is development-only."""
+    if not file or not file.filename:
+        return None
+    if not allowed_file(file.filename):
+        flash('⚠️ Banner image NOT saved: please use a JPG, PNG or WEBP photo.', 'error')
+        return None
+    url = None
+    try:
+        url = cloudinary_helper.upload_image(file, folder="hero", max_width=1600, max_height=1000)
+    except Exception as e:
+        print(f"[Cloudinary] hero upload exception: {e}")
+    if url:
+        return url
+    if not LOCAL_UPLOADS_ALLOWED:
+        flash('⚠️ Banner upload failed, so it was NOT saved. Please check the Cloudinary settings and try again.', 'error')
+        return None
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    filename = f"hero_{secrets.token_hex(6)}.{ext}"
+    upload_dir = os.path.join(BASE_DIR, 'static', 'uploads')
+    os.makedirs(upload_dir, exist_ok=True)
+    file.seek(0)
+    file.save(os.path.join(upload_dir, filename))
+    return filename
 
 def _parse_product_fields(form):
     """Validate product form input. Returns (cleaned_dict, error_message)."""
@@ -683,6 +714,27 @@ def admin_settings():
                 if old_logo and old_logo != new_logo:
                     delete_image(old_logo)
                 set_setting('shop_logo', new_logo)
+
+        # Homepage hero banner (up to 3 images) + banner / top-bar text
+        for n in (1, 2, 3):
+            hkey = f'hero_image_{n}'
+            old_hero = get_setting(hkey, '')
+            if request.form.get(f'remove_hero_{n}') == '1':
+                if old_hero:
+                    delete_image(old_hero)
+                set_setting(hkey, '')
+                continue
+            hero_file = request.files.get(hkey)
+            if hero_file and hero_file.filename:
+                new_hero = save_hero_image(hero_file)
+                if new_hero:
+                    if old_hero and old_hero != new_hero:
+                        delete_image(old_hero)
+                    set_setting(hkey, new_hero)
+                    flash(f'Banner image {n} uploaded ✅', 'success')
+        for key, limit in (('hero_button_text', 24), ('topbar_text_1', 50), ('topbar_text_2', 50)):
+            set_setting(key, request.form.get(key, '').strip()[:limit])
+        set_setting('hero_show_text', '1' if request.form.get('hero_show_text') else '0')
 
         maintenance_mode = '1' if request.form.get('maintenance_mode') else '0'
         maintenance_msg  = request.form.get('maintenance_message', '').strip()
