@@ -88,6 +88,76 @@
       </div>
     </div>
 
+    <!-- Homepage Hero Banner (Cocoa / brown storefront) -->
+    <div class="form-section">
+      <div class="form-section-title">🖼️ Homepage Hero Banner</div>
+      <p style="font-size:0.78rem;color:var(--a-text-muted);margin:-4px 0 16px;line-height:1.5">
+        The big banner at the top of your storefront. Upload up to 3 images &mdash; with 2 or more they slide automatically.
+        Use a wide landscape photo (about 1600&times;900 px) and keep the main subject on the <strong>right</strong> side, because the text sits on the left.
+        Shown on the brown (Cocoa) storefront theme.
+      </p>
+
+      {% for n in [1, 2, 3] %}
+      {% set hkey = 'hero_image_' ~ n %}
+      <div class="a-form-group" style="margin-bottom:16px">
+        <label>Banner image {{ n }}{% if n == 1 %} (main){% else %} (optional){% endif %}</label>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:8px;flex-wrap:wrap">
+          <div style="width:128px;height:72px;border-radius:10px;border:2px dashed var(--a-border-md);background:var(--a-surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+            <img id="heroPrev{{ n }}" src="{% if settings.get(hkey) %}{{ img_url(settings.get(hkey)) }}{% endif %}" alt="Banner {{ n }}" style="width:100%;height:100%;object-fit:cover;{% if not settings.get(hkey) %}display:none;{% endif %}" />
+            <span id="heroPrevEmpty{{ n }}" style="font-size:0.7rem;color:var(--a-text-muted);{% if settings.get(hkey) %}display:none;{% endif %}">No image</span>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <input type="file" id="{{ hkey }}" name="{{ hkey }}" accept="image/*" data-hero-slot="{{ n }}" style="font-size:0.82rem;color:var(--a-text);width:100%" />
+            {% if settings.get(hkey) %}
+            <label style="font-size:0.78rem;color:var(--a-danger);display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin-top:8px;text-transform:none;letter-spacing:0;font-weight:500">
+              <input type="checkbox" name="remove_hero_{{ n }}" value="1" style="width:auto;flex:none" /> Remove this image
+            </label>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="a-form-group" style="margin-top:8px">
+        <label style="text-transform:none;letter-spacing:0;font-size:0.875rem;font-weight:500;color:var(--a-text);display:flex;align-items:center;gap:10px;cursor:pointer">
+          <input type="checkbox" name="hero_show_text" value="1" style="width:auto;flex:none" {% if settings.get('hero_show_text','1') == '1' %}checked{% endif %} />
+          Show text &amp; button on top of the banner
+        </label>
+        <p style="font-size:0.72rem;color:var(--a-text-muted);margin-top:4px">Turn this off if your banner image already has its own text.</p>
+      </div>
+
+      <div class="a-form-group" style="margin-top:16px">
+        <label for="hero_title">Banner Title</label>
+        <input type="text" id="hero_title" name="hero_title" maxlength="80" value="{{ settings.get('hero_title','') }}" placeholder="{{ settings.get('shop_name','Your shop name') }}" />
+      </div>
+      <div class="a-form-group" style="margin-top:16px">
+        <label for="hero_tagline">Small Line Under Title</label>
+        <input type="text" id="hero_tagline" name="hero_tagline" maxlength="60" value="{{ settings.get('hero_tagline','') }}" placeholder="One of a kind finds" />
+      </div>
+      <div class="a-form-group" style="margin-top:16px">
+        <label for="hero_text">Banner Message</label>
+        <input type="text" id="hero_text" name="hero_text" maxlength="160" value="{{ settings.get('hero_text','') }}" placeholder="Quality products for your everyday life." />
+      </div>
+      <div class="a-form-group" style="margin-top:16px">
+        <label for="hero_button_text">Button Text</label>
+        <input type="text" id="hero_button_text" name="hero_button_text" maxlength="24" value="{{ settings.get('hero_button_text','') }}" placeholder="Shop Now" />
+      </div>
+
+      <div class="a-form-row" style="margin-top:16px">
+        <div class="a-form-group">
+          <label for="topbar_text_1">Top Bar &mdash; Left Text</label>
+          <input type="text" id="topbar_text_1" name="topbar_text_1" maxlength="50" value="{{ settings.get('topbar_text_1','') }}" placeholder="Free shipping on all orders" />
+        </div>
+        <div class="a-form-group">
+          <label for="topbar_text_2">Top Bar &mdash; Right Text</label>
+          <input type="text" id="topbar_text_2" name="topbar_text_2" maxlength="50" value="{{ settings.get('topbar_text_2','') }}" placeholder="Genuine &amp; premium quality" />
+        </div>
+      </div>
+      <p style="font-size:0.72rem;color:var(--a-text-muted);margin-top:6px">
+        Tip: change the top bar text if free shipping doesn&rsquo;t apply to your shop.
+      </p>
+    </div>
+
     <!-- Currency -->
     <div class="form-section">
       <div class="form-section-title">💰 Currency</div>
@@ -506,5 +576,26 @@ function confirmClear(type) {
   }
   return confirm(messages[type] || 'Are you sure?');
 }
+</script>
+<script nonce="{{ csp_nonce() }}">
+(function () {
+  // Live preview for the hero banner image pickers
+  document.querySelectorAll('input[data-hero-slot]').forEach(function (inp) {
+    inp.addEventListener('change', function () {
+      var n = inp.getAttribute('data-hero-slot');
+      var f = inp.files && inp.files[0];
+      var img = document.getElementById('heroPrev' + n);
+      var empty = document.getElementById('heroPrevEmpty' + n);
+      if (!f || !img) return;
+      var r = new FileReader();
+      r.onload = function (e) {
+        img.src = e.target.result;
+        img.style.display = 'block';
+        if (empty) empty.style.display = 'none';
+      };
+      r.readAsDataURL(f);
+    });
+  });
+})();
 </script>
 {% endblock %}
