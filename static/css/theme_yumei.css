@@ -73,7 +73,8 @@ body.yp .yp-wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--yp-pad); 
   text-align: center; text-decoration: none; color: var(--yp-brown-dk);
   display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 10); min-width: 0;
 }
-.yp-brand-logo { height: calc(var(--u) * 46); width: auto; max-width: calc(var(--u) * 160); object-fit: contain; border-radius: 8px; }
+.yp-brand-row { display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 12); max-width: 100%; min-width: 0; }
+.yp-brand-logo { height: calc(var(--u) * 46); width: auto; max-width: calc(var(--u) * 70); object-fit: contain; border-radius: 8px; flex-shrink: 0; }
 .yp-brand-name {
   font: 500 min(calc(var(--u) * 42), 7.6vw) / 1.05 var(--yp-serif); letter-spacing: 0.03em; text-transform: uppercase;
   color: var(--yp-brown-dk); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;

@@ -164,11 +164,13 @@
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
       </button>
       <a href="{{ url_for('index') }}" class="yp-brand">
-        {% if settings.get('shop_logo') %}
-        <img src="{{ img_url(settings.get('shop_logo')) }}" alt="" class="yp-brand-logo" />
-        {% endif %}
-        <span class="yp-brand-name">{{ settings.get('shop_name','My Shop') }}</span>
-        <span class="yp-brand-tag">{{ settings.get('shop_tagline') or 'One of a kind finds' }}</span>
+        <span class="yp-brand-row">
+          {% if settings.get('shop_logo') %}
+          <img src="{{ img_url(settings.get('shop_logo')) }}" alt="" class="yp-brand-logo" />
+          {% endif %}
+          <span class="yp-brand-name">{{ settings.get('shop_name','My Shop') }}</span>
+        </span>
+        {% if settings.get('shop_tagline') %}<span class="yp-brand-tag">{{ settings.get('shop_tagline') }}</span>{% endif %}
       </a>
       <button class="yp-cart cart-btn" id="cartBtn" type="button" aria-label="Open cart">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"><path d="M5.5 8h13l1 12.5h-15z"/><path d="M8.5 10.5V7a3.5 3.5 0 0 1 7 0v3.5"/></svg>

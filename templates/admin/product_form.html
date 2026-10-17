@@ -126,7 +126,7 @@
             <div class="img-upload-label" id="uploadLabel1">{% if product and product.image %}Change Photo 1{% else %}Click to upload Photo 1{% endif %}</div>
             <div style="font-size:0.72rem;color:var(--a-text-light);margin-top:4px">JPG, PNG, WEBP (Max 5MB)</div>
           </div>
-          <input type="file" id="image" name="image"
+          <input type="file" id="image" name="image" data-compress="1000"
                  accept="image/*" style="display:none"
                  data-on-change="previewSingleImage" data-args='["$el", "uploadArea1", "uploadLabel1"]' />
         </div>
@@ -161,7 +161,7 @@
             <div class="img-upload-label" id="uploadLabel2">{% if product and product.image2 %}Change Photo 2{% else %}Click to upload Photo 2{% endif %}</div>
             <div style="font-size:0.72rem;color:var(--a-text-light);margin-top:4px">JPG, PNG, WEBP (Max 5MB)</div>
           </div>
-          <input type="file" id="image2" name="image2"
+          <input type="file" id="image2" name="image2" data-compress="1000"
                  accept="image/*" style="display:none"
                  data-on-change="previewSingleImage" data-args='["$el", "uploadArea2", "uploadLabel2"]' />
         </div>
@@ -215,4 +215,5 @@
     input.focus();
   }
 </script>
+<script src="{{ url_for('static', filename='js/img-compress.js') }}?v=1"></script>
 {% endblock %}

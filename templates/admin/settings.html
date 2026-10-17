@@ -52,7 +52,7 @@
           </div>
 
           <div style="flex:1;min-width:210px">
-            <input type="file" id="shop_logo" name="shop_logo" accept="image/*" style="font-size:0.82rem;color:var(--a-text);width:100%;" data-on-change="handleLogoSelect" data-args='["$event"]' />
+            <input type="file" id="shop_logo" name="shop_logo" accept="image/*" data-compress="500" data-keep-png="1" style="font-size:0.82rem;color:var(--a-text);width:100%;" data-on-change="handleLogoSelect" data-args='["$event"]' />
             <p style="font-size:0.72rem;color:var(--a-text-muted);margin-top:4px">
               Upload PNG, JPG, or WEBP. Square ratio recommended (e.g. 300x300 px).
             </p>
@@ -94,7 +94,7 @@
       <p style="font-size:0.78rem;color:var(--a-text-muted);margin:-4px 0 16px;line-height:1.5">
         The big banner at the top of your storefront. Upload up to 3 images &mdash; with 2 or more they slide automatically.
         Use a wide landscape photo (about 1600&times;900 px) and keep the main subject on the <strong>right</strong> side, because the text sits on the left.
-        Shown on the brown (Cocoa) storefront theme.
+        Shown on the brown (Cocoa) storefront theme. The title, small line and message on the banner come from <strong>Shop Name</strong>, <strong>Header &amp; Footer Logo Tagline</strong> and <strong>Shop Hero Slogan</strong> above.
       </p>
 
       {% for n in [1, 2, 3] %}
@@ -107,7 +107,7 @@
             <span id="heroPrevEmpty{{ n }}" style="font-size:0.7rem;color:var(--a-text-muted);{% if settings.get(hkey) %}display:none;{% endif %}">No image</span>
           </div>
           <div style="flex:1;min-width:200px">
-            <input type="file" id="{{ hkey }}" name="{{ hkey }}" accept="image/*" data-hero-slot="{{ n }}" style="font-size:0.82rem;color:var(--a-text);width:100%" />
+            <input type="file" id="{{ hkey }}" name="{{ hkey }}" accept="image/*" data-hero-slot="{{ n }}" data-compress="1600" style="font-size:0.82rem;color:var(--a-text);width:100%" />
             {% if settings.get(hkey) %}
             <label style="font-size:0.78rem;color:var(--a-danger);display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin-top:8px;text-transform:none;letter-spacing:0;font-weight:500">
               <input type="checkbox" name="remove_hero_{{ n }}" value="1" style="width:auto;flex:none" /> Remove this image
@@ -126,18 +126,6 @@
         <p style="font-size:0.72rem;color:var(--a-text-muted);margin-top:4px">Turn this off if your banner image already has its own text.</p>
       </div>
 
-      <div class="a-form-group" style="margin-top:16px">
-        <label for="hero_title">Banner Title</label>
-        <input type="text" id="hero_title" name="hero_title" maxlength="80" value="{{ settings.get('hero_title','') }}" placeholder="{{ settings.get('shop_name','Your shop name') }}" />
-      </div>
-      <div class="a-form-group" style="margin-top:16px">
-        <label for="hero_tagline">Small Line Under Title</label>
-        <input type="text" id="hero_tagline" name="hero_tagline" maxlength="60" value="{{ settings.get('hero_tagline','') }}" placeholder="One of a kind finds" />
-      </div>
-      <div class="a-form-group" style="margin-top:16px">
-        <label for="hero_text">Banner Message</label>
-        <input type="text" id="hero_text" name="hero_text" maxlength="160" value="{{ settings.get('hero_text','') }}" placeholder="Quality products for your everyday life." />
-      </div>
       <div class="a-form-group" style="margin-top:16px">
         <label for="hero_button_text">Button Text</label>
         <input type="text" id="hero_button_text" name="hero_button_text" maxlength="24" value="{{ settings.get('hero_button_text','') }}" placeholder="Shop Now" />
@@ -577,6 +565,7 @@ function confirmClear(type) {
   return confirm(messages[type] || 'Are you sure?');
 }
 </script>
+<script src="{{ url_for('static', filename='js/img-compress.js') }}?v=1"></script>
 <script nonce="{{ csp_nonce() }}">
 (function () {
   // Live preview for the hero banner image pickers

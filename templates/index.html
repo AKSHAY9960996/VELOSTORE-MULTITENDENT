@@ -27,10 +27,10 @@
 
     {% if hero_show_text %}
     <div class="yp-hero-copy">
-      <h1 class="yp-hero-title">{{ settings.get('hero_title') or settings.get('shop_name', 'My Shop') }}</h1>
-      <p class="yp-hero-eyebrow">{{ settings.get('hero_tagline') or settings.get('shop_tagline') or 'One of a kind finds' }}</p>
-      <div class="yp-hero-rule"></div>
-      <p class="yp-hero-text">{{ settings.get('hero_text') or 'Quality products for your everyday life.' }}</p>
+      <h1 class="yp-hero-title">{{ settings.get('shop_name', 'My Shop') }}</h1>
+      {% if settings.get('shop_tagline') %}<p class="yp-hero-eyebrow">{{ settings.get('shop_tagline') }}</p>{% endif %}
+      {% if settings.get('shop_tagline') or settings.get('shop_slogan') %}<div class="yp-hero-rule"></div>{% endif %}
+      {% if settings.get('shop_slogan') %}<p class="yp-hero-text">{{ settings.get('shop_slogan') }}</p>{% endif %}
       <a href="#shop" class="yp-hero-btn">
         <span>{{ settings.get('hero_button_text') or 'Shop Now' }}</span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
