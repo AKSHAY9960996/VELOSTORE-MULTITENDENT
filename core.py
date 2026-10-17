@@ -367,6 +367,13 @@ def client_ip():
     """Real client IP (ProxyFix already resolved the single trusted proxy hop)."""
     return request.remote_addr or '0.0.0.0'
 
+# Throttle: only scan for expired reservations at most once every 60 seconds per process.
+# Previously it ran on EVERY request, causing a full table scan each time.
+import time as _time
+_last_reservation_cleanup: dict = {}  # slug -> timestamp
+_RESERVATION_CLEANUP_INTERVAL = 60   # seconds
+
+
 def check_expired_reservations(db):
     """Finds all orders with status 'Reserved' that have expired,
     restores their stock, and marks them as 'Expired'."""
@@ -400,6 +407,7 @@ def check_expired_reservations(db):
                 )
         db.commit()
 
+
 def get_db():
     if 'db' not in g:
         slug = getattr(g, 'tenant_slug', 'default')
@@ -408,13 +416,17 @@ def get_db():
         else:
             g.db = get_tenant_db_connection(slug)
 
-        # Run cleanup here without recursive get_db loop
+        # Throttled cleanup: run at most once per 60 s per store (not on every request)
         if not g.get('cleaning_reservations') and slug != 'master':
-            g.cleaning_reservations = True
-            try:
-                check_expired_reservations(g.db)
-            finally:
-                g.cleaning_reservations = False
+            now = _time.monotonic()
+            last = _last_reservation_cleanup.get(slug, 0)
+            if now - last >= _RESERVATION_CLEANUP_INTERVAL:
+                _last_reservation_cleanup[slug] = now
+                g.cleaning_reservations = True
+                try:
+                    check_expired_reservations(g.db)
+                finally:
+                    g.cleaning_reservations = False
     return g.db
 
 @app.teardown_appcontext
@@ -510,6 +522,29 @@ def init_db():
             [key, value]
         )
     db.commit()
+
+    # --- Performance indexes: created idempotently (IF NOT EXISTS) ---
+    # These are the most impactful indexes for the admin panel load time.
+    # The reservation cleanup scans orders.reserved_until + orders.status on every request;
+    # orders pages JOIN customers and filter/sort on status and created_at;
+    # products pages filter on category.
+    index_stmts = [
+        "CREATE INDEX IF NOT EXISTS idx_orders_status         ON orders(status)",
+        "CREATE INDEX IF NOT EXISTS idx_orders_created_at     ON orders(created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_orders_customer_id    ON orders(customer_id)",
+        "CREATE INDEX IF NOT EXISTS idx_orders_reserved_until ON orders(reserved_until) WHERE reserved_until IS NOT NULL",
+        "CREATE INDEX IF NOT EXISTS idx_order_items_order_id  ON order_items(order_id)",
+        "CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON order_items(product_id)",
+        "CREATE INDEX IF NOT EXISTS idx_products_category     ON products(category)",
+        "CREATE INDEX IF NOT EXISTS idx_products_stock        ON products(stock)",
+        "CREATE INDEX IF NOT EXISTS idx_products_created_at   ON products(created_at)",
+    ]
+    for stmt in index_stmts:
+        try:
+            db.execute(stmt)
+        except Exception:
+            pass  # Partial-index syntax not supported by older SQLite; skip gracefully
+    db.commit()
     db.close()
 
 def query_db(query, args=(), one=False):
@@ -532,10 +567,21 @@ def get_setting(key, default=''):
 
 def set_setting(key, value):
     execute_db('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, value])
+    invalidate_settings_cache()  # keep per-request cache consistent after a write
 
 def get_all_settings():
-    rows = query_db('SELECT key, value FROM settings')
-    return {row['key']: row['value'] for row in rows}
+    # Cache on g so the settings table is read at most once per request,
+    # even though inject_settings(), get_setting(), and route handlers all call this.
+    if not hasattr(g, '_settings_cache'):
+        rows = query_db('SELECT key, value FROM settings')
+        g._settings_cache = {row['key']: row['value'] for row in rows}
+    return g._settings_cache
+
+
+def invalidate_settings_cache():
+    """Call after set_setting() to clear the per-request cache."""
+    if hasattr(g, '_settings_cache'):
+        del g._settings_cache
 
 # ---------------------------------------------------------------------------
 # Password Helpers
@@ -653,20 +699,19 @@ def to_ist_filter(utc_str):
 def get_storage_stats():
     """Returns media metrics for the admin panel."""
     try:
-        # Count images in DB (products + logo)
-        products_with_img = query_db(
-            "SELECT COUNT(*) as cnt FROM products WHERE image IS NOT NULL AND image != ''",
+        # Single query instead of two separate COUNT queries
+        row = query_db(
+            "SELECT "
+            "  SUM(CASE WHEN image  IS NOT NULL AND image  != '' THEN 1 ELSE 0 END) as img1_cnt, "
+            "  SUM(CASE WHEN image2 IS NOT NULL AND image2 != '' THEN 1 ELSE 0 END) as img2_cnt "
+            "FROM products",
             one=True
         )
-        products_with_img2 = query_db(
-            "SELECT COUNT(*) as cnt FROM products WHERE image2 IS NOT NULL AND image2 != ''",
-            one=True
-        )
-        img_count = (products_with_img['cnt'] if products_with_img else 0) + \
-                    (products_with_img2['cnt'] if products_with_img2 else 0)
+        img_count = (row['img1_cnt'] or 0) + (row['img2_cnt'] or 0) if row else 0
 
-        logo = get_setting('shop_logo', '')
-        if logo:
+        # Reuse cached settings — get_all_settings() is already called by inject_settings()
+        settings = get_all_settings()
+        if settings.get('shop_logo', ''):
             img_count += 1
 
         return {
