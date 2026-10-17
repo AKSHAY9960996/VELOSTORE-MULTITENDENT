@@ -2,233 +2,81 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>VeloStore | Sell online. Your way.</title>
+  <title>VeloStore | Your fashion store, without the DM chaos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="VeloStore gives small businesses a ready-made online store with live stock, simple checkout and a powerful dashboard. Sell without the endless Instagram and WhatsApp order chats.">
+  <meta name="description" content="VeloStore turns Instagram and WhatsApp order DMs into a clean online store with live size availability, smart checkout and an admin dashboard.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#fcf9f6;--card:#fff;--line:rgba(60,30,20,.10);--text:#16110f;--muted:#6a5f58;--accent:#9a4635;--accent-soft:#f6e8e2;--dark:#14100e;--ok:#2f9e6b;--font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+    :root{--bg:#f7f8fc;--card:#ffffff;--line:rgba(15,23,42,.10);--text:#0f172a;--muted:#5b6478;--p:#6366f1;--p2:#8b5cf6;--ok:#059669}
     *{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
-    body{background:radial-gradient(900px 600px at 95% 0%,#f3e6dd,transparent 60%),radial-gradient(700px 500px at 0% 100%,#f8efe8,transparent 60%),var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased}
+    body{background:radial-gradient(900px 500px at 80% -10%,rgba(99,102,241,.14),transparent),radial-gradient(700px 400px at -10% 20%,rgba(139,92,246,.10),transparent),var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;line-height:1.6}
     a{color:inherit;text-decoration:none}
-    .wrap{max-width:1380px;margin:0 auto;padding:0 28px}
-
-    /* ---------- nav ---------- */
-    nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.65rem;letter-spacing:-.03em}
-    .logo svg{width:30px;height:30px}
-    .menu{display:flex;gap:40px;font-weight:500;font-size:1rem}
-    .menu a{position:relative;padding:4px 0}
-    .menu a::after{content:"";position:absolute;left:0;bottom:-2px;height:2px;width:0;background:var(--accent);transition:.25s}
-    .menu a:hover::after{width:100%}
-    .nav-right{display:flex;align-items:center;gap:26px}
-    .signin{font-weight:500}
-    .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;border-radius:14px;font-weight:600;font-size:1rem;border:1px solid var(--line);background:#fff;color:var(--text);transition:transform .2s,box-shadow .2s;cursor:pointer}
-    .btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(40,20,10,.12)}
-    .btn.dark{background:var(--dark);border-color:var(--dark);color:#fff}
-    .btn.wa{background:#25d366;border-color:#25d366;color:#fff}
-    .btn.sm{padding:13px 22px;border-radius:12px}
-    .arrow{width:18px;height:18px;flex:none}
-
-    /* ---------- hero ---------- */
-    .hero{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.28fr);gap:24px;align-items:center;padding:28px 0 36px}
-    .pill{display:inline-block;padding:10px 20px;border-radius:12px;background:var(--accent-soft);color:#8a3a29;font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:26px}
-    h1{font-weight:800;font-size:clamp(2.9rem,6vw,5.7rem);line-height:1;letter-spacing:-.045em;margin-bottom:26px}
-    h1 span{color:var(--accent);display:block}
-    .lead{font-size:1.2rem;color:#4d433d;max-width:560px;margin-bottom:34px}
-    .cta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:40px}
-    .cta .btn{padding:19px 34px;font-size:1.1rem;border-radius:16px}
-    .perks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;max-width:600px}
-    .perk{display:flex;flex-direction:column;gap:12px;font-weight:500;font-size:.95rem;line-height:1.35}
-    .perk i{width:58px;height:58px;border-radius:16px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center}
-    .perk svg{width:28px;height:28px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-
-    /* ---------- device mockups (sizes use cqw so everything scales with the stage) ---------- */
-    .stage{position:relative;width:100%;aspect-ratio:100/76;container-type:inline-size;margin-right:calc(-1 * min(3vw,48px))}
-    .laptop{position:absolute;right:0;top:8cqw;width:76cqw;transform:perspective(1600px) rotateY(-9deg) rotateX(2deg);transform-origin:right center;filter:drop-shadow(0 3cqw 4cqw rgba(60,30,20,.22))}
-    .lp-screen{background:#f3f3f3;border:.9cqw solid #2c2c2e;border-bottom-width:1cqw;border-radius:1.8cqw 1.8cqw .4cqw .4cqw;overflow:hidden;display:flex;aspect-ratio:16/10.3;font-size:1.25cqw;color:#222}
-    .lp-base{height:2.4cqw;margin:0 -3cqw;background:linear-gradient(#d9d9dc,#bdbdc2);border-radius:0 0 3cqw 3cqw}
-    .side{width:24%;background:#fafafa;padding:2.6cqw 1.4cqw;border-right:1px solid #eee;display:flex;flex-direction:column;gap:.6cqw}
-    .side .brand{display:flex;align-items:center;gap:.6cqw;font-weight:800;font-size:1.7cqw;letter-spacing:-.02em;margin-bottom:2cqw}
-    .side .brand svg{width:2cqw;height:2cqw}
-    .side div.it{display:flex;align-items:center;gap:.9cqw;padding:.95cqw 1cqw;border-radius:.8cqw;color:#555}
-    .side div.it::before{content:"";width:1.3cqw;height:1.3cqw;border-radius:.35cqw;border:.18cqw solid #aaa}
-    .side div.it.on{background:#dfeaf8;color:#17375e;font-weight:600}
-    .side div.it.on::before{border-color:#17375e}
-    .main{flex:1;padding:2.4cqw 2.6cqw;background:#f7f7f8}
-    .main .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.6cqw}
-    .main h4{font-size:2.5cqw;font-weight:800;letter-spacing:-.02em}
-    .main .today{font-size:1.1cqw;background:#fff;border:1px solid #e5e5e5;border-radius:.7cqw;padding:.6cqw 1.2cqw}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2cqw;margin-bottom:1.8cqw}
-    .stat{background:#fff;border:1px solid #ececec;border-radius:1cqw;padding:1.3cqw 1.5cqw}
-    .stat small{display:block;color:#777;font-size:1.1cqw}
-    .stat b{display:block;font-size:2.4cqw;font-weight:800;letter-spacing:-.02em;line-height:1.3}
-    .stat em{font-style:normal;color:#1ba35e;font-weight:600;font-size:1cqw}
-    .orders{background:#fff;border:1px solid #ececec;border-radius:1cqw;padding:1.4cqw 1.6cqw}
-    .orders .ttl{display:flex;justify-content:space-between;font-weight:700;font-size:1.3cqw;margin-bottom:1cqw}
-    .orders .ttl span{color:#2563eb;font-weight:600;font-size:1.1cqw}
-    .row{display:grid;grid-template-columns:.5fr 1.2fr .9fr .9fr 1.1fr;padding:.85cqw .5cqw;border-top:1px solid #f0f0f0;align-items:center;font-size:1.15cqw}
-    .row.h{border-top:0;background:#f6f6f7;color:#888;border-radius:.6cqw;font-size:1.05cqw}
-    .dot{display:inline-block;width:.8cqw;height:.8cqw;border-radius:50%;margin-right:.5cqw}
-    .phone{position:absolute;left:1cqw;top:0;width:31cqw;aspect-ratio:1/2.04;background:#fff;border:.9cqw solid #111;border-radius:5cqw;overflow:hidden;box-shadow:0 3cqw 5cqw rgba(60,30,20,.30),0 0 0 .25cqw #3a3a3c;z-index:3;font-size:1.5cqw;color:#222}
-    .notch{position:absolute;top:.9cqw;left:50%;transform:translateX(-50%);width:9cqw;height:2.6cqw;background:#111;border-radius:2cqw;z-index:4}
-    .ph{padding:5.2cqw 1.9cqw 0}
-    .ph-top{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:1.65cqw;margin-bottom:1.5cqw}
-    .ph-top svg{width:2cqw;height:2cqw;stroke:#222;fill:none;stroke-width:2;stroke-linecap:round}
-    .ph-top .ic{display:flex;gap:1.3cqw;position:relative}
-    .ph-top .bd{position:absolute;right:-.7cqw;top:-.8cqw;background:#e5484d;color:#fff;border-radius:50%;width:1.4cqw;height:1.4cqw;font-size:.9cqw;display:flex;align-items:center;justify-content:center}
-    .banner{margin:0 -1.9cqw;background:linear-gradient(120deg,#e8dbcb,#f1e8dc);height:13.5cqw;position:relative;padding:2.8cqw 2cqw}
-    .banner b{display:block;font-size:2.7cqw;line-height:1.15;font-weight:800;letter-spacing:-.02em}
-    .banner span{display:inline-block;margin-top:1.4cqw;background:#111;color:#fff;font-size:1.2cqw;font-weight:600;padding:.9cqw 1.6cqw;border-radius:.6cqw}
-    .banner svg{position:absolute;right:0;bottom:0;height:100%}
-    .sec{display:flex;justify-content:space-between;font-weight:700;font-size:1.3cqw;margin:1.5cqw 0 .9cqw}
-    .sec span{color:#2563eb;font-weight:600;font-size:1.1cqw}
-    .cats{display:grid;grid-template-columns:repeat(4,1fr);gap:1cqw;text-align:center;font-size:.95cqw;color:#555}
-    .cats i{display:flex;align-items:center;justify-content:center;font-style:normal;height:5cqw;border-radius:1.2cqw;background:#f3ebe3;font-size:2.4cqw;margin-bottom:.5cqw}
-    .prods{display:grid;grid-template-columns:1fr 1fr;gap:1.2cqw}
-    .prod{border:1px solid #eee;border-radius:1.2cqw;padding:.9cqw;font-size:1.05cqw}
-    .prod .im{height:7.2cqw;background:#f4efe9;border-radius:.9cqw;display:flex;align-items:center;justify-content:center;margin-bottom:.7cqw}
-    .prod .im svg{height:80%}
-    .prod b{display:block;font-size:1.2cqw;margin-top:.2cqw}
-
-    /* ---------- sections ---------- */
-    section{padding:64px 0}
-    h2{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:-.035em;text-align:center;margin-bottom:12px;line-height:1.15}
-    .sub{text-align:center;color:var(--muted);max-width:580px;margin:0 auto 40px;font-size:1.05rem}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 2px 12px rgba(60,30,20,.04)}
-    .card .ic{width:50px;height:50px;border-radius:14px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:14px}
-    .card h3{font-size:1.12rem;font-weight:700;margin-bottom:6px;letter-spacing:-.01em}
-    .card p{color:var(--muted);font-size:.95rem}
-    .vs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
-    .vs ul{list-style:none;margin-top:12px}.vs li{padding:7px 0;color:var(--muted);font-size:.96rem}
-    .bad li::before{content:"✕  ";color:#d14343;font-weight:700}.good li::before{content:"✓  ";color:var(--ok);font-weight:700}
-    .good{border-color:rgba(154,70,53,.35);background:linear-gradient(#fff,#fdf6f2)}
-    .step b{display:inline-flex;width:38px;height:38px;border-radius:12px;align-items:center;justify-content:center;background:var(--dark);color:#fff;margin-bottom:12px}
+    .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+    .logo{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.4rem}
+    .logo span{background:linear-gradient(135deg,var(--p),var(--p2));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .links{display:flex;gap:18px;align-items:center;font-size:.92rem;color:var(--muted)}
+    .btn{display:inline-block;padding:12px 22px;border-radius:12px;font-weight:600;font-size:.95rem;border:1px solid var(--line);background:#fff;color:var(--text);transition:.2s}
+    .btn.primary{background:linear-gradient(135deg,var(--p),var(--p2));border:0;color:#fff;box-shadow:0 8px 24px rgba(99,102,241,.30)}
+    .btn:hover{transform:translateY(-2px)}
+    .hero{text-align:center;padding:72px 0 56px}
+    .pill{display:inline-block;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:.8rem;margin-bottom:22px}
+    h1{font-family:'Outfit',sans-serif;font-weight:800;font-size:clamp(2.1rem,6vw,3.7rem);line-height:1.1;margin-bottom:18px}
+    h1 em{font-style:normal;background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .hero p{max-width:620px;margin:0 auto 30px;color:var(--muted);font-size:1.08rem}
+    .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    section{padding:54px 0}
+    h2{font-family:'Outfit',sans-serif;font-size:clamp(1.6rem,4vw,2.2rem);text-align:center;margin-bottom:10px}
+    .sub{text-align:center;color:var(--muted);max-width:560px;margin:0 auto 34px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 2px 10px rgba(15,23,42,.04)}
+    .card .ic{font-size:1.6rem;margin-bottom:10px}
+    .card h3{font-family:'Outfit',sans-serif;font-size:1.1rem;margin-bottom:6px}
+    .card p{color:var(--muted);font-size:.93rem}
+    .vs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .vs .card ul{list-style:none;margin-top:10px}
+    .vs li{padding:6px 0;color:var(--muted);font-size:.93rem}
+    .bad li::before{content:"✕  ";color:#dc2626}.good li::before{content:"✓  ";color:var(--ok)}
+    .step b{display:inline-flex;width:34px;height:34px;border-radius:10px;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--p),var(--p2));margin-bottom:10px;font-family:'Outfit',sans-serif}
     .plan h3{font-size:1.3rem;text-transform:capitalize}
-    .plan .n{font-size:2.4rem;font-weight:800;letter-spacing:-.03em;margin:6px 0 0;line-height:1.1}
-    .plan ul{list-style:none;margin-top:14px}.plan li{padding:5px 0;font-size:.92rem;color:var(--muted)}
-    .plan li.on::before{content:"✓  ";color:var(--ok);font-weight:700}.plan li.off{opacity:.45}.plan li.off::before{content:"–  "}
-    .plan.hot{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 16px 44px rgba(154,70,53,.16)}
-    .stores a.card{display:block;transition:.2s}.stores a.card:hover{transform:translateY(-3px);border-color:var(--accent)}
-    .stores small{color:var(--accent);font-weight:700}
-    .about{max-width:760px;margin:0 auto;text-align:center;color:var(--muted);font-size:1.05rem}
-    .final{text-align:center;background:linear-gradient(135deg,#f8ebe4,#f3e3d9);border:1px solid var(--line);border-radius:28px;padding:54px 22px;margin:10px 0}
-    .final .cta{justify-content:center;margin:0}
-    footer{padding:34px 0 46px;text-align:center;color:var(--muted);font-size:.88rem}
-    footer a{margin:0 10px;text-decoration:underline;text-decoration-color:var(--line)}
+    .plan .n{font-family:'Outfit',sans-serif;font-size:2rem;font-weight:800;margin:6px 0}
+    .plan ul{list-style:none;margin-top:10px}.plan li{padding:4px 0;font-size:.9rem;color:var(--muted)}
+    .plan li.on::before{content:"✓  ";color:var(--ok)}.plan li.off{opacity:.45}.plan li.off::before{content:"–  "}
+    .plan.hot{border-color:var(--p);box-shadow:0 0 0 1px var(--p),0 12px 40px rgba(99,102,241,.18)}
+    .stores a.card{display:block;transition:.2s}.stores a.card:hover{transform:translateY(-3px);border-color:var(--p)}
+    .stores small{color:var(--p);font-weight:600}
+    .final{text-align:center;background:linear-gradient(135deg,#eef0ff,#f5eefe);border:1px solid var(--line);border-radius:24px;padding:48px 20px;margin:20px 0 10px}
+    footer{padding:30px 0 40px;text-align:center;color:var(--muted);font-size:.85rem}
+    footer a{margin:0 8px;text-decoration:underline;text-decoration-color:var(--line)}
+    .btn.wa{background:#25d366;border:0;color:#fff;box-shadow:0 8px 24px rgba(37,211,102,.30)}
     .wa-float{position:fixed;right:18px;bottom:18px;z-index:50;display:flex;align-items:center;gap:8px;background:#25d366;color:#fff;padding:13px 18px;border-radius:99px;font-weight:600;font-size:.92rem;box-shadow:0 10px 28px rgba(37,211,102,.45)}
-
-    /* ---------- responsive ---------- */
-    @media(max-width:1020px){
-      .hero{grid-template-columns:1fr;gap:34px}
-      .menu{display:none}
-      .stage{max-width:640px;margin:0 auto}
-    }
-    @media(max-width:640px){
-      .wrap{padding:0 18px}
-      .signin{display:none}
-      .logo{font-size:1.4rem}
-      .nav-right .btn{white-space:nowrap;padding:10px 16px;font-size:.85rem}
-      .nav-right .arrow{display:none}
-      .perks{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
-      .cta .btn{width:100%;justify-content:center}
-      .wa-float span{display:none}.wa-float{padding:15px}
-      section{padding:46px 0}
-    }
+    .wa-float:hover{transform:translateY(-2px)}
+    @media(max-width:640px){.links .hide{display:none}.wa-float span{display:none}.wa-float{padding:15px}}
   </style>
 </head>
 <body>
 <div class="wrap">
   <nav>
-    <a href="/" class="logo">
-      <svg viewBox="0 0 32 32" fill="none"><path d="M7 11h18l-1.2 14.2a2 2 0 0 1-2 1.8H10.2a2 2 0 0 1-2-1.8L7 11Z" fill="#9a4635"/><path d="M11.5 14V9.5a4.5 4.5 0 0 1 9 0V14" stroke="#9a4635" stroke-width="2.4" stroke-linecap="round"/><path d="M11 17.5v3.5M21 17.5v3.5" stroke="#fcf9f6" stroke-width="2" stroke-linecap="round" opacity=".55"/></svg>
-      VeloStore
-    </a>
-    <div class="menu">
-      <a href="#features">Features</a>
-      <a href="#plans">Plans</a>
-      <a href="#why">For Sellers</a>
-      <a href="#about">About</a>
-    </div>
-    <div class="nav-right">
-      <a class="signin" href="{{ url_for('admin_login') }}">Sign in</a>
-      <a class="btn dark sm" href="{{ wa_url or '#plans' }}"{% if wa_url %} target="_blank" rel="noopener"{% endif %}>Create Your Store
-        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <a href="/" class="logo">Velo<span>Store</span></a>
+    <div class="links">
+      <a class="hide" href="#features">Features</a>
+      <a class="hide" href="#how">How it works</a>
+      <a class="hide" href="#plans">Plans</a>
+      <a class="btn" href="{{ url_for('admin_login') }}">Store owner login</a>
     </div>
   </nav>
 
   <header class="hero">
-    <div>
-      <span class="pill">Online stores for small businesses</span>
-      <h1>Sell online.<span>Your way.</span></h1>
-      <p class="lead">VeloStore gives you a ready-made online store with live stock, simple checkout and a powerful dashboard. Sell your products without the endless Instagram and WhatsApp order chats.</p>
-      <div class="cta">
-        <a class="btn dark" href="{{ wa_url or '#plans' }}"{% if wa_url %} target="_blank" rel="noopener"{% endif %}>Create Your Store
-          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <a class="btn" href="{{ demo_url }}">Explore Demo</a>
-      </div>
-      <div class="perks">
-        <div class="perk"><i><svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"/><path d="m4 7 8 4 8-4M12 11v10"/></svg></i>Live stock availability</div>
-        <div class="perk"><i><svg viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 8H6.4"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg></i>Simple checkout</div>
-        <div class="perk"><i><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg></i>Complete delivery details</div>
-        <div class="perk"><i><svg viewBox="0 0 24 24"><path d="M5 20V11M10 20V5M15 20v-9M20 20V8"/></svg></i>Easy store management</div>
-      </div>
-    </div>
-
-    <div class="stage" aria-hidden="true">
-      <!-- laptop dashboard -->
-      <div class="laptop">
-        <div class="lp-screen">
-          <div class="side">
-            <div class="brand"><svg viewBox="0 0 32 32" fill="none"><path d="M7 11h18l-1.2 14.2a2 2 0 0 1-2 1.8H10.2a2 2 0 0 1-2-1.8L7 11Z" fill="#9a4635"/><path d="M11.5 14V9.5a4.5 4.5 0 0 1 9 0V14" stroke="#9a4635" stroke-width="2.4" stroke-linecap="round"/></svg>VeloStore</div>
-            <div class="it on">Dashboard</div><div class="it">Products</div><div class="it">Orders</div><div class="it">Customers</div><div class="it">Analytics</div><div class="it">Store Settings</div>
-          </div>
-          <div class="main">
-            <div class="head"><h4>Dashboard</h4><span class="today">Today ▾</span></div>
-            <div class="stats">
-              <div class="stat"><small>Total Orders</small><b>128</b><em>↑ 12%</em></div>
-              <div class="stat"><small>Total Sales</small><b>₹24,560</b><em>↑ 18%</em></div>
-              <div class="stat"><small>Pending Orders</small><b>12</b></div>
-            </div>
-            <div class="orders">
-              <div class="ttl">Recent Orders<span>View all</span></div>
-              <div class="row h"><span>#</span><span>Customer</span><span>Items</span><span>Total</span><span>Status</span></div>
-              <div class="row"><span>#1024</span><span>Anjali K.</span><span>2 items</span><span>₹1,299</span><span><i class="dot" style="background:#3b82f6"></i>Processing</span></div>
-              <div class="row"><span>#1023</span><span>Rahul M.</span><span>1 item</span><span>₹899</span><span><i class="dot" style="background:#22a559"></i>Shipped</span></div>
-              <div class="row"><span>#1022</span><span>Sneha P.</span><span>3 items</span><span>₹2,499</span><span><i class="dot" style="background:#f59e0b"></i>Pending</span></div>
-              <div class="row"><span>#1021</span><span>Arjun S.</span><span>1 item</span><span>₹799</span><span><i class="dot" style="background:#22a559"></i>Delivered</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="lp-base"></div>
-      </div>
-
-      <!-- phone storefront -->
-      <div class="phone">
-        <div class="notch"></div>
-        <div class="ph">
-          <div class="ph-top">
-            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-            <span>Your Store</span>
-            <span class="ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><svg viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 8H6.4"/></svg><i class="bd">2</i></span>
-          </div>
-          <div class="banner">
-            <b>New<br>Arrivals</b><span>Shop Now</span>
-            <svg viewBox="0 0 120 150" preserveAspectRatio="xMaxYMax meet"><path d="M62 70C50 50 52 30 66 12c6 18 4 38-4 58Z" fill="#5b7a4a"/><path d="M62 72C74 56 94 52 108 56c-10 14-28 22-46 16Z" fill="#6f8f5c"/><path d="M60 74C46 60 28 58 14 64c10 12 28 18 46 10Z" fill="#4f6d40"/><path d="M62 70c0-20 8-36 22-44-2 20-8 36-22 44Z" fill="#7a9a66"/><path d="M44 96c0-8 36-8 36 0l6 30c1 12-8 22-24 22s-25-10-24-22l6-30Z" fill="#f5efe8"/><ellipse cx="62" cy="96" rx="18" ry="4" fill="#e6dccf"/><circle cx="92" cy="136" r="9" fill="#d9b9a0"/><path d="M92 128c-5 0-8 5-8 9h16c0-4-3-9-8-9Z" fill="#c9a48a"/></svg>
-          </div>
-          <div class="sec">Categories<span>See all</span></div>
-          <div class="cats"><div><i>👕</i>Fashion</div><div><i>👜</i>Accessories</div><div><i>🪔</i>Home Decor</div><div><i>🧴</i>Lifestyle</div></div>
-          <div class="sec">Featured Products<span>See all</span></div>
-          <div class="prods">
-            <div class="prod"><div class="im"><svg viewBox="0 0 100 60"><path d="M8 40c0-6 4-10 9-11l14-3c4-1 6-4 8-7 2 3 6 6 11 8l24 9c8 3 12 6 12 12v4H8v-12Z" fill="#e2d3c0"/><path d="M8 47h84v6H8z" fill="#f7f2ec"/><path d="M34 24l4 6M42 27l4 6M50 30l4 6" stroke="#c9b59c" stroke-width="2" stroke-linecap="round"/></svg></div>Casual Sneakers<b>₹1,299</b></div>
-            <div class="prod"><div class="im"><svg viewBox="0 0 60 70"><rect x="22" y="2" width="16" height="14" rx="3" fill="#2b2b2b"/><rect x="22" y="54" width="16" height="14" rx="3" fill="#2b2b2b"/><circle cx="30" cy="35" r="20" fill="#c9a77c"/><circle cx="30" cy="35" r="16.5" fill="#1d1d1f"/><circle cx="30" cy="35" r="1.6" fill="#d9b88a"/><path d="M30 35V24M30 35l8 4" stroke="#e6cfa8" stroke-width="1.6" stroke-linecap="round"/></svg></div>Analog Watch<b>₹2,499</b></div>
-          </div>
-        </div>
-      </div>
+    <span class="pill">Built for small fashion businesses</span>
+    <h1>Stop taking orders in DMs.<br>Start running a <em>real store</em>.</h1>
+    <p>VeloStore replaces Instagram and WhatsApp order chats with a clean online storefront, live size availability and a simple dashboard for your stock and orders.</p>
+    <div class="cta">
+      <a class="btn primary" href="{{ demo_url }}">View a live store →</a>
+      {% if wa_url %}<a class="btn wa" href="{{ wa_url }}" target="_blank" rel="noopener">💬 Chat on WhatsApp</a>{% endif %}
+      <a class="btn" href="#plans">See plans</a>
     </div>
   </header>
 
@@ -286,7 +134,7 @@
 
   <section id="plans">
     <h2>Pick a plan that fits</h2>
-    <p class="sub">Start small and upgrade as your catalogue grows.{% if wa_url %} <a href="{{ wa_url }}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700">Message us on WhatsApp for pricing →</a>{% else %} Contact us for pricing.{% endif %}</p>
+    <p class="sub">Start small and upgrade as your catalogue grows.{% if wa_url %} <a href="{{ wa_url }}" target="_blank" rel="noopener" style="color:var(--p);font-weight:600">Message us on WhatsApp for pricing →</a>{% else %} Contact us for pricing.{% endif %}</p>
     <div class="grid">
       {% for name, p in plans.items() %}
       <div class="card plan {% if name == 'basic' %}hot{% endif %}">
@@ -305,17 +153,12 @@
     </div>
   </section>
 
-  <section id="about">
-    <h2>About VeloStore</h2>
-    <p class="about">VeloStore is built for small fashion businesses that grew up on Instagram and WhatsApp. It keeps what works about selling in chat, and removes the manual work: no more typing addresses, tracking stock in a notebook, or losing orders in a long thread.</p>
-  </section>
-
   <div class="final">
     <h2>Ready to get your orders out of the DMs?</h2>
     <p class="sub">Take a look at a live store, then get yours set up.</p>
     <div class="cta">
-      {% if wa_url %}<a class="btn wa" href="{{ wa_url }}" target="_blank" rel="noopener">💬 Get your store on WhatsApp</a>{% else %}<a class="btn dark" href="#plans">Create Your Store</a>{% endif %}
-      <a class="btn" href="{{ demo_url }}">Explore Demo</a>
+      {% if wa_url %}<a class="btn wa" href="{{ wa_url }}" target="_blank" rel="noopener">💬 Get your store on WhatsApp</a>{% else %}<a class="btn primary" href="{{ demo_url }}">View a live store →</a>{% endif %}
+      <a class="btn" href="{{ url_for('admin_login') }}">Store owner login</a>
     </div>
   </div>
 

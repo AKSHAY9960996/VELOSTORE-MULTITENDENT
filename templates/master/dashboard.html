@@ -4,167 +4,126 @@
 
 {% block content %}
 <!-- Header Banner -->
-<div
-  style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
   <div>
     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
       <h1 style="font-size: 2.2rem; font-weight: 800; color: #fff;">Platform Control Overview</h1>
-      <span
-        style="background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); color: #a5b4fc; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">Multi-Tenant
-        Core</span>
+      <span style="background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); color: #a5b4fc; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase;">Multi-Tenant Core</span>
     </div>
-    <p style="color: var(--text-muted); font-size: 0.95rem;">Global fleet metrics, tenant management, plan entitlements,
-      and direct store impersonation.</p>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Global fleet metrics, tenant management, plan entitlements, and direct store impersonation.</p>
   </div>
   <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-    <a href="{{ url_for('master_tenant_new') }}" class="nav-btn nav-btn-primary"
-      style="padding: 12px 22px; font-size: 0.95rem; border-radius: var(--radius-md);">
+    <a href="{{ url_for('master_tenant_new') }}" class="nav-btn nav-btn-primary" style="padding: 12px 22px; font-size: 0.95rem; border-radius: var(--radius-md);">
       ⚡ Provision New Store
     </a>
   </div>
 </div>
 
 <!-- Stats Grid -->
-<div
-  style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-bottom: 28px;">
-
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-bottom: 28px;">
+  
   <!-- Total Stores -->
-  <div
-    style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span
-        style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Total
-        Stores</span>
+      <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Total Stores</span>
       <span style="font-size: 1.2rem;">🏢</span>
     </div>
-    <div style="font-size: 2.2rem; font-weight: 800; color: #fff; margin-top: 6px;" class="brand-font">{{
-      stats.total_shops }}</div>
+    <div style="font-size: 2.2rem; font-weight: 800; color: #fff; margin-top: 6px;" class="brand-font">{{ stats.total_shops }}</div>
     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Managed tenant databases</div>
   </div>
 
   <!-- Active Stores -->
-  <div
-    style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span
-        style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Active
-        Stores</span>
+      <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Active Stores</span>
       <span style="font-size: 1.2rem;">🟢</span>
     </div>
-    <div style="font-size: 2.2rem; font-weight: 800; color: #34d399; margin-top: 6px;" class="brand-font">{{
-      stats.active_shops }}</div>
+    <div style="font-size: 2.2rem; font-weight: 800; color: #34d399; margin-top: 6px;" class="brand-font">{{ stats.active_shops }}</div>
     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Live storefronts online</div>
   </div>
 
   <!-- Suspended Stores -->
-  <div
-    style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span
-        style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Suspended</span>
+      <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Suspended</span>
       <span style="font-size: 1.2rem;">🛑</span>
     </div>
-    <div
-      style="font-size: 2.2rem; font-weight: 800; color: {% if stats.suspended_shops > 0 %}#f87171{% else %}var(--text-muted){% endif %}; margin-top: 6px;"
-      class="brand-font">{{ stats.suspended_shops }}</div>
+    <div style="font-size: 2.2rem; font-weight: 800; color: {% if stats.suspended_shops > 0 %}#f87171{% else %}var(--text-muted){% endif %}; margin-top: 6px;" class="brand-font">{{ stats.suspended_shops }}</div>
     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Offline / locked tenants</div>
   </div>
 
   <!-- Platform Gross Sales / Revenue -->
-  <div
-    style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span
-        style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Platform
-        GMV</span>
+      <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Platform GMV</span>
       <span style="font-size: 1.2rem;">💰</span>
     </div>
-    <div style="font-size: 2rem; font-weight: 800; color: #fbbf24; margin-top: 6px;" class="brand-font">₹{{
-      "%.0f"|format(stats.total_revenue_global) }}</div>
+    <div style="font-size: 2rem; font-weight: 800; color: #fbbf24; margin-top: 6px;" class="brand-font">₹{{ "%.0f"|format(stats.total_revenue_global) }}</div>
     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Gross platform merchandise</div>
   </div>
 
   <!-- Total Platform Products -->
-  <div
-    style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span
-        style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Total
-        Products</span>
+      <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Total Products</span>
       <span style="font-size: 1.2rem;">📦</span>
     </div>
-    <div style="font-size: 2.2rem; font-weight: 800; color: #818cf8; margin-top: 6px;" class="brand-font">{{
-      stats.total_products_global }}</div>
+    <div style="font-size: 2.2rem; font-weight: 800; color: #818cf8; margin-top: 6px;" class="brand-font">{{ stats.total_products_global }}</div>
     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Cataloged across all shops</div>
   </div>
 
   <!-- Total Platform Orders -->
-  <div
-    style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-premium);">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span
-        style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Total
-        Orders</span>
+      <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Total Orders</span>
       <span style="font-size: 1.2rem;">🧾</span>
     </div>
-    <div style="font-size: 2.2rem; font-weight: 800; color: #38bdf8; margin-top: 6px;" class="brand-font">{{
-      stats.total_orders_global }}</div>
+    <div style="font-size: 2.2rem; font-weight: 800; color: #38bdf8; margin-top: 6px;" class="brand-font">{{ stats.total_orders_global }}</div>
     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Completed & reserved orders</div>
   </div>
 
 </div>
 
 <!-- Plan Distribution Bar -->
-<div
-  style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+<div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
   <div style="display: flex; align-items: center; gap: 8px;">
-    <span
-      style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Plan
-      Tier Distribution:</span>
+    <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Plan Tier Distribution:</span>
   </div>
   <div style="display: flex; gap: 14px; flex-wrap: wrap;">
-    <span
-      style="background: rgba(156,163,175,0.15); border: 1px solid rgba(156,163,175,0.3); color: #d1d5db; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
+    <span style="background: rgba(156,163,175,0.15); border: 1px solid rgba(156,163,175,0.3); color: #d1d5db; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
       Free Tier: <strong>{{ stats.plan_counts.get('free', 0) }}</strong>
     </span>
-    <span
-      style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
+    <span style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
       Basic Tier: <strong>{{ stats.plan_counts.get('basic', 0) }}</strong>
     </span>
-    <span
-      style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #fcd34d; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
+    <span style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #fcd34d; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
       Premium Tier: <strong>{{ stats.plan_counts.get('premium', 0) }}</strong>
     </span>
   </div>
 </div>
 
 <!-- Tenants List Section -->
-<div
-  style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-premium);">
-
+<div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-premium);">
+  
   <!-- Search & Filter Controls -->
-  <div
-    style="padding: 22px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+  <div style="padding: 22px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
     <div>
       <h2 style="font-size: 1.35rem; font-weight: 700; color: #fff;">Managed Tenant Fleet</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Inspect per-store limits, feature flags,
-        sales, or click "Login As" to impersonate tenant admin.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Inspect per-store limits, feature flags, sales, or click "Login As" to impersonate tenant admin.</p>
     </div>
-
+    
     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
       <!-- Search Input -->
       <div style="position: relative; min-width: 260px;">
-        <input type="text" id="tenantSearchInput" placeholder="Search by name, slug, owner, email..."
-          oninput="filterTenants()"
-          style="width: 100%; padding: 10px 16px 10px 38px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.88rem; outline: none; transition: border-color 0.2s;"
-          onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-color)'" />
-        <span
-          style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 0.9rem;">🔍</span>
+        <input type="text" id="tenantSearchInput" placeholder="Search by name, slug, owner, email..." oninput="filterTenants()"
+               style="width: 100%; padding: 10px 16px 10px 38px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.88rem; outline: none; transition: border-color 0.2s;"
+               onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-color)'" />
+        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 0.9rem;">🔍</span>
       </div>
 
       <!-- Filter by Status -->
       <select id="statusFilter" onchange="filterTenants()"
-        style="padding: 10px 14px; border-radius: var(--radius-md); background: #12182b; border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; outline: none;">
+              style="padding: 10px 14px; border-radius: var(--radius-md); background: #12182b; border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; outline: none;">
         <option value="all">All Statuses</option>
         <option value="active">Active Only</option>
         <option value="suspended">Suspended Only</option>
@@ -172,7 +131,7 @@
 
       <!-- Filter by Plan -->
       <select id="planFilter" onchange="filterTenants()"
-        style="padding: 10px 14px; border-radius: var(--radius-md); background: #12182b; border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; outline: none;">
+              style="padding: 10px 14px; border-radius: var(--radius-md); background: #12182b; border: 1px solid var(--border-color); color: #fff; font-size: 0.85rem; outline: none;">
         <option value="all">All Plans</option>
         <option value="free">Free Tier</option>
         <option value="basic">Basic Plan</option>
@@ -182,8 +141,7 @@
   </div>
 
   <!-- Store Count Banner -->
-  <div
-    style="padding: 8px 24px; background: rgba(255,255,255,0.015); border-bottom: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-dim); display: flex; justify-content: space-between;">
+  <div style="padding: 8px 24px; background: rgba(255,255,255,0.015); border-bottom: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-dim); display: flex; justify-content: space-between;">
     <span id="tenantMatchCount">Showing {{ tenants|length }} of {{ tenants|length }} stores</span>
     <span>⚡ Multi-Tenant Isolation: SQLite per Store Database</span>
   </div>
@@ -191,8 +149,7 @@
   <div style="overflow-x: auto;">
     <table id="tenantsTable" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
       <thead>
-        <tr
-          style="background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em;">
+        <tr style="background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em;">
           <th style="padding: 16px 24px;">Store & Identifier</th>
           <th style="padding: 16px 18px;">Owner Contact</th>
           <th style="padding: 16px 18px;">Domain / Path</th>
@@ -205,30 +162,31 @@
       </thead>
       <tbody>
         {% for shop in tenants %}
-        <tr class="tenant-row" data-name="{{ shop.store_name|lower }}" data-slug="{{ shop.slug|lower }}"
-          data-owner="{{ shop.owner_name|lower }}" data-email="{{ (shop.owner_email or '')|lower }}"
-          data-status="{{ 'active' if shop.is_active else 'suspended' }}" data-plan="{{ shop.plan|lower }}"
-          style="border-bottom: 1px solid var(--border-color); transition: background 0.15s ease;"
-          onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-
+        <tr class="tenant-row"
+            data-name="{{ shop.store_name|lower }}"
+            data-slug="{{ shop.slug|lower }}"
+            data-owner="{{ shop.owner_name|lower }}"
+            data-email="{{ (shop.owner_email or '')|lower }}"
+            data-status="{{ 'active' if shop.is_active else 'suspended' }}"
+            data-plan="{{ shop.plan|lower }}"
+            style="border-bottom: 1px solid var(--border-color); transition: background 0.15s ease;"
+            onmouseover="this.style.background='rgba(255,255,255,0.02)'"
+            onmouseout="this.style.background='transparent'">
+          
           <!-- Store Name & Slug -->
           <td style="padding: 16px 24px;">
             <div style="display: flex; align-items: center; gap: 12px;">
-              <div
-                style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(168,85,247,0.2)); border: 1px solid rgba(99,102,241,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; font-weight: 700; color: #fff;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(168,85,247,0.2)); border: 1px solid rgba(99,102,241,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; font-weight: 700; color: #fff;">
                 {{ shop.store_name[:1]|upper }}
               </div>
               <div>
                 <div style="font-weight: 700; color: #fff; font-size: 0.96rem;">{{ shop.store_name }}</div>
-                <div
-                  style="font-size: 0.76rem; color: var(--text-muted); font-family: monospace; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <div style="font-size: 0.76rem; color: var(--text-muted); font-family: monospace; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                   <span style="color: #818cf8;">slug:</span> {{ shop.slug }}
                   <span style="color: #94a3b8;">•</span>
-                  <span style="color: #94a3b8;">👤 <code
-                      style="color: #38bdf8;">{{ shop.admin_username or 'admin' }}</code></span>
+                  <span style="color: #94a3b8;">👤 <code style="color: #38bdf8;">{{ shop.admin_username or 'admin' }}</code></span>
                   {% if shop.slug == 'default' %}
-                  <span
-                    style="background: rgba(99,102,241,0.2); color: #a5b4fc; padding: 1px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 700;">DEFAULT</span>
+                    <span style="background: rgba(99,102,241,0.2); color: #a5b4fc; padding: 1px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 700;">DEFAULT</span>
                   {% endif %}
                 </div>
               </div>
@@ -238,35 +196,30 @@
           <!-- Owner Contact -->
           <td style="padding: 16px 18px;">
             <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">{{ shop.owner_name }}</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">{{ shop.owner_email or 'No email recorded' }}
-            </div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">{{ shop.owner_email or 'No email recorded' }}</div>
             {% if shop.owner_phone %}
-            <a href="https://wa.me/{{ shop.owner_phone }}" target="_blank"
-              style="font-size: 0.75rem; color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px;">
-              💬 {{ shop.owner_phone }}
-            </a>
+              <a href="https://wa.me/{{ shop.owner_phone }}" target="_blank" style="font-size: 0.75rem; color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px;">
+                💬 {{ shop.owner_phone }}
+              </a>
             {% endif %}
           </td>
 
           <!-- Domain / Path -->
           <td style="padding: 16px 18px;">
             {% if shop.custom_domain %}
-            <div>
-              <a href="https://{{ shop.custom_domain }}" target="_blank"
-                style="color: #60a5fa; text-decoration: none; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
-                🌐 {{ shop.custom_domain }} ↗
-              </a>
-            </div>
+              <div>
+                <a href="https://{{ shop.custom_domain }}" target="_blank" style="color: #60a5fa; text-decoration: none; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
+                  🌐 {{ shop.custom_domain }} ↗
+                </a>
+              </div>
             {% endif %}
             <div>
-              <a href="{{ url_for('storefront_shop', shop_slug=shop.slug) }}" target="_blank"
-                style="color: #a5b4fc; text-decoration: none; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 4px; font-family: monospace;">
+              <a href="{{ url_for('storefront_shop', shop_slug=shop.slug) }}" target="_blank" style="color: #a5b4fc; text-decoration: none; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 4px; font-family: monospace;">
                 🔗 /s/{{ shop.slug }} ↗
               </a>
             </div>
             <div style="margin-top: 2px;">
-              <a href="/s/{{ shop.slug }}/admin" target="_blank"
-                style="color: #38bdf8; text-decoration: none; font-size: 0.76rem; display: inline-flex; align-items: center; gap: 4px; font-family: monospace;">
+              <a href="/s/{{ shop.slug }}/admin" target="_blank" style="color: #38bdf8; text-decoration: none; font-size: 0.76rem; display: inline-flex; align-items: center; gap: 4px; font-family: monospace;">
                 🔐 /s/{{ shop.slug }}/admin ↗
               </a>
             </div>
@@ -275,20 +228,17 @@
           <!-- Plan & Product Limits -->
           <td style="padding: 16px 18px;">
             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-              <span
-                style="padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; {% if shop.plan == 'premium' %}background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3);{% elif shop.plan == 'basic' %}background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3);{% else %}background: rgba(156,163,175,0.15); color: #d1d5db; border: 1px solid rgba(156,163,175,0.3);{% endif %}">
+              <span style="padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; {% if shop.plan == 'premium' %}background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3);{% elif shop.plan == 'basic' %}background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3);{% else %}background: rgba(156,163,175,0.15); color: #d1d5db; border: 1px solid rgba(156,163,175,0.3);{% endif %}">
                 {{ shop.plan }}
               </span>
               {% if shop.theme == 'luxury' %}
-              <span
-                style="padding: 2px 8px; border-radius: 12px; font-size: 0.68rem; font-weight: 700; background: rgba(37, 99, 235, 0.15); color: #93c5fd; border: 1px solid rgba(37, 99, 235, 0.35); display: inline-flex; align-items: center; gap: 3px;">
-                💎 Luxury Blue
-              </span>
+                <span style="padding: 2px 8px; border-radius: 12px; font-size: 0.68rem; font-weight: 700; background: rgba(37, 99, 235, 0.15); color: #93c5fd; border: 1px solid rgba(37, 99, 235, 0.35); display: inline-flex; align-items: center; gap: 3px;">
+                  💎 Luxury Blue
+                </span>
               {% else %}
-              <span
-                style="padding: 2px 8px; border-radius: 12px; font-size: 0.68rem; font-weight: 700; background: rgba(244, 114, 182, 0.15); color: #f472b6; border: 1px solid rgba(244, 114, 182, 0.3); display: inline-flex; align-items: center; gap: 3px;">
-                🌸 Sakura
-              </span>
+                <span style="padding: 2px 8px; border-radius: 12px; font-size: 0.68rem; font-weight: 700; background: rgba(244, 114, 182, 0.15); color: #f472b6; border: 1px solid rgba(244, 114, 182, 0.3); display: inline-flex; align-items: center; gap: 3px;">
+                  🌸 Sakura
+                </span>
               {% endif %}
             </div>
             <!-- Product Usage Indicator -->
@@ -297,11 +247,8 @@
                 <span>{{ shop.product_count }} / {{ shop.max_products }}</span>
                 <span>{{ shop.usage_pct }}%</span>
               </div>
-              <div
-                style="width: 100%; height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-top: 2px;">
-                <div
-                  style="height: 100%; width: {{ shop.usage_pct }}%; background: {% if shop.usage_pct >= 90 %}#ef4444{% elif shop.usage_pct >= 70 %}#f59e0b{% else %}#10b981{% endif %}; border-radius: 3px;">
-                </div>
+              <div style="width: 100%; height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-top: 2px;">
+                <div style="height: 100%; width: {{ shop.usage_pct }}%; background: {% if shop.usage_pct >= 90 %}#ef4444{% elif shop.usage_pct >= 70 %}#f59e0b{% else %}#10b981{% endif %}; border-radius: 3px;"></div>
               </div>
             </div>
           </td>
@@ -309,24 +256,19 @@
           <!-- Sales & Orders -->
           <td style="padding: 16px 18px;">
             <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">₹{{ "%.0f"|format(shop.revenue) }}</div>
-            <div style="font-size: 0.76rem; color: var(--text-muted);">{{ shop.order_count }} order{% if
-              shop.order_count != 1 %}s{% endif %} · {{ shop.customer_count }} cust.</div>
+            <div style="font-size: 0.76rem; color: var(--text-muted);">{{ shop.order_count }} order{% if shop.order_count != 1 %}s{% endif %} · {{ shop.customer_count }} cust.</div>
           </td>
 
           <!-- Status Badge -->
           <td style="padding: 16px 18px;">
             {% if shop.is_active %}
-            <span
-              style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 600; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
-              <span
-                style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399;"></span>
-              Active
-            </span>
+              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 600; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399;"></span> Active
+              </span>
             {% else %}
-            <span
-              style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 600; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background: #f87171;"></span> Suspended
-            </span>
+              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 600; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #f87171;"></span> Suspended
+              </span>
             {% endif %}
           </td>
 
@@ -334,29 +276,19 @@
           <td style="padding: 16px 18px;">
             <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 140px;">
               {% if shop.features.get('custom_domain') %}
-              <span
-                style="background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;"
-                title="Custom Domain Enabled">🌐 Domain</span>
+                <span style="background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;" title="Custom Domain Enabled">🌐 Domain</span>
               {% endif %}
               {% if shop.features.get('export_csv') %}
-              <span
-                style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;"
-                title="CSV Export Enabled">📥 CSV</span>
+                <span style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;" title="CSV Export Enabled">📥 CSV</span>
               {% endif %}
               {% if shop.features.get('analytics') %}
-              <span
-                style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #fcd34d; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;"
-                title="Advanced Analytics Enabled">📊 Analytics</span>
+                <span style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #fcd34d; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;" title="Advanced Analytics Enabled">📊 Analytics</span>
               {% endif %}
               {% if shop.features.get('whatsapp_checkout') %}
-              <span
-                style="background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86efac; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;"
-                title="WhatsApp Checkout Enabled">💬 WhatsApp</span>
+                <span style="background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86efac; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;" title="WhatsApp Checkout Enabled">💬 WhatsApp</span>
               {% endif %}
               {% if shop.features.get('pos_receipt') %}
-              <span
-                style="background: rgba(147,51,234,0.15); border: 1px solid rgba(147,51,234,0.3); color: #d8b4fe; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;"
-                title="POS Receipt Enabled">🧾 Receipt</span>
+                <span style="background: rgba(147,51,234,0.15); border: 1px solid rgba(147,51,234,0.3); color: #d8b4fe; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;" title="POS Receipt Enabled">🧾 Receipt</span>
               {% endif %}
             </div>
           </td>
@@ -364,60 +296,48 @@
           <!-- Actions -->
           <td style="padding: 16px 24px; text-align: right;">
             <div style="display: flex; justify-content: flex-end; align-items: center; gap: 6px; flex-wrap: wrap;">
-
+              
               <!-- Impersonate Store Admin ("Login As") -->
-              <a href="{{ url_for('master_impersonate', tenant_id=shop.id) }}" class="nav-btn nav-btn-ghost"
-                style="padding: 6px 12px; font-size: 0.8rem; color: #a5b4fc; border-color: rgba(165,180,252,0.3); background: rgba(99,102,241,0.08);"
-                title="Login directly into this store's admin panel as Master Administrator">
+              <a href="{{ url_for('master_impersonate', tenant_id=shop.id) }}"
+                 class="nav-btn nav-btn-ghost"
+                 style="padding: 6px 12px; font-size: 0.8rem; color: #a5b4fc; border-color: rgba(165,180,252,0.3); background: rgba(99,102,241,0.08);"
+                 title="Login directly into this store's admin panel as Master Administrator">
                 🔑 Login As
               </a>
 
-              {% if not shop.permanent_db %}
-              <form method="POST" action="{{ url_for('master_migrate_tenant_db', tenant_id=shop.id) }}"
-                style="display: inline;"
-                onsubmit="return confirm('{{ shop.store_name }} is stored on a temporary disk that is wiped on every deploy. Create its own permanent Turso database now?')">
-                <button type="submit" class="nav-btn nav-btn-ghost"
-                  style="padding: 6px 10px; font-size: 0.8rem; color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08);"
-                  title="This store's data (products, images, orders) is lost on every redeploy. Click to fix.">
-                  ⚠️ Move to permanent DB
-                </button>
-              </form>
-              {% endif %}
-
               <!-- Edit Tenant Settings & Limits -->
-              <a href="{{ url_for('master_tenant_edit', tenant_id=shop.id) }}" class="nav-btn nav-btn-ghost"
-                style="padding: 6px 10px; font-size: 0.8rem; color: var(--text-main); border-color: var(--border-color);"
-                title="Edit store settings, limits, feature flags, or reset password">
+              <a href="{{ url_for('master_tenant_edit', tenant_id=shop.id) }}"
+                 class="nav-btn nav-btn-ghost"
+                 style="padding: 6px 10px; font-size: 0.8rem; color: var(--text-main); border-color: var(--border-color);"
+                 title="Edit store settings, limits, feature flags, or reset password">
                 ✏️ Edit
               </a>
 
               <!-- Toggle Status (Activate / Suspend) -->
-              <form method="POST" action="{{ url_for('master_toggle_tenant', tenant_id=shop.id) }}"
-                style="display: inline;">
+              <form method="POST" action="{{ url_for('master_toggle_tenant', tenant_id=shop.id) }}" style="display: inline;">
                 {% if shop.is_active %}
-                <button type="submit" class="nav-btn nav-btn-ghost"
-                  style="padding: 6px 10px; font-size: 0.8rem; color: var(--danger); border-color: rgba(239,68,68,0.3);"
-                  onclick="return confirm('Suspend {{ shop.store_name }}? Storefront will display offline screen.')"
-                  title="Suspend storefront access">
-                  ⏸️ Pause
-                </button>
+                  <button type="submit" class="nav-btn nav-btn-ghost"
+                          style="padding: 6px 10px; font-size: 0.8rem; color: var(--danger); border-color: rgba(239,68,68,0.3);"
+                          onclick="return confirm('Suspend {{ shop.store_name }}? Storefront will display offline screen.')"
+                          title="Suspend storefront access">
+                    ⏸️ Pause
+                  </button>
                 {% else %}
-                <button type="submit" class="nav-btn nav-btn-ghost"
-                  style="padding: 6px 10px; font-size: 0.8rem; color: var(--accent); border-color: rgba(16,185,129,0.3);"
-                  title="Activate storefront">
-                  ▶️ Activate
-                </button>
+                  <button type="submit" class="nav-btn nav-btn-ghost"
+                          style="padding: 6px 10px; font-size: 0.8rem; color: var(--accent); border-color: rgba(16,185,129,0.3);"
+                          title="Activate storefront">
+                    ▶️ Activate
+                  </button>
                 {% endif %}
               </form>
 
               <!-- Delete Tenant (safeguard default store) -->
               {% if shop.slug != 'default' %}
-              <form method="POST" action="{{ url_for('master_tenant_delete', tenant_id=shop.id) }}"
-                style="display: inline;"
-                onsubmit="return confirm('⚠️ DANGER: Permanently delete store {{ shop.store_name }} ({{ shop.slug }}) and its database? This action cannot be undone.')">
+              <form method="POST" action="{{ url_for('master_tenant_delete', tenant_id=shop.id) }}" style="display: inline;"
+                    onsubmit="return confirm('⚠️ DANGER: Permanently delete store {{ shop.store_name }} ({{ shop.slug }}) and its database? This action cannot be undone.')">
                 <button type="submit" class="nav-btn nav-btn-ghost"
-                  style="padding: 6px 8px; font-size: 0.8rem; color: var(--text-dim); border-color: transparent;"
-                  title="Delete this store database permanently">
+                        style="padding: 6px 8px; font-size: 0.8rem; color: var(--text-dim); border-color: transparent;"
+                        title="Delete this store database permanently">
                   🗑️
                 </button>
               </form>
@@ -436,57 +356,56 @@
   <div id="noMatchMessage" style="display: none; padding: 48px 24px; text-align: center;">
     <div style="font-size: 2.5rem; margin-bottom: 8px;">🔍</div>
     <div style="font-size: 1.1rem; font-weight: 700; color: #fff;">No Stores Match Filter</div>
-    <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">Try refining your search keyword or
-      clearing status/plan dropdowns.</div>
+    <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">Try refining your search keyword or clearing status/plan dropdowns.</div>
     <button onclick="resetFilters()" class="nav-btn nav-btn-ghost" style="margin-top: 16px;">Reset All Filters</button>
   </div>
 
 </div>
 
 <script>
-  function filterTenants() {
-    const query = (document.getElementById('tenantSearchInput').value || '').trim().toLowerCase();
-    const statusFilter = document.getElementById('statusFilter').value;
-    const planFilter = document.getElementById('planFilter').value;
-    const rows = document.querySelectorAll('.tenant-row');
-    let matchCount = 0;
+function filterTenants() {
+  const query = (document.getElementById('tenantSearchInput').value || '').trim().toLowerCase();
+  const statusFilter = document.getElementById('statusFilter').value;
+  const planFilter = document.getElementById('planFilter').value;
+  const rows = document.querySelectorAll('.tenant-row');
+  let matchCount = 0;
 
-    rows.forEach(row => {
-      const name = row.getAttribute('data-name') || '';
-      const slug = row.getAttribute('data-slug') || '';
-      const owner = row.getAttribute('data-owner') || '';
-      const email = row.getAttribute('data-email') || '';
-      const status = row.getAttribute('data-status') || '';
-      const plan = row.getAttribute('data-plan') || '';
+  rows.forEach(row => {
+    const name = row.getAttribute('data-name') || '';
+    const slug = row.getAttribute('data-slug') || '';
+    const owner = row.getAttribute('data-owner') || '';
+    const email = row.getAttribute('data-email') || '';
+    const status = row.getAttribute('data-status') || '';
+    const plan = row.getAttribute('data-plan') || '';
 
-      const matchesQuery = !query || name.includes(query) || slug.includes(query) || owner.includes(query) || email.includes(query);
-      const matchesStatus = statusFilter === 'all' || status === statusFilter;
-      const matchesPlan = planFilter === 'all' || plan === planFilter;
+    const matchesQuery = !query || name.includes(query) || slug.includes(query) || owner.includes(query) || email.includes(query);
+    const matchesStatus = statusFilter === 'all' || status === statusFilter;
+    const matchesPlan = planFilter === 'all' || plan === planFilter;
 
-      if (matchesQuery && matchesStatus && matchesPlan) {
-        row.style.display = '';
-        matchCount++;
-      } else {
-        row.style.display = 'none';
-      }
-    });
-
-    const countEl = document.getElementById('tenantMatchCount');
-    if (countEl) {
-      countEl.textContent = `Showing ${matchCount} of ${rows.length} stores`;
+    if (matchesQuery && matchesStatus && matchesPlan) {
+      row.style.display = '';
+      matchCount++;
+    } else {
+      row.style.display = 'none';
     }
+  });
 
-    const noMatch = document.getElementById('noMatchMessage');
-    if (noMatch) {
-      noMatch.style.display = matchCount === 0 ? 'block' : 'none';
-    }
+  const countEl = document.getElementById('tenantMatchCount');
+  if (countEl) {
+    countEl.textContent = `Showing ${matchCount} of ${rows.length} stores`;
   }
 
-  function resetFilters() {
-    document.getElementById('tenantSearchInput').value = '';
-    document.getElementById('statusFilter').value = 'all';
-    document.getElementById('planFilter').value = 'all';
-    filterTenants();
+  const noMatch = document.getElementById('noMatchMessage');
+  if (noMatch) {
+    noMatch.style.display = matchCount === 0 ? 'block' : 'none';
   }
+}
+
+function resetFilters() {
+  document.getElementById('tenantSearchInput').value = '';
+  document.getElementById('statusFilter').value = 'all';
+  document.getElementById('planFilter').value = 'all';
+  filterTenants();
+}
 </script>
 {% endblock %}

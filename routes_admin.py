@@ -647,23 +647,6 @@ def admin_settings():
                     delete_image(old_logo)
                 set_setting('shop_logo', new_logo)
 
-        # Hero Banner Upload & Removal (Cloudinary)
-        remove_banner = request.form.get('remove_hero_banner') == '1'
-        banner_file = request.files.get('hero_banner')
-
-        if remove_banner:
-            old_banner = get_setting('hero_banner', '')
-            if old_banner:
-                delete_image(old_banner)
-            set_setting('hero_banner', '')
-        elif banner_file and banner_file.filename:
-            new_banner = save_logo_image(banner_file)
-            if new_banner:
-                old_banner = get_setting('hero_banner', '')
-                if old_banner and old_banner != new_banner:
-                    delete_image(old_banner)
-                set_setting('hero_banner', new_banner)
-
         maintenance_mode = '1' if request.form.get('maintenance_mode') else '0'
         maintenance_msg  = request.form.get('maintenance_message', '').strip()
         set_setting('maintenance_mode', maintenance_mode)

@@ -16,9 +16,9 @@
     rel="stylesheet">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.1" />
-  {% if tenant_theme == 'cocoa' %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_cocoa.css') }}?v=1.1" />
-  {% elif tenant_theme == 'luxury' %}
+  {% if tenant_theme == 'cocoa' or (tenant and tenant.theme == 'cocoa') %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_cocoa.css') }}?v=1.0" />
+  {% elif tenant_theme == 'luxury' or (tenant and tenant.theme == 'luxury') %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_luxury.css') }}?v=1.0" />
   {% endif %}
   {% block head %}{% endblock %}
@@ -95,16 +95,13 @@
       <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
       <span></span> LUXURY COLLECTIONS <span></span> EXCLUSIVE DROPS <span></span> ONE OF A KIND FINDS
       <span></span>
-      {% elif is_cocoa %}
-      <span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span> FREE SHIPPING ON ALL ORDERS <span></span> <span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> GENUINE &amp; PREMIUM QUALITY <span></span>
-      <span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span> FREE SHIPPING ON ALL ORDERS <span></span> <span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> GENUINE &amp; PREMIUM QUALITY <span></span>
       {% else %}
-      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
-      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
-      <span>{{ flower }}</span>
-      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
-      <span>{{ flower }}</span> PREMIUM COLLECTIONS <span>{{ flower }}</span> LIMITED DROPS <span>{{ flower }}</span> ONE OF A KIND FINDS
-      <span>{{ flower }}</span>
+      <span>🌸</span> PREMIUM COLLECTIONS <span>🌸</span> LIMITED DROPS <span>🌸</span> ONE OF A KIND FINDS
+      <span>🌸</span> PREMIUM COLLECTIONS <span>🌸</span> LIMITED DROPS <span>🌸</span> ONE OF A KIND FINDS
+      <span>🌸</span>
+      <span>🌸</span> PREMIUM COLLECTIONS <span>🌸</span> LIMITED DROPS <span>🌸</span> ONE OF A KIND FINDS
+      <span>🌸</span> PREMIUM COLLECTIONS <span>🌸</span> LIMITED DROPS <span>🌸</span> ONE OF A KIND FINDS
+      <span>🌸</span>
       {% endif %}
     </div>
   </div>
@@ -119,7 +116,7 @@
           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
         </svg>
       </div>
-      <h2 id="maintenanceTitle">{% if is_luxury %}STORE NOTICE 💎{% else %}STORE NOTICE {{ flower }}{%
+      <h2 id="maintenanceTitle">{% if is_luxury %}STORE NOTICE 💎{% else %}STORE NOTICE 🌸{%
         endif %}</h2>
       <div class="maintenance-msg">
         {{ settings.get('maintenance_message', 'We are currently curating our exclusive stock. Kindly visit later!') |
@@ -142,15 +139,6 @@
   <!-- ===== HEADER / NAVBAR ===== -->
   <header class="site-header">
     <div class="header-inner">
-      {% if is_cocoa %}
-      <button class="cocoa-nav-btn" id="cocoaMenuBtn" aria-label="Open menu">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
-      {% endif %}
       <a href="{{ url_for('index') }}" class="site-logo">
         <div class="logo-icon">
           {% if settings.get('shop_logo') %}
@@ -165,12 +153,13 @@
         </div>
         <div class="logo-text">
           <span class="logo-name">{{ settings.get('shop_name','My Shop') }}</span>
-          <span class="logo-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY EDITION{% else %}{{ flower }} CURATED FASHION{% endif %}</span>
+          <span class="logo-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY EDITION{% else %}🌸 CURATED FASHION{% endif %}</span>
         </div>
       </a>
 
       <div class="header-search">
         <form method="GET" action="{{ url_for('index') }}" role="search">
+        <input type="hidden" name="shop" value="{{ g.tenant_slug }}">
           <div class="search-wrap">
             <span class="search-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -191,7 +180,7 @@
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
-          <span class="cart-btn-text">{% if is_luxury %}💎 Bag{% else %}{{ flower }} Bag{% endif %}</span>
+          <span class="cart-btn-text">{% if is_luxury %}💎 Bag{% else %}🌸 Bag{% endif %}</span>
           <span class="cart-badge" id="cartBadge">0</span>
         </button>
       </div>
@@ -201,6 +190,7 @@
   <!-- ===== MOBILE SEARCH BAR (below header, phone only) ===== -->
   <div class="mobile-search-bar" id="mobileSearchBar">
     <form method="GET" action="{{ url_for('index') }}" role="search">
+        <input type="hidden" name="shop" value="{{ g.tenant_slug }}">
       <div class="mobile-search-wrap">
         <span class="mobile-search-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -208,19 +198,10 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </span>
-        <input type="search" name="q" id="mobileSearchInput"
-          placeholder="{% if is_cocoa %}Search {{ settings.get('shop_name', brand) }} collection...{% else %}Search collection...{% endif %}"
+        <input type="search" name="q" id="mobileSearchInput" placeholder="Search collection..."
           value="{{ request.args.get('q','') }}" autocomplete="off" />
         {% if request.args.get('q') %}
         <a href="{{ url_for('index') }}" class="mobile-search-clear" aria-label="Clear search">✕</a>
-        {% endif %}
-        {% if is_cocoa %}
-        <button class="mobile-search-filter-btn" type="button" aria-label="Filter"
-          onclick="document.getElementById('priceFilterToggle') && document.getElementById('priceFilterToggle').click(); document.getElementById('priceFilterWrap') && document.getElementById('priceFilterWrap').scrollIntoView({behavior:'smooth'});">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-          </svg>
-        </button>
         {% endif %}
       </div>
     </form>
@@ -236,7 +217,7 @@
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <path d="M16 10a4 4 0 0 1-8 0"></path>
         </svg>
-        <h2>{% if is_luxury %}SHOPPING BAG 💎{% else %}YOUR BAG {{ flower }}{% endif %}</h2>
+        <h2>{% if is_luxury %}SHOPPING BAG 💎{% else %}YOUR BAG 🌸{% endif %}</h2>
       </div>
       <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close cart">✕</button>
     </div>
@@ -252,7 +233,7 @@
         </div>
         <h3>Your Bag is Empty</h3>
         <p class="empty-cart-desc">{% if is_luxury %}Discover our exclusive curated luxury creations.{%
-          else %}Discover our handpicked creations {{ flower }}.{% endif %}</p>
+          else %}Discover our handpicked creations 🌸.{% endif %}</p>
       </div>
       <div id="cartItemsContainer"></div>
     </div>
@@ -330,19 +311,20 @@
           {% endif %}
         </div>
         <span class="footer-logo-name">{{ settings.get('shop_name','My Shop') }}</span>
-        <span class="footer-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY FINE SELECTIONS{% else %}{{ flower }} CURATED FASHION · FINE SELECTIONS{% endif %}</span>
+        <span class="footer-tagline">{% if settings.get('shop_tagline') %}{{ settings.get('shop_tagline') }}{% elif is_luxury %}💎 ROYAL ATELIER · LUXURY FINE SELECTIONS{% else %}🌸 CURATED FASHION · FINE SELECTIONS{% endif %}</span>
       </div>
       <div class="footer-divider"></div>
       <div class="footer-bottom">
         <p class="footer-copy">
           © 2026 {{ settings.get('shop_name','My Shop') }}. All Rights Reserved. {% if is_luxury
-          %}Crafted with Royal Elegance 💎{% else %}Crafted with Elegance {{ flower }}{% endif %}.
+          %}Crafted with Royal Elegance 💎{% else %}Crafted with Elegance 🌸{% endif %}.
         </p>
       </div>
     </div>
   </footer>
 
-  <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+  <script>window.SHOP_SLUG = {{ (g.tenant_slug or 'default')|tojson }};</script>
+  <script src="{{ url_for('static', filename='js/cart.js') }}?v=shopiso2"></script>
 
   <script>
     // Flash auto-dismiss
@@ -356,7 +338,7 @@
   <div id="founderAdBanner" class="founder-ad-banner" style="display: none;">
     <button class="founder-ad-close" id="closeFounderAd" aria-label="Close concierge banner">✕</button>
     <div class="founder-ad-content">
-      <div class="founder-ad-badge">{% if is_luxury %}💎 CONCIERGE{% else %}{{ flower }} CONCIERGE{% endif %}
+      <div class="founder-ad-badge">{% if is_luxury %}💎 CONCIERGE{% else %}🌸 CONCIERGE{% endif %}
       </div>
       <div class="founder-ad-text">
         <p class="founder-ad-title">Desire a custom storefront?</p>

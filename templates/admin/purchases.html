@@ -555,7 +555,7 @@ function showSalesHistory(productId, productName, productImage, category, price)
   setTimeout(() => document.getElementById('salesModalCloseBtn').focus(), 100);
 
   // Fetch data
-  fetch(`/api/admin/products/${productId}/sales`)
+  fetch(`/api/admin/products/${productId}/sales?shop={{ g.tenant_slug|urlencode }}`)
     .then(response => {
       if (!response.ok) throw new Error('Network response was not ok');
       return response.json();

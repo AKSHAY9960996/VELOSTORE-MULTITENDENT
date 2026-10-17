@@ -19,8 +19,7 @@ from db import (Database, get_connection, is_turso, init_master_db,
                 get_master_db_connection, get_tenant_by_identifier,
                 get_tenant_db_connection, provision_new_tenant,
                 get_tenant_feature_flags, update_tenant_admin_password,
-                delete_tenant, DEFAULT_PLAN_CONFIG, clear_tenant_cache,
-                _tenant_get)
+                delete_tenant, DEFAULT_PLAN_CONFIG, clear_tenant_cache)
 import cloudinary_helper
 
 # ---------------------------------------------------------------------------
@@ -92,15 +91,6 @@ def _render_landing():
 # ---------------------------------------------------------------------------
 # Friendly error pages (rendered without touching the database, so they work even if it is down)
 # ---------------------------------------------------------------------------
-def _season_label():
-    """Auto hero title for the Cocoa theme, e.g. 'FESTIVE 2026' (India-friendly seasons)."""
-    now = datetime.utcnow()
-    m = now.month
-    season = ('WINTER' if m in (12, 1, 2) else 'SUMMER' if m in (3, 4, 5)
-              else 'MONSOON' if m in (6, 7, 8, 9) else 'FESTIVE')
-    return f"{season} {now.year}"
-
-
 def _error_page(code, title, message, error_id=None):
     home_url = '/'
     try:
@@ -135,13 +125,26 @@ def handle_server_error(e):
 # ---------------------------------------------------------------------------
 # Multi-Tenant Middleware & Database Connection
 # ---------------------------------------------------------------------------
+# Endpoints that must NOT get a ?shop= parameter appended
+_NO_SHOP_PARAM = {'static', 'welcome', 'health_check', 'diag', 'storefront_shop', 'admin_sw'}
+
+
 @app.url_defaults
-def _add_shop_to_home_links(endpoint, values):
-    """Links to the storefront home keep the current store, since '/' alone is the marketing page."""
-    if endpoint == 'index' and 'shop' not in values:
-        slug = getattr(g, 'tenant_slug', None)
-        if slug and not getattr(g, 'is_master', False) and slug != 'master':
-            values['shop'] = slug
+def _add_shop_to_links(endpoint, values):
+    """
+    Every link, form action and redirect built with url_for() names its store explicitly
+    (?shop=<slug>). Stores share one web address, and product/order ids overlap between stores,
+    so a link without a store name could open another store's data (it used to fall back to
+    whichever store the browser visited last). Stores opened through their own custom domain
+    do not need the parameter.
+    """
+    if endpoint in _NO_SHOP_PARAM or endpoint.startswith('master_') or 'shop' in values:
+        return
+    if getattr(g, 'is_master', False) or getattr(g, 'tenant_via_host', False):
+        return
+    slug = getattr(g, 'tenant_slug', None)
+    if slug and slug != 'master':
+        values['shop'] = slug
 
 @app.before_request
 def resolve_tenant_context():
@@ -169,6 +172,7 @@ def resolve_tenant_context():
         return
 
     g.is_master = False
+    g.tenant_via_host = False
     tenant_slug = None
 
     # Option 1: Header
@@ -193,6 +197,7 @@ def resolve_tenant_context():
             t_info = get_tenant_by_identifier(host)
             if t_info:
                 tenant_slug = t_info['slug']
+                g.tenant_via_host = True
 
     # Marketing page at '/': shown whenever no store is explicitly named in the request
     # (no /s/slug, ?shop=, header or custom domain). The remembered session store is ignored
@@ -296,10 +301,6 @@ def get_db():
             g.cleaning_reservations = True
             try:
                 check_expired_reservations(g.db)
-            except Exception as _resv_err:
-                # Silently ignore if schema hasn't been initialised yet
-                # (e.g. brand-new tenant DB that hasn't run init_db yet)
-                print(f"[Reservations] skipped cleanup ({type(_resv_err).__name__}: {_resv_err})", flush=True)
             finally:
                 g.cleaning_reservations = False
     return g.db
@@ -372,7 +373,6 @@ def init_db():
         ('maintenance_mode', '0'),  # '0' = normal, '1' = storefront offline (maintenance mode)
         ('maintenance_message', 'We are currently updating our stock. Kindly visit later!'),
         ('shop_logo', ''),
-        ('hero_banner', ''),
     ]
     for key, value in defaults:
         db.execute(
@@ -416,18 +416,13 @@ def get_all_settings():
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def _tenant_cloud_folder(kind):
-    """Per-store Cloudinary folder, e.g. velostore/yumei/products, so shops never share media."""
-    slug = getattr(g, 'tenant_slug', None) or 'default'
-    return f"velostore/{slug}/{kind}"
-
 def save_image(file):
     """Upload image to Cloudinary. Local static/uploads/ fallback is development-only."""
     if not file or not allowed_file(file.filename):
         return None
     url = None
     try:
-        url = cloudinary_helper.upload_image(file, folder=_tenant_cloud_folder("products"))
+        url = cloudinary_helper.upload_image(file, folder="products")
     except Exception as e:
         print(f"[Cloudinary] upload exception: {e}")
     if url:
@@ -454,7 +449,7 @@ def save_logo_image(file):
         return None
     url = None
     try:
-        url = cloudinary_helper.upload_logo(file, folder=_tenant_cloud_folder("branding"))
+        url = cloudinary_helper.upload_logo(file, folder="branding")
     except Exception as e:
         print(f"[Cloudinary] logo upload exception: {e}")
     if url:
@@ -571,7 +566,12 @@ def inject_settings():
     settings = get_all_settings()
     tenant = getattr(g, 'tenant', None)
     features = getattr(g, 'tenant_features', {}) or (get_tenant_feature_flags(tenant) if tenant else {})
-    tenant_theme = (_tenant_get(tenant, 'theme') or 'standard') if tenant else 'standard'
+    tenant_theme = 'standard'
+    if tenant:
+        try:
+            tenant_theme = tenant['theme'] if 'theme' in tenant.keys() else 'standard'
+        except Exception:
+            tenant_theme = 'standard'
     brand = (settings.get('shop_name') or '').strip()
     if not brand and tenant:
         try:
@@ -580,9 +580,7 @@ def inject_settings():
             brand = ''
     brand = brand or 'My Shop'
     ctx = dict(settings=settings, now_year=datetime.utcnow().year, tenant=tenant, tenant_features=features, tenant_theme=tenant_theme,
-                 is_luxury=(tenant_theme == 'luxury'), is_cocoa=(tenant_theme == 'cocoa'),
-                 flower=('' if tenant_theme == 'cocoa' else '🌸'),
-                 season_label=_season_label(), brand=brand)
+                 is_luxury=(tenant_theme in ('luxury', 'cocoa')), brand=brand)
 
     if request.path.startswith('/admin'):
         ctx['storage_stats'] = get_storage_stats()

@@ -1,57 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}{{ settings.get('shop_name','My Shop') }} — {% if is_luxury %}💎 Luxury Collection{% else %}{{ flower }} Online Fashion Store{% endif %}{% endblock %}
+{% block title %}{{ settings.get('shop_name','My Shop') }} — {% if is_luxury %}💎 Luxury Collection{% else %}🌸 Online Fashion Store{% endif %}{% endblock %}
 {% block description %}Discover handpicked luxury goods at {{ settings.get('shop_name','My Shop') }}. Authentic premium quality.{% endblock %}
 
 {% block content %}
 
 <!-- ===== HERO SECTION ===== -->
-{% set hero_banner_url = img_url(settings.get('hero_banner','')) %}
-<section class="hero-section{% if is_cocoa %} hero-has-banner{% endif %}"
-  {% if is_cocoa and hero_banner_url %}style="--hero-banner-url: url('{{ hero_banner_url }}');"{% endif %}>
+<section class="hero-section">
   <div class="hero-overlay-glow"></div>
-  {% if is_cocoa %}
-    {% if hero_banner_url %}
-      <div class="hero-banner-img" aria-hidden="true"></div>
-    {% else %}
-      <div class="hero-banner-img hero-banner-default" aria-hidden="true"></div>
-    {% endif %}
-  {% endif %}
   <div class="hero-content">
-    <div class="hero-badge">{% if is_cocoa %}{{ brand|upper }} COLLECTION{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}{{ flower }} {{ brand|upper }} · NEW COLLECTION {{ now_year }} {{ flower }}{% endif %}</div>
-    <h1 class="hero-title">{% if is_cocoa %}{{ settings.get('shop_name', brand) }}{% else %}{{ settings.get('shop_name','My Shop') }}{% endif %}</h1>
-    <p class="hero-subtitle-small">{% if is_cocoa %}ONE OF A KIND FINDS{% endif %}</p>
+    <div class="hero-badge">{% if tenant_theme == 'cocoa' %}🤎 HERITAGE COCOA LUXURY COLLECTION 2026 🤎{% elif tenant_theme == 'luxury' %}💎 ROYAL SAPPHIRE LUXURY COLLECTION 2026 💎{% else %}🌸 {{ brand|upper }} · NEW COLLECTION {{ now_year }} 🌸{% endif %}</div>
+    <h1 class="hero-title">{{ settings.get('shop_name','My Shop') }}</h1>
     <p class="hero-subtitle">
       {% if settings.get('shop_slogan') %}
       {{ settings.get('shop_slogan') }}
       {% elif is_luxury %}
       Where royal elegance meets timeless craftsmanship. Curated luxury pieces tailored for the discerning lifestyle.
-      {% elif is_cocoa %}
-      Quality products for your everyday life.
       {% else %}
       Where grace meets modern haute couture. Handcrafted silhouettes, delicate rose hues, and timeless elegance —
       curated for the discerning wardrobe.
       {% endif %}
     </p>
-    {% if is_cocoa %}
-    <a href="#collection" class="hero-cta">SHOP NOW
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    <div class="hero-slider-dots">
-      <span class="hero-dot active"></span>
-      <span class="hero-dot"></span>
-      <span class="hero-dot"></span>
-    </div>
-    {% endif %}
     <div class="hero-divider">
       <span class="divider-line"></span>
-      <span class="divider-diamond">{% if is_luxury %}💎{% else %}{{ flower }}{% endif %}</span>
+      <span class="divider-diamond">{% if is_luxury %}💎{% else %}🌸{% endif %}</span>
       <span class="divider-line"></span>
     </div>
   </div>
 </section>
 
 <!-- ===== SHOP SECTION ===== -->
-<div class="shop-section" id="collection">
+<div class="shop-section">
 
   <!-- Storefront Announcement Notice -->
   {% if settings.get('store_notice') %}
@@ -70,9 +49,9 @@
   <!-- Category Filter Strip -->
   {% if categories %}
   <div class="filter-strip" role="navigation" aria-label="Product categories">
-    {% if not is_cocoa %}<span class="filter-strip-label">{% if is_luxury %}💎 COLLECTION:{% else %}{{ flower }} COLLECTION:{% endif %}</span>{% endif %}
+    <span class="filter-strip-label">{% if is_luxury %}💎 COLLECTION:{% else %}🌸 COLLECTION:{% endif %}</span>
     <a href="{{ url_for('index') }}" class="category-tag {% if not active_category %}active{% endif %}">
-      {% if is_cocoa %}ALL{% else %}All Selections{% endif %}
+      All Selections
     </a>
     {% for cat in categories %}
     <a href="{{ url_for('index', category=cat, q=search) }}"
@@ -104,6 +83,7 @@
 
     <div class="price-filter-panel" id="priceFilterPanel" style="display:none;">
       <form method="GET" action="{{ url_for('index') }}" id="priceFilterForm">
+        <input type="hidden" name="shop" value="{{ g.tenant_slug }}">
         {% if search %}<input type="hidden" name="q" value="{{ search }}">{% endif %}
         {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
         <!-- hidden field updated by JS -->
@@ -147,20 +127,14 @@
         Results for "{{ search }}"
         {% elif active_category %}
         {{ active_category }}
-        {% elif is_cocoa %}
-        FEATURED PRODUCTS
         {% else %}
         {% if is_luxury %}Featured Luxury Pieces{% else %}Featured Pieces{% endif %}
         {% endif %}
       </h2>
       <div class="section-count">
-        {% if is_cocoa %}
-        {{ products|length }} PRODUCTS AVAILABLE{% if max_price %} · Under {{ settings.get('currency_symbol','₹') }}{{ max_price }}{% endif %}
-        {% else %}
-        {{ products|length }} {{ 'piece' if products|length == 1 else 'pieces' }} available {% if is_luxury %}· 💎{% elif flower %}· {{ flower }}{% endif %}
+        {{ products|length }} {{ 'piece' if products|length == 1 else 'pieces' }} available {% if is_luxury %}· 💎{% else %}· 🌸{% endif %}
         {% if max_price %}
         · <span class="price-filter-active-tag">Under {{ settings.get('currency_symbol','₹') }}{{ max_price }}</span>
-        {% endif %}
         {% endif %}
       </div>
     </div>
@@ -177,13 +151,9 @@
         <!-- Stock Badges -->
         {% if product.stock == 0 %}
         <span class="product-badge badge-oos">EXHAUSTED</span>
-        {% elif product.stock <= 2 %}<span class="product-badge badge-low">ONLY {{ product.stock }} LEFT</span>{% endif %}
-        {% if is_cocoa %}
-        <button class="wishlist-btn" aria-label="Save to wishlist" title="Save to wishlist"
-          onclick="this.classList.toggle('wishlisted')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </button>
-        {% endif %}
+        {% elif product.stock <= 2 %} <span class="product-badge badge-low">LIMITED — ONLY {{ product.stock }}
+          LEFT</span>
+          {% endif %}
 
           {% if product.image %}
           <img src="{{ img_url(product.image) }}" alt="{{ product.name }}"
@@ -201,7 +171,7 @@
               <path
                 d="M12 2c-.8 2.2-2.8 3.5-5 3.5 1.5 1.8 1.5 4.5 0 6.3 2.2 0 4.2 1.3 5 3.5.8-2.2 2.8-3.5 5-3.5-1.5-1.8-1.5-4.5 0-6.3-2.2 0-4.2-1.3-5-3.5zm0 5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
             </svg>
-            <p>{% if is_luxury %}LUXURY PIECE 💎{% else %}PREMIUM PIECE {{ flower }}{% endif %}</p>
+            <p>{% if is_luxury %}LUXURY PIECE 💎{% else %}PREMIUM PIECE 🌸{% endif %}</p>
           </div>
           {% endif %}
 
@@ -221,10 +191,10 @@
       <div class="product-info">
         {% if product.category or ('size' in product.keys() and product.size) %}
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">
-          {% if product.category %}<div class="product-category" style="margin-bottom:0">{% if is_cocoa %}{{ product.category }}{% elif is_luxury %}💎 {{ product.category }}{% else %}{{ flower }} {{ product.category }}{% endif %}</div>
+          {% if product.category %}<div class="product-category" style="margin-bottom:0">{% if is_luxury %}💎{% else %}🌸{% endif %} {{ product.category }}</div>
           {% else %}<div></div>{% endif %}
           {% if 'size' in product.keys() and product.size %}
-          <span class="size-tag"
+          <span
             style="font-size:0.7rem;color:var(--clr-text-muted);background:rgba(255,255,255,0.06);padding:1px 6px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);white-space:nowrap;">
             {{ product.size }}
           </span>
@@ -237,18 +207,12 @@
           <span class="product-price">
             {{ settings.get('currency_symbol','₹') }}{{ "%.2f"|format(product.price) }}
           </span>
-          <span class="delivery-charge-tag">+ EXPRESS SHIPPING</span>
+          <span class="delivery-charge-tag">+ Express Shipping</span>
         </div>
 
-        {% if is_cocoa and product.stock > 0 %}
-        <div class="cocoa-shop-avail">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          Only {{ product.stock }} available in {{ settings.get('shop_name', brand) }}
-        </div>
-        {% endif %}
         {% if product.stock > 0 %}
         <div class="product-stock {% if product.stock <= 2 %}low{% endif %}">
-          {% if product.stock <= 2 %} {% if is_luxury %}💎 Only {{ product.stock }} available{% else %}{{ flower }} Only {{ product.stock }} left{% endif %} {% else %} ✓ In Stock {% endif %} </div>
+          {% if product.stock <= 2 %} {% if is_luxury %}💎 Only {{ product.stock }} available{% else %}🌸 Only {{ product.stock }} left{% endif %} {% else %} ✓ In Stock {% endif %} </div>
             {% else %}
             <div class="product-stock oos">✕ Exhausted / Out of Stock</div>
             {% endif %}

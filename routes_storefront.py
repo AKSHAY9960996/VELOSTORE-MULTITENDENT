@@ -3,7 +3,7 @@
 import os
 from datetime import datetime, timedelta
 from db import get_master_db_connection, get_tenant_by_identifier
-from flask import flash, jsonify, redirect, render_template, request, session, url_for
+from flask import flash, g, jsonify, redirect, render_template, request, session, url_for
 from core import _ensure_master_db_ready, _render_landing, app, get_db, get_setting, query_db
 
 @app.route('/health')
@@ -263,6 +263,7 @@ def checkout():
 
         # Store order info in session for the order success page
         session['last_order'] = {
+            'shop': g.tenant_slug,   # an order confirmation only ever shows inside the shop it was placed in
             'customer_name': name,
             'order_id': order_id,
             'currency': currency,
@@ -280,7 +281,7 @@ def checkout():
 @app.route('/order-success')
 def order_success():
     order_data = session.get('last_order', None)
-    if not order_data:
+    if not order_data or order_data.get('shop') != g.tenant_slug:
         return redirect(url_for('index'))
     return render_template('order_success.html', order=order_data)
 

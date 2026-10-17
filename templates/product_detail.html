@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ product.name }} — {{ settings.get('shop_name','My Shop') }} {% if is_luxury %}· 💎{% elif flower %}· {{ flower }} 桜{% endif %}{% endblock %}
+{% block title %}{{ product.name }} — {{ settings.get('shop_name','My Shop') }} {% if is_luxury %}· 💎{% else %}· 🌸 桜{% endif %}{% endblock %}
 {% block description %}{{ product.description or product.name }} — Discover fine craftsmanship
 at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
 
@@ -38,7 +38,7 @@ at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
             <path
               d="M12 2c-.8 2.2-2.8 3.5-5 3.5 1.5 1.8 1.5 4.5 0 6.3 2.2 0 4.2 1.3 5 3.5.8-2.2 2.8-3.5 5-3.5-1.5-1.8-1.5-4.5 0-6.3-2.2 0-4.2-1.3-5-3.5zm0 5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
           </svg>
-          <span>{% if is_luxury %}💎 LUXURY EDITION 💎{% else %}{{ flower }} SIGNATURE EDITION {{ flower }}{% endif %}</span>
+          <span>{% if is_luxury %}💎 LUXURY EDITION 💎{% else %}🌸 SIGNATURE EDITION 🌸{% endif %}</span>
         </div>
         {% endif %}
       </div>
@@ -65,7 +65,7 @@ at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
     <!-- Info & Actions -->
     <div class="product-detail-info">
       {% if product.category %}
-      <div class="product-category">{% if is_luxury %}💎{% else %}{{ flower }}{% endif %} {{ product.category }}</div>
+      <div class="product-category">{% if is_luxury %}💎{% else %}🌸{% endif %} {{ product.category }}</div>
       {% endif %}
 
       <h1 class="detail-title">{{ product.name }}</h1>
@@ -74,7 +74,7 @@ at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
         <span class="product-detail-price">
           {{ settings.get('currency_symbol','₹') }}{{ "%.2f"|format(product.price) }}
         </span>
-        <span class="product-detail-delivery">+ Express Shipping {% if is_luxury %}· Luxury Packaging 💎{% else %}& Gift Packaging {{ flower }}{% endif %}</span>
+        <span class="product-detail-delivery">+ Express Shipping {% if is_luxury %}· Luxury Packaging 💎{% else %}& Gift Packaging 🌸{% endif %}</span>
       </div>
 
       <!-- Stock Indicator -->
@@ -222,7 +222,7 @@ at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
-          <span>Return to Store {% if is_luxury %}💎{% else %}{{ flower }}{% endif %}</span>
+          <span>Return to Store {% if is_luxury %}💎{% else %}🌸{% endif %}</span>
         </a>
       </div>
     </div>
@@ -233,7 +233,7 @@ at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
   <div style="margin-top:64px">
     <div class="section-header">
       <div>
-        <div class="section-title">{% if is_luxury %}Complementary Pieces 💎{% else %}Complementary Pieces {{ flower }}{% endif %}</div>
+        <div class="section-title">{% if is_luxury %}Complementary Pieces 💎{% else %}Complementary Pieces 🌸{% endif %}</div>
         <div class="section-subtitle">More curated selections from {{ product.category }}</div>
       </div>
     </div>
@@ -261,7 +261,7 @@ at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
           {% endif %}
         </a>
         <div class="product-info">
-          {% if item.category %}<div class="product-category">{% if is_luxury %}💎{% else %}{{ flower }}{% endif %} {{ item.category }}</div>{% endif %}
+          {% if item.category %}<div class="product-category">{% if is_luxury %}💎{% else %}🌸{% endif %} {{ item.category }}</div>{% endif %}
           <a href="{{ url_for('product_detail', product_id=item.id) }}" class="product-name">{{ item.name }}</a>
           <div class="product-price-row">
             <span class="product-price">{{ settings.get('currency_symbol','₹') }}{{ "%.2f"|format(item.price) }}</span>

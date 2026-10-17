@@ -6,7 +6,16 @@
 // ============================================================
 // Cart State
 // ============================================================
-const CART_KEY = 'shopCart';
+// Each shop has its own cart. (Stores share one web address, so a single shared key would mix
+// products from different shops.)
+const CURRENT_SHOP = window.SHOP_SLUG || 'default';
+const CART_KEY = 'shopCart:' + CURRENT_SHOP;
+try { localStorage.removeItem('shopCart'); } catch (e) {}   // old shared cart, no longer used
+
+// Adds ?shop=<slug> so the server always knows which store a request belongs to
+function shopUrl(path) {
+  return path + (path.indexOf('?') === -1 ? '?' : '&') + 'shop=' + encodeURIComponent(CURRENT_SHOP);
+}
 
 // Product images are either full Cloudinary URLs or (legacy) local filenames
 function imgSrc(value) {
@@ -34,7 +43,7 @@ async function addToCart(productId, quantity = 1) {
   // Fetch fresh product info to verify stock
   let product;
   try {
-    const res = await fetch(`/api/product/${productId}`);
+    const res = await fetch(shopUrl(`/api/product/${productId}`));
     if (!res.ok) { showToast('Piece not found in collection.', 'error'); return; }
     product = await res.json();
   } catch {
@@ -231,7 +240,7 @@ function renderCheckoutSummary() {
   const currency = document.body.dataset.currency || '₹';
 
   if (items.length === 0) {
-    window.location.href = '/';
+    window.location.href = shopUrl('/');
     return;
   }
 
@@ -362,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData(checkoutForm);
 
       try {
-        const response = await fetch('/checkout', {
+        const response = await fetch(shopUrl('/checkout'), {
           method: 'POST',
           body: formData
         });
