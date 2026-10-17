@@ -42,13 +42,17 @@ def _is_configured() -> bool:
 def upload_image(file, folder: str = "products", max_width: int = 800,
                  max_height: int = 800) -> str | None:
     """
-    Upload an image file to Cloudinary.
+    Upload an image file to Cloudinary at original quality.
+
+    Transformations (quality, format, resize) are intentionally NOT applied
+    at upload time — they are applied at delivery time via get_optimized_url()
+    so the stored master copy retains full fidelity.
 
     Args:
         file: A file-like object (from request.files).
         folder: Cloudinary folder path (e.g. 'products' or 'branding').
-        max_width: Maximum image width for transformation.
-        max_height: Maximum image height for transformation.
+        max_width: Unused; kept for backwards-compatible call signatures.
+        max_height: Unused; kept for backwards-compatible call signatures.
 
     Returns:
         The secure URL string, or None on failure.
@@ -64,17 +68,12 @@ def upload_image(file, folder: str = "products", max_width: int = 800,
         return None
 
     try:
+        # Store the original at full quality; let delivery-time transforms handle
+        # resizing and compression so clarity is never permanently reduced.
         result = cloudinary.uploader.upload(
             file,
             folder=folder,
             resource_type="image",
-            transformation=[{
-                "width": max_width,
-                "height": max_height,
-                "crop": "limit",
-                "quality": "auto:good",
-                "fetch_format": "auto"
-            }],
             overwrite=False,
             unique_filename=True,
         )
@@ -85,7 +84,12 @@ def upload_image(file, folder: str = "products", max_width: int = 800,
 
 
 def upload_logo(file, folder: str = "branding") -> str | None:
-    """Upload a shop logo with transparency preservation."""
+    """
+    Upload a shop logo with transparency preservation at original quality.
+
+    Transformations are applied at delivery time (not upload time) to
+    preserve full image fidelity in the stored master copy.
+    """
     if not _is_configured():
         return None
 
@@ -93,16 +97,12 @@ def upload_logo(file, folder: str = "branding") -> str | None:
         return None
 
     try:
+        # Store original; delivery-time transforms (via get_optimized_url) handle
+        # quality/format. PNG transparency is preserved in the master copy.
         result = cloudinary.uploader.upload(
             file,
             folder=folder,
             resource_type="image",
-            transformation=[{
-                "width": 400,
-                "height": 400,
-                "crop": "limit",
-                "quality": "auto:good",
-            }],
             overwrite=False,
             unique_filename=True,
         )
@@ -150,15 +150,36 @@ def delete_image(url: str) -> bool:
 # ---------------------------------------------------------------------------
 # Optimised delivery URL
 # ---------------------------------------------------------------------------
-def get_optimized_url(url: str, width: int = None, height: int = None) -> str:
+def get_optimized_url(url: str, width: int = None, height: int = None,
+                      quality: str = "auto:best") -> str:
     """
-    Return a Cloudinary URL with auto-format and auto-quality transformations.
-    This significantly reduces bandwidth usage.
+    Return a Cloudinary delivery URL with format/quality/resize transformations.
+
+    Because we now store originals at full quality, this is the ONLY place
+    where compression and resizing happen — ensuring on-screen images are
+    crisp while bandwidth is still managed efficiently.
+
+    Args:
+        url: The Cloudinary secure_url from the database.
+        width: Optional display width to resize to (e.g. 800).
+        height: Optional display height to resize to (e.g. 800).
+        quality: Cloudinary quality string. Defaults to 'auto:best' for
+                 maximum sharpness. Use 'auto:good' for lighter pages.
     """
     if not url or 'cloudinary' not in url:
         return url or ''
 
-    # Insert f_auto,q_auto transformation into existing URL
-    if '/upload/' in url:
-        return url.replace('/upload/', '/upload/f_auto,q_auto/')
-    return url
+    if '/upload/' not in url:
+        return url
+
+    # Build transformation string
+    transforms = [f"f_auto", f"q_{quality}"]
+    if width and height:
+        transforms.append(f"w_{width},h_{height},c_limit")
+    elif width:
+        transforms.append(f"w_{width},c_limit")
+    elif height:
+        transforms.append(f"h_{height},c_limit")
+
+    transform_str = ",".join(transforms)
+    return url.replace('/upload/', f'/upload/{transform_str}/')
