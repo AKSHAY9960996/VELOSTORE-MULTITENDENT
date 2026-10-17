@@ -27,6 +27,7 @@
   <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-premium);">
     
     <form method="POST" action="{% if tenant %}{{ url_for('master_tenant_edit', tenant_id=tenant.id) }}{% else %}{{ url_for('master_tenant_new') }}{% endif %}">
+    {{ csrf_field() }}
       
       <!-- Section 1: Store Identity -->
       <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 24px; margin-bottom: 24px;">
@@ -38,7 +39,7 @@
           <div>
             <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Store Display Name *</label>
             <input type="text" id="store_name" name="store_name" required placeholder="e.g. Trendy Boutique" value="{{ tenant.store_name if tenant else '' }}"
-                   oninput="{% if not tenant %}generateSlug(this.value){% endif %}"
+                   {% if not tenant %}data-on-input="generateSlug" data-args='["$value"]'{% endif %}
                    style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
           </div>
 
@@ -95,7 +96,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
           <div>
             <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Subscription Plan</label>
-            <select id="planSelector" name="plan" onchange="applyPlanDefaults(this.value)"
+            <select id="planSelector" name="plan" data-on-change="applyPlanDefaults" data-args='["$value"]'
                     style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: #12182b; border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;">
               <option value="free" {% if tenant and tenant.plan == 'free' %}selected{% endif %}>Free Tier (Starter - 25 items)</option>
               <option value="basic" {% if tenant and tenant.plan == 'basic' %}selected{% endif %}>Basic Plan (Pro - 100 items)</option>
@@ -127,7 +128,7 @@
           
           <!-- Theme 1: Standard Sakura Blossom -->
           <label style="position: relative; display: block; background: rgba(255,255,255,0.02); border: 2px solid {% if cur_theme == 'standard' %}var(--primary){% else %}var(--border-color){% endif %}; border-radius: var(--radius-md); padding: 18px; cursor: pointer; transition: all 0.2s ease;" class="theme-card">
-            <input type="radio" name="theme" value="standard" {% if cur_theme == 'standard' %}checked{% endif %} style="position: absolute; top: 16px; right: 16px; accent-color: var(--primary);" onchange="updateThemeSelection()" />
+            <input type="radio" name="theme" value="standard" {% if cur_theme == 'standard' %}checked{% endif %} style="position: absolute; top: 16px; right: 16px; accent-color: var(--primary);" data-on-change="updateThemeSelection" />
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
               <span style="font-size: 1.5rem;">🌸</span>
               <div>
@@ -143,7 +144,7 @@
 
           <!-- Theme 2: Pure White & Luxury Royal Sapphire Blue -->
           <label style="position: relative; display: block; background: rgba(255,255,255,0.02); border: 2px solid {% if cur_theme == 'luxury' %}#2563eb{% else %}var(--border-color){% endif %}; border-radius: var(--radius-md); padding: 18px; cursor: pointer; transition: all 0.2s ease;" class="theme-card">
-            <input type="radio" name="theme" value="luxury" {% if cur_theme == 'luxury' %}checked{% endif %} style="position: absolute; top: 16px; right: 16px; accent-color: #2563eb;" onchange="updateThemeSelection()" />
+            <input type="radio" name="theme" value="luxury" {% if cur_theme == 'luxury' %}checked{% endif %} style="position: absolute; top: 16px; right: 16px; accent-color: #2563eb;" data-on-change="updateThemeSelection" />
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
               <span style="font-size: 1.5rem;">💎</span>
               <div>
@@ -159,7 +160,7 @@
 
           <!-- Theme 3: Heritage Cocoa Brown -->
           <label style="position: relative; display: block; background: rgba(255,255,255,0.02); border: 2px solid {% if cur_theme == 'cocoa' %}#8b5a2b{% else %}var(--border-color){% endif %}; border-radius: var(--radius-md); padding: 18px; cursor: pointer; transition: all 0.2s ease;" class="theme-card">
-            <input type="radio" name="theme" value="cocoa" {% if cur_theme == 'cocoa' %}checked{% endif %} style="position: absolute; top: 16px; right: 16px; accent-color: #8b5a2b;" onchange="updateThemeSelection()" />
+            <input type="radio" name="theme" value="cocoa" {% if cur_theme == 'cocoa' %}checked{% endif %} style="position: absolute; top: 16px; right: 16px; accent-color: #8b5a2b;" data-on-change="updateThemeSelection" />
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
               <span style="font-size: 1.5rem;">🤎</span>
               <div>
@@ -262,7 +263,7 @@
             </div>
             <div>
               <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Initial Shop Admin Password *</label>
-              <input type="password" name="admin_password" required value="admin123"
+              <input type="password" name="admin_password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters"
                      style="width: 100%; padding: 12px 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff; font-size: 0.95rem; outline: none;" />
               <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;">Temporary password for the store owner.</div>
             </div>
@@ -304,7 +305,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce() }}">
 function generateSlug(text) {
   const slugInput = document.getElementById('store_slug');
   const preview = document.getElementById('slugPreview');

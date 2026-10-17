@@ -31,9 +31,10 @@
     <p>{{ message }}</p>
     <div class="row">
       <a class="primary" href="{{ home_url }}">Back to the store</a>
-      {% if code >= 500 %}<button type="button" onclick="location.reload()">Try again</button>{% endif %}
+      {% if code >= 500 %}<button type="button" data-on-click="ui.reload">Try again</button>{% endif %}
     </div>
     {% if error_id %}<div class="ref">Reference: {{ error_id }}</div>{% endif %}
   </div>
+<script src="{{ url_for('static', filename='js/ui-events.js') }}?v=1"></script>
 </body>
 </html>

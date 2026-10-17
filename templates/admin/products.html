@@ -47,7 +47,7 @@
              type="search" name="q" placeholder="Search products…"
              value="{{ search }}" autocomplete="off" />
     </div>
-    <select name="category" class="admin-filter-select" onchange="this.form.submit()">
+    <select name="category" class="admin-filter-select" data-on-change="ui.submit">
       <option value="">All Categories</option>
       {% for cat in categories %}
       <option value="{{ cat }}" {% if active_category == cat %}selected{% endif %}>{{ cat }}</option>
@@ -112,7 +112,7 @@
     <div class="admin-product-actions">
       <a href="{{ url_for('admin_edit_product', product_id=product.id) }}"
          class="action-btn edit">✏️ Edit</a>
-      <button class="action-btn delete" onclick="confirmDelete({{ product.id }}, '{{ product.name|e }}')">
+      <button class="action-btn delete" data-on-click="confirmDelete" data-args='{{ [product.id, product.name]|tojson }}'>
         🗑️ Delete
       </button>
     </div>
@@ -142,8 +142,9 @@
     <h3 style="text-align:center;font-size:1.1rem;margin-bottom:8px">Delete Product?</h3>
     <p id="deleteModalMsg" style="text-align:center;color:var(--a-text-muted);font-size:0.875rem;margin-bottom:24px"></p>
     <div style="display:flex;gap:10px">
-      <button onclick="closeDeleteModal()" class="topbar-btn" style="flex:1;justify-content:center;padding:10px">Cancel</button>
+      <button data-on-click="closeDeleteModal" class="topbar-btn" style="flex:1;justify-content:center;padding:10px">Cancel</button>
       <form id="deleteForm" method="POST" style="flex:1">
+    {{ csrf_field() }}
         <button type="submit" class="action-btn delete" style="width:100%;padding:10px;justify-content:center">
           🗑️ Delete
         </button>
@@ -152,7 +153,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce() }}">
   function confirmDelete(id, name) {
     const modal = document.getElementById('deleteModal');
     const msg = document.getElementById('deleteModalMsg');

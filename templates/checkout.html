@@ -74,6 +74,7 @@
 
     <!-- ===== DELIVERY FORM ===== -->
     <form id="checkoutForm" method="POST" action="{{ url_for('checkout') }}">
+    {{ csrf_field() }}
       <div class="form-card">
         <div class="form-card-title">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -128,7 +129,7 @@
             <label for="post_office">Post Office (P.O.) *</label>
             <input type="text" id="post_office" name="post_office" placeholder="e.g. Kakkanad" required
               pattern="[A-Za-z\s.]+" title="Only letters, spaces and dots are allowed"
-              oninput="this.value = this.value.replace(/[^A-Za-z\s.]/g, '')" />
+              data-on-input="ui.lettersOnly" />
           </div>
         </div>
 

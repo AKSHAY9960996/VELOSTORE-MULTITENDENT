@@ -1,10 +1,14 @@
 """Customer-facing storefront routes (home, product pages, checkout, order success, /s/<store>)."""
 
 import os
+import re
 from datetime import datetime, timedelta
+from urllib.parse import quote
 from db import get_master_db_connection, get_tenant_by_identifier
-from flask import flash, g, jsonify, redirect, render_template, request, session, url_for
-from core import _ensure_master_db_ready, _render_landing, app, get_db, get_setting, query_db
+from flask import abort, flash, g, jsonify, redirect, render_template, request, session, url_for
+from werkzeug.exceptions import HTTPException
+from core import (_ensure_master_db_ready, _render_landing, app, get_db, get_setting, query_db,
+                  rows_affected, app_config)
 
 @app.route('/health')
 def health_check():
@@ -12,14 +16,15 @@ def health_check():
 
 @app.route('/diag')
 def diag():
-    """Safe diagnostics: shows env presence + tests Turso with a 10s timeout. No secrets shown."""
+    """Platform diagnostics. Only visible to a logged-in master admin; everyone else gets a plain 404."""
+    if not session.get('master_logged_in'):
+        abort(404)
     import threading, time, importlib.util
     url = os.environ.get('TURSO_DB_URL', '')
     info = {
         'flask_env': os.environ.get('FLASK_ENV'),
         'libsql_installed': importlib.util.find_spec('libsql') is not None,
         'TURSO_DB_URL_set': bool(url),
-        'TURSO_DB_URL_prefix': url[:9] + '...' if url else '',
         'TURSO_DB_URL_has_whitespace': url != url.strip(),
         'TURSO_AUTH_TOKEN_set': bool(os.environ.get('TURSO_AUTH_TOKEN')),
         'CLOUDINARY_set': bool(os.environ.get('CLOUDINARY_CLOUD_NAME') and os.environ.get('CLOUDINARY_API_KEY') and os.environ.get('CLOUDINARY_API_SECRET')),
@@ -140,37 +145,49 @@ def checkout():
             return redirect(url_for('index'))
 
     if request.method == 'POST':
-        # Collect cart items from hidden fields
+        def fail(message, **extra):
+            return jsonify({'success': False, 'error': message, **extra})
+
+        # ---- 1. Read and validate the cart ----
         product_ids = request.form.getlist('product_id[]')
         quantities  = request.form.getlist('quantity[]')
-
         if not product_ids:
-            return jsonify({'success': False, 'error': 'Your cart is empty.'})
+            return fail('Your cart is empty.')
+        if len(product_ids) != len(quantities) or len(product_ids) > app_config.MAX_CART_LINES:
+            return fail('Your cart could not be read. Please refresh the page and try again.')
 
-        # Validate stock for each item
+        wanted = {}   # product id -> total quantity (repeated lines for one product are merged)
+        try:
+            for pid_raw, qty_raw in zip(product_ids, quantities):
+                pid, qty = int(pid_raw), int(qty_raw)
+                if qty < 1:
+                    return fail('Quantity must be at least 1.')
+                wanted[pid] = wanted.get(pid, 0) + qty
+        except (TypeError, ValueError):
+            return fail('Your cart contains invalid data. Please refresh the page and try again.')
+
+        def current_stock_levels():
+            levels = {}
+            for check_pid in wanted:
+                p_row = query_db('SELECT stock FROM products WHERE id = ?', [check_pid], one=True)
+                levels[check_pid] = p_row['stock'] if p_row else 0
+            return levels
+
         items = []
         total = 0.0
-        for pid, qty in zip(product_ids, quantities):
-            pid = int(pid)
-            qty = int(qty)
+        for pid, qty in wanted.items():
+            if qty > app_config.MAX_QTY_PER_ITEM:
+                return fail(f'You can order at most {app_config.MAX_QTY_PER_ITEM} of one item at a time.')
             product = query_db('SELECT * FROM products WHERE id = ?', [pid], one=True)
             if not product:
-                return jsonify({'success': False, 'error': 'A product in your cart no longer exists.'})
+                return fail('A product in your cart no longer exists.')
             if product['stock'] < qty:
-                # Compile current database stock levels for items in checkout request
-                stock_updates = {}
-                for check_pid in product_ids:
-                    p_row = query_db('SELECT stock FROM products WHERE id = ?', [int(check_pid)], one=True)
-                    stock_updates[int(check_pid)] = p_row['stock'] if p_row else 0
-                return jsonify({
-                    'success': False,
-                    'error': f'"{product["name"]}" only has {product["stock"]} item(s) left in stock.',
-                    'stock_updates': stock_updates
-                })
+                return fail(f'"{product["name"]}" only has {product["stock"]} item(s) left in stock.',
+                            stock_updates=current_stock_levels())
             items.append({'product': product, 'quantity': qty})
             total += product['price'] * qty
 
-        # Customer details
+        # ---- 2. Validate customer details ----
         name        = request.form.get('name', '').strip()
         phone       = request.form.get('phone', '').strip()
         whatsapp    = request.form.get('whatsapp', '').strip()
@@ -182,106 +199,125 @@ def checkout():
         notes       = request.form.get('notes', '').strip()
 
         if not all([name, phone, whatsapp, address, post_office, district, pincode]):
-            return jsonify({'success': False, 'error': 'Please fill in all required fields.'})
+            return fail('Please fill in all required fields.')
+        phone_ok = lambda v: re.fullmatch(r'\+?[0-9][0-9 \-]{6,19}', v) is not None
+        if not phone_ok(phone) or not phone_ok(whatsapp):
+            return fail('Please enter a valid phone / WhatsApp number.')
+        if not re.fullmatch(r'[0-9]{6}', pincode):
+            return fail('Please enter a valid 6-digit pincode.')
+        if (len(name) > 100 or len(address) > 500 or len(landmark) > 200 or len(post_office) > 100
+                or len(district) > 100 or len(notes) > 300):
+            return fail('One of the fields is too long. Please shorten it and try again.')
 
-        # Save customer
+        # ---- 3. Save everything in ONE transaction ----
         db = get_db()
-        cur = db.execute(
-            'INSERT INTO customers (name, phone, whatsapp, address, pincode, post_office, district, landmark) VALUES (?,?,?,?,?,?,?,?)',
-            [name, phone, whatsapp, address, pincode, post_office, district, landmark]
-        )
-        customer_id = cur.lastrowid
-
-        # Get stock reduction mode setting
         stock_mode = get_setting('stock_reduction_mode', 'reserve')
+        try:
+            cur = db.execute(
+                'INSERT INTO customers (name, phone, whatsapp, address, pincode, post_office, district, landmark) VALUES (?,?,?,?,?,?,?,?)',
+                [name, phone, whatsapp, address, pincode, post_office, district, landmark]
+            )
+            customer_id = cur.lastrowid
 
-        if stock_mode == 'manual':
-            # Save order with Pending status and no expiration
+            if stock_mode == 'manual':
+                # Stock is updated manually by the shop owner; nothing is held here
+                status, reserved_until = 'Pending', None
+            else:
+                try:
+                    res_mins = min(max(int(get_setting('reservation_minutes', '15')), 1), 1440)
+                except ValueError:
+                    res_mins = 15
+                status = 'Reserved'
+                reserved_until = (datetime.utcnow() + timedelta(minutes=res_mins)).strftime('%Y-%m-%d %H:%M:%S')
+
             cur = db.execute(
                 'INSERT INTO orders (customer_id, total, status, reserved_until) VALUES (?,?,?,?)',
-                [customer_id, total, 'Pending', None]
+                [customer_id, total, status, reserved_until]
             )
             order_id = cur.lastrowid
 
-            # Save order items without reducing stock
             for item in items:
-                pid = item['product']['id']
-                qty = item['quantity']
+                pid, qty = item['product']['id'], item['quantity']
                 db.execute(
                     'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?,?,?,?)',
                     [order_id, pid, qty, item['product']['price']]
                 )
-        else:
-            # Save order with Reserved status and dynamic expiration duration
-            res_mins = int(get_setting('reservation_minutes', '15'))
-            reserved_until = (datetime.utcnow() + timedelta(minutes=res_mins)).strftime('%Y-%m-%d %H:%M:%S')
-            cur = db.execute(
-                'INSERT INTO orders (customer_id, total, status, reserved_until) VALUES (?,?,?,?)',
-                [customer_id, total, 'Reserved', reserved_until]
-            )
-            order_id = cur.lastrowid
+                if stock_mode != 'manual':
+                    # Atomic "take stock only if enough is left". If two customers buy the last item
+                    # at the same moment, exactly one of these UPDATEs changes a row.
+                    took = db.execute(
+                        'UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?', [qty, pid, qty])
+                    changed = rows_affected(took)
+                    if changed is None:   # driver can't report rows changed: verify by reading back
+                        check = db.execute('SELECT stock FROM products WHERE id = ?', [pid]).fetchone()
+                        changed = 1 if check and check['stock'] >= 0 else 0
+                    if changed == 0:
+                        db.rollback()
+                        return fail(f'Sorry, "{item["product"]["name"]}" just sold out or has less stock than you '
+                                    f'asked for. Please review your bag.', stock_updates=current_stock_levels())
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
 
-            # Save order items and reduce stock
-            for item in items:
-                pid = item['product']['id']
-                qty = item['quantity']
-                db.execute(
-                    'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?,?,?,?)',
-                    [order_id, pid, qty, item['product']['price']]
-                )
-                db.execute('UPDATE products SET stock = stock - ? WHERE id = ?', [qty, pid])
-
-        db.commit()
-
-        # Build WhatsApp message
-        shop_name = get_setting('shop_name', 'Our Shop')
-        wa_number = get_setting('whatsapp_number', '')
-        currency  = get_setting('currency_symbol', '₹')
-
-        lines = [
-            f"🛍️ *New Order from {shop_name}!*\n",
-            f"📋 *Order ID:* #{order_id}",
-            f"👤 *Customer:* {name}",
-            f"📞 *Phone:* {phone}",
-            f"📍 *Address:* {address}",
-        ]
-        if landmark:
-            lines.append(f"🏠 *Landmark:* {landmark}")
-        if post_office:
-            lines.append(f"📦 *Post Office (P.O.):* {post_office}")
-        if district:
-            lines.append(f"🏙️ *District:* {district}")
-        lines.append(f"📮 *Pincode:* {pincode}")
-        if notes:
-            lines.append(f"📝 *Notes:* {notes}")
-        lines.append("\n🛒 *Items Ordered:*")
-        for item in items:
-            p = item['product']
-            lines.append(f"  • {item['quantity']} x {p['name']} — {currency}{p['price']:.2f}")
-        lines.append(f"\n💰 *Total Amount:* {currency}{total:.2f} + Delivery Charges")
-        wa_message = '\n'.join(lines)
-
-        # Store order info in session for the order success page
+        # Keep the session small: the WhatsApp message is rebuilt from the database on the next page
         session['last_order'] = {
             'shop': g.tenant_slug,   # an order confirmation only ever shows inside the shop it was placed in
-            'customer_name': name,
             'order_id': order_id,
-            'currency': currency,
-            'total': total,
-            'wa_number': wa_number,
-            'wa_message': wa_message
+            'notes': notes,
         }
-
-        # Return JSON containing redirect URL to local success page
         return jsonify({'success': True, 'redirect_url': url_for('order_success')})
 
     # GET – render the checkout page with cart data from query params
     return render_template('checkout.html')
 
+def _build_order_confirmation(order_id, notes=''):
+    """Rebuild the confirmation page data and the WhatsApp message from the database."""
+    row = query_db(
+        '''SELECT o.id, o.total, c.name, c.phone, c.address, c.landmark, c.post_office, c.district, c.pincode
+           FROM orders o JOIN customers c ON c.id = o.customer_id WHERE o.id = ?''', [order_id], one=True)
+    if not row:
+        return None
+    items = query_db(
+        '''SELECT oi.quantity, oi.price, p.name FROM order_items oi
+           LEFT JOIN products p ON p.id = oi.product_id WHERE oi.order_id = ?''', [order_id])
+    shop_name = get_setting('shop_name', 'Our Shop')
+    wa_number = ''.join(ch for ch in get_setting('whatsapp_number', '') if ch.isdigit())
+    currency = get_setting('currency_symbol', '₹')
+    total = row['total']
+
+    lines = [
+        f"🛍️ *New Order from {shop_name}!*\n",
+        f"📋 *Order ID:* #{order_id}",
+        f"👤 *Customer:* {row['name']}",
+        f"📞 *Phone:* {row['phone']}",
+        f"📍 *Address:* {row['address']}",
+    ]
+    if row['landmark']:
+        lines.append(f"🏠 *Landmark:* {row['landmark']}")
+    if row['post_office']:
+        lines.append(f"📦 *Post Office (P.O.):* {row['post_office']}")
+    if row['district']:
+        lines.append(f"🏙️ *District:* {row['district']}")
+    lines.append(f"📮 *Pincode:* {row['pincode']}")
+    if notes:
+        lines.append(f"📝 *Notes:* {notes}")
+    lines.append("\n🛒 *Items Ordered:*")
+    for it in items:
+        lines.append(f"  • {it['quantity']} x {it['name'] or 'Item'} — {currency}{it['price']:.2f}")
+    lines.append(f"\n💰 *Total Amount:* {currency}{total:.2f} + Delivery Charges")
+    return {
+        'customer_name': row['name'], 'order_id': order_id, 'currency': currency, 'total': total,
+        'wa_number': wa_number, 'wa_message': '\n'.join(lines),
+    }
+
 @app.route('/order-success')
 def order_success():
-    order_data = session.get('last_order', None)
-    if not order_data or order_data.get('shop') != g.tenant_slug:
+    last = session.get('last_order', None)
+    if not last or last.get('shop') != g.tenant_slug or not last.get('order_id'):
+        return redirect(url_for('index'))
+    order_data = _build_order_confirmation(last['order_id'], last.get('notes', ''))
+    if not order_data:
         return redirect(url_for('index'))
     return render_template('order_success.html', order=order_data)
 
@@ -292,6 +328,20 @@ def api_product(product_id):
     if not product:
         return jsonify({'error': 'Not found'}), 404
     return jsonify(dict(product))
+
+_ADMIN_PATH_RE = re.compile(r'admin(?:/[A-Za-z0-9_\-]+)+')
+
+def _safe_admin_path(clean_sub):
+    """Return '/admin/...' only if it is a plain path (no '..', '//', '?', '#') that matches a real
+    admin route; otherwise None. Prevents crafted /s/<shop>/admin/... links from redirecting oddly."""
+    if not _ADMIN_PATH_RE.fullmatch(clean_sub):
+        return None
+    path = '/' + clean_sub
+    try:
+        app.url_map.bind('localhost').match(path, method='GET')
+    except HTTPException:
+        return None
+    return path
 
 @app.route('/s/<shop_slug>/', defaults={'subpath': ''})
 @app.route('/s/<shop_slug>/<path:subpath>')
@@ -304,15 +354,17 @@ def storefront_shop(shop_slug, subpath):
         flash("Store not found.", "error")
         return redirect(url_for('index'))
 
-    session['active_tenant_slug'] = shop_slug
+    slug = tenant['slug']   # the middleware already remembers the active store; no extra session write here
     clean_sub = subpath.strip('/')
 
     if clean_sub == 'admin' or clean_sub == 'admin/dashboard':
-        return redirect(url_for('admin_dashboard', shop=shop_slug))
+        return redirect(url_for('admin_dashboard', shop=slug))
     elif clean_sub == 'admin/login':
-        return redirect(url_for('admin_login', shop=shop_slug))
+        return redirect(url_for('admin_login', shop=slug))
     elif clean_sub.startswith('admin/'):
-        target = clean_sub.replace('admin/', '', 1)
-        return redirect(f'/admin/{target}?shop={shop_slug}')
+        safe_path = _safe_admin_path(clean_sub)
+        if safe_path:
+            return redirect(f'{safe_path}?shop={quote(slug, safe="")}')
+        return redirect(url_for('admin_dashboard', shop=slug))
 
-    return redirect(url_for('index', shop=shop_slug))
+    return redirect(url_for('index', shop=slug))

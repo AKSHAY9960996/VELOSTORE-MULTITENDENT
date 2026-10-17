@@ -323,10 +323,11 @@
     </div>
   </footer>
 
-  <script>window.SHOP_SLUG = {{ (g.tenant_slug or 'default')|tojson }};</script>
-  <script src="{{ url_for('static', filename='js/cart.js') }}?v=shopiso2"></script>
+  <script nonce="{{ csp_nonce() }}">window.SHOP_SLUG = {{ (g.tenant_slug or 'default')|tojson }};</script>
+  <script src="{{ url_for('static', filename='js/ui-events.js') }}?v=1"></script>
+  <script src="{{ url_for('static', filename='js/cart.js') }}?v=shopiso3"></script>
 
-  <script>
+  <script nonce="{{ csp_nonce() }}">
     // Flash auto-dismiss
     document.querySelectorAll('.flash-msg').forEach(el => {
       el.addEventListener('click', () => el.remove());
@@ -355,7 +356,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="{{ csp_nonce() }}">
     document.addEventListener('DOMContentLoaded', () => {
       const banner = document.getElementById('founderAdBanner');
       const closeBtn = document.getElementById('closeFounderAd');

@@ -7,3 +7,4 @@ python-dotenv>=1.0,<2
 requests>=2.31,<3
 cloudinary>=1.36,<2
 libsql>=0.1
+cryptography>=42,<48

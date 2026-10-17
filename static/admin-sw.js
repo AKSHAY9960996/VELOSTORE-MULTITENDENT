@@ -1,13 +1,12 @@
 // Admin PWA Service Worker
 // Caches admin shell pages for offline fallback and fast repeat loads
 
-const CACHE_NAME = 'admin-shell-v2';
+const CACHE_NAME = 'admin-shell-v3';   // bumped: purges previously cached admin pages
 
 // Resources to pre-cache on install
+// NOTE: admin HTML pages are deliberately NOT cached any more. They contain private shop data and
+// per-session CSRF tokens; a cached copy would hold stale tokens and stay readable after logout.
 const PRECACHE_URLS = [
-  '/admin',
-  '/admin/orders',
-  '/admin/products',
   '/static/css/admin.css',
   '/static/admin-icons/icon-192.png',
   '/static/admin-icons/icon-512.png',
@@ -86,27 +85,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Admin pages → Network-first with offline fallback
+  // Admin pages → always straight from the network (never cached). Falls through to the browser default.
   if (url.pathname.startsWith('/admin')) {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          // Cache successful GET responses for offline fallback
-          if (request.method === 'GET' && response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(c => c.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => {
-          // Offline: serve cached version if available
-          return caches.match(request).then(cached => {
-            if (cached) return cached;
-            // Final fallback — serve cached dashboard
-            return caches.match('/admin');
-          });
-        })
-    );
+    event.respondWith(fetch(request));
   }
 });
 

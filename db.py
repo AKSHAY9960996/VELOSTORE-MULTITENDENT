@@ -3,7 +3,8 @@ import json
 import sqlite3
 import hashlib
 import time
-from security import hash_password as _hash_password
+import re
+from security import hash_password as _hash_password, validate_new_password, verify_password as _verify_password
 from collections.abc import Mapping
 import requests as _requests
 
@@ -21,6 +22,62 @@ except ImportError:
 from config import get_config
 
 _config = get_config()
+
+# ---------------------------------------------------------------------------
+# Encryption at rest for per-store Turso tokens
+# ---------------------------------------------------------------------------
+# Each store's database token is stored in the master `tenants` table. Anyone who can read that
+# table could otherwise open every shop's database, so tokens are encrypted (Fernet/AES) with a
+# key that lives only in an environment variable, never in the database.
+#   TOKEN_ENCRYPTION_KEY  any long random string (falls back to SECRET_KEY if not set)
+# Values written before this feature (no "enc1:" prefix) are still read, and are encrypted
+# automatically at startup by encrypt_plaintext_tenant_tokens().
+_TOKEN_PREFIX = 'enc1:'
+_fernet_cache = None
+
+
+def _get_fernet():
+    global _fernet_cache
+    if _fernet_cache is None:
+        from cryptography.fernet import Fernet
+        import base64
+        secret = os.environ.get('TOKEN_ENCRYPTION_KEY') or _config.SECRET_KEY
+        key = base64.urlsafe_b64encode(hashlib.sha256(b'velostore-token-v1|' + secret.encode('utf-8')).digest())
+        _fernet_cache = Fernet(key)
+    return _fernet_cache
+
+
+def encrypt_token(token: str) -> str:
+    """Encrypt a token for storage. Already-encrypted or empty values are returned unchanged."""
+    if not token or token.startswith(_TOKEN_PREFIX):
+        return token
+    return _TOKEN_PREFIX + _get_fernet().encrypt(token.encode('utf-8')).decode('ascii')
+
+
+def decrypt_token(stored: str) -> str:
+    """Return the usable token. Legacy plain-text values pass straight through."""
+    if not stored or not stored.startswith(_TOKEN_PREFIX):
+        return stored
+    from cryptography.fernet import InvalidToken
+    try:
+        return _get_fernet().decrypt(stored[len(_TOKEN_PREFIX):].encode('ascii')).decode('utf-8')
+    except InvalidToken:
+        raise RuntimeError('Could not decrypt a store database token. TOKEN_ENCRYPTION_KEY (or SECRET_KEY, '
+                           'if no separate key is set) has changed since the token was saved.')
+
+
+def encrypt_plaintext_tenant_tokens(conn):
+    """One-time, idempotent upgrade: encrypt any tokens still stored as plain text."""
+    rows = conn.execute("SELECT id, turso_auth_token FROM tenants "
+                        "WHERE turso_auth_token IS NOT NULL AND turso_auth_token != '' "
+                        "AND turso_auth_token NOT LIKE 'enc1:%'").fetchall()
+    for r in rows:
+        conn.execute("UPDATE tenants SET turso_auth_token = ? WHERE id = ? AND turso_auth_token = ?",
+                     [encrypt_token(r['turso_auth_token']), r['id'], r['turso_auth_token']])
+    if rows:
+        conn.commit()
+        print(f"[Security] Encrypted {len(rows)} store database token(s) at rest.", flush=True)
+
 
 # ---------------------------------------------------------------------------
 # Path constants (used only when Turso is NOT configured / local dev)
@@ -483,6 +540,7 @@ def init_master_db():
         custom_domain TEXT UNIQUE,
         turso_db_url TEXT,
         turso_auth_token TEXT,
+        admin_username TEXT,
         cloudinary_folder TEXT,
         plan TEXT DEFAULT 'free',
         theme TEXT DEFAULT 'standard',
@@ -498,6 +556,7 @@ def init_master_db():
         "ALTER TABLE tenants ADD COLUMN theme TEXT DEFAULT 'standard'",
         "ALTER TABLE tenants ADD COLUMN turso_db_url TEXT",
         "ALTER TABLE tenants ADD COLUMN turso_auth_token TEXT",
+        "ALTER TABLE tenants ADD COLUMN admin_username TEXT",
     ]:
         try:
             cur.execute(migration_sql)
@@ -506,15 +565,32 @@ def init_master_db():
 
     cur.execute("SELECT COUNT(*) as cnt FROM master_admins")
     if cur.fetchone()['cnt'] == 0:
-        default_pwd = os.environ.get('MASTER_ADMIN_PASSWORD', 'master123')
         default_user = os.environ.get('MASTER_ADMIN_USERNAME', 'master')
-        pwd_hash = _hash_password(default_pwd)
-        if not os.environ.get('MASTER_ADMIN_PASSWORD'):
-            print('[Security] WARNING: MASTER_ADMIN_PASSWORD is not set - using an insecure default. Set it in Render.', flush=True)
-        cur.execute(
-            "INSERT INTO master_admins (username, password_hash) VALUES (?, ?)",
-            [default_user, pwd_hash]
-        )
+        env_pwd = os.environ.get('MASTER_ADMIN_PASSWORD', '')
+        if env_pwd:
+            cur.execute(
+                "INSERT INTO master_admins (username, password_hash) VALUES (?, ?)",
+                [default_user, _hash_password(env_pwd)]
+            )
+        elif os.environ.get('FLASK_ENV', 'development') == 'production':
+            # Never create a master admin with a guessable default password on a live server.
+            print('[Security] ERROR: MASTER_ADMIN_PASSWORD is not set, so NO master admin was created. '
+                  'Set MASTER_ADMIN_PASSWORD (and MASTER_ADMIN_USERNAME) in Render and restart.', flush=True)
+        else:
+            # Local development only
+            cur.execute(
+                "INSERT INTO master_admins (username, password_hash) VALUES (?, ?)",
+                [default_user, _hash_password('master123')]
+            )
+            print('[Security] DEV: created master admin "%s" with the dev password "master123".' % default_user, flush=True)
+    else:
+        try:
+            cur.execute("SELECT password_hash FROM master_admins")
+            for row in cur.fetchall():
+                if _verify_password('master123', row['password_hash']):
+                    print('[Security] WARNING: a master admin still uses the password "master123". Change it immediately.', flush=True)
+        except Exception:
+            pass
 
     cur.execute("SELECT COUNT(*) as cnt FROM tenants")
     if cur.fetchone()['cnt'] == 0:
@@ -525,6 +601,20 @@ def init_master_db():
               'free', 1, 100, json.dumps(DEFAULT_PLAN_CONFIG['free']['features'])])
 
     conn.commit()
+    try:
+        encrypt_plaintext_tenant_tokens(conn)
+    except Exception as e:
+        print(f"[Security] Could not encrypt existing store tokens yet: {e}", flush=True)
+    try:
+        backfill_admin_usernames(conn)
+    except Exception as e:
+        print(f"[Init] Could not copy admin usernames into the master table yet: {e}", flush=True)
+    try:
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tenants_admin_username "
+                     "ON tenants(lower(admin_username)) WHERE admin_username IS NOT NULL")
+        conn.commit()
+    except Exception as e:
+        print(f"[Init] WARNING: could not create the unique admin-username index: {e}", flush=True)
     conn.close()
     clear_tenant_cache()
 
@@ -581,15 +671,157 @@ def get_tenant_db_connection(tenant_slug: str):
         row = get_tenant_by_identifier(tenant_slug)
 
         if row and row['turso_db_url'] and row['turso_auth_token'] and HAS_LIBSQL:
+            try:
+                token = decrypt_token(row['turso_auth_token'])
+            except RuntimeError as e:
+                # Never fall back to an empty local database for a store that lives on Turso.
+                print(f"[DB] {e} (store '{tenant_slug}')", flush=True)
+                raise
             return Database(
                 turso_url=row['turso_db_url'],
-                auth_token=row['turso_auth_token']
+                auth_token=token
             ).connect()
+    except RuntimeError:
+        raise
     except Exception as e:
         print(f"[DB] Could not fetch Turso credentials for '{tenant_slug}': {e}")
 
     tenant_db_path = os.path.join(TENANTS_DIR, f"{tenant_slug}.db")
     return Database(local_path=tenant_db_path).connect()
+
+
+def _is_unique_violation(exc) -> bool:
+    return 'UNIQUE' in str(exc).upper()
+
+
+def backfill_admin_usernames(conn):
+    """Copy each store's admin username from its own database into tenants.admin_username.
+
+    Runs at startup, only for stores that do not have it yet (normally once). If two legacy stores
+    share a username, the older one keeps it and the newer one is left empty (and reported), so the
+    unique index can still be created. A store whose database is unreachable is retried next start.
+    """
+    rows = conn.execute("SELECT id, slug FROM tenants WHERE admin_username IS NULL ORDER BY id").fetchall()
+    if not rows:
+        return
+    taken = {r['k'] for r in conn.execute(
+        "SELECT lower(admin_username) AS k FROM tenants WHERE admin_username IS NOT NULL").fetchall()}
+    filled = 0
+    for r in rows:
+        try:
+            t_conn = get_tenant_db_connection(r['slug'])
+            try:
+                u_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_username'").fetchone()
+            finally:
+                t_conn.close()
+        except Exception as e:
+            print(f"[Init] Could not read the admin username of store '{r['slug']}' yet: {e}", flush=True)
+            continue
+        name = ((u_row['value'] if u_row else 'admin') or 'admin').strip() or 'admin'
+        if name.lower() in taken:
+            print(f"[Init] WARNING: store '{r['slug']}' uses the admin username '{name}', which another store already "
+                  f"has. Give one of them a different username (Master > Edit store).", flush=True)
+            continue
+        try:
+            conn.execute("UPDATE tenants SET admin_username = ? WHERE id = ?", [name, r['id']])
+            conn.commit()
+            taken.add(name.lower())
+            filled += 1
+        except Exception as e:   # e.g. another worker filled it first
+            print(f"[Init] admin username for '{r['slug']}' not stored: {e}", flush=True)
+    if filled:
+        print(f"[Init] Stored admin usernames for {filled} store(s) in the master table.", flush=True)
+
+
+def is_admin_username_taken(username: str, exclude_slug: str = None) -> bool:
+    """True if a *different* store already uses this admin username (case-insensitive).
+
+    One indexed query on the master table. Only stores that have no username stored yet (a startup
+    backfill that could not reach their database) fall back to reading that store's own database.
+    Suspended stores keep their username reserved.
+    """
+    username_lower = (username or '').strip().lower()
+    if not username_lower:
+        return False
+
+    master_conn = get_master_db_connection()
+    try:
+        sql = "SELECT 1 AS hit FROM tenants WHERE lower(admin_username) = ?"
+        args = [username_lower]
+        if exclude_slug:
+            sql += " AND slug != ?"
+            args.append(exclude_slug)
+        if master_conn.execute(sql + " LIMIT 1", args).fetchone():
+            return True
+        pending_sql = "SELECT slug FROM tenants WHERE admin_username IS NULL"
+        pending_args = []
+        if exclude_slug:
+            pending_sql += " AND slug != ?"
+            pending_args.append(exclude_slug)
+        pending = [r['slug'] for r in master_conn.execute(pending_sql, pending_args).fetchall()]
+    finally:
+        master_conn.close()
+
+    for slug in pending:
+        try:
+            t_conn = get_tenant_db_connection(slug)
+            try:
+                u_row = t_conn.execute("SELECT value FROM settings WHERE key = 'admin_username'").fetchone()
+            finally:
+                t_conn.close()
+            if ((u_row['value'] if u_row else 'admin') or 'admin').strip().lower() == username_lower:
+                return True
+        except Exception:
+            continue
+    return False
+
+
+def get_tenant_admin_username(slug: str):
+    """The username stored in the master table (None if not stored yet)."""
+    conn = get_master_db_connection()
+    try:
+        row = conn.execute("SELECT admin_username FROM tenants WHERE slug = ?", [slug]).fetchone()
+        return row['admin_username'] if row else None
+    finally:
+        conn.close()
+
+
+def set_tenant_admin_username(slug: str, username: str):
+    """Store a store's admin username in the master table. The unique index makes the claim atomic:
+    if another store already has the name this raises ValueError and nothing changes."""
+    username = (username or '').strip()
+    conn = get_master_db_connection()
+    try:
+        conn.execute("UPDATE tenants SET admin_username = ? WHERE slug = ?", [username, slug])
+        conn.commit()
+    except Exception as e:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        if _is_unique_violation(e):
+            raise ValueError(f"Admin username '{username}' is already used by another store.")
+        raise
+    finally:
+        conn.close()
+    clear_tenant_cache()
+
+
+def change_admin_username(slug: str, new_username: str, write_tenant_setting):
+    """Rename a store's admin login. Claims the name in the master table first (unique), then calls
+    write_tenant_setting(new_username) to update the store's own database; if that second step fails
+    the claim is undone, so the two places never disagree. Raises ValueError if the name is taken."""
+    old = get_tenant_admin_username(slug)
+    set_tenant_admin_username(slug, new_username)
+    try:
+        write_tenant_setting(new_username.strip())
+    except Exception:
+        try:
+            if old:
+                set_tenant_admin_username(slug, old)
+        except Exception:
+            pass
+        raise
 
 
 def update_tenant_admin_password(slug: str, new_password: str):
@@ -642,12 +874,20 @@ def delete_tenant(tenant_id: int):
     return store_name
 
 
+# Store identifiers end up in URLs (/s/<slug>) and, for local SQLite, in a file path - keep them strict.
+SLUG_RE = re.compile(r'[a-z0-9](?:[a-z0-9]|-(?=[a-z0-9])){1,38}[a-z0-9]')
+RESERVED_SLUGS = {
+    'admin', 'master', 'static', 'api', 's', 'health', 'diag', 'welcome', 'checkout', 'product',
+    'order-success', 'login', 'logout', 'default', 'www', 'app', 'null', 'undefined',
+}
+
+
 def provision_new_tenant(slug: str, store_name: str, owner_name: str,
                          owner_email: str = '', owner_phone: str = '',
                          plan: str = 'free', theme: str = 'standard',
                          max_products: int = 100, custom_domain: str = '',
                          admin_username: str = 'admin',
-                         admin_password: str = 'admin123',
+                         admin_password: str = '',
                          feature_flags: dict = None):
     """
     Provisions a new tenant:
@@ -656,6 +896,14 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
       3. Initializes schema and seeds settings in the new tenant DB.
     """
     slug = slug.strip().lower()
+    if not SLUG_RE.fullmatch(slug):
+        raise ValueError("Store identifier must be 3-40 characters: lowercase letters, numbers and single hyphens "
+                         "(for example 'my-shop').")
+    if slug in RESERVED_SLUGS:
+        raise ValueError(f"'{slug}' is a reserved name. Please choose a different store identifier.")
+    pw_error = validate_new_password(admin_password or '', admin_username)
+    if pw_error:
+        raise ValueError(pw_error)
     master_conn = get_master_db_connection()
     m_cur = master_conn.cursor()
 
@@ -670,6 +918,12 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
             master_conn.close()
             raise ValueError(f"Custom domain '{custom_domain}' is already assigned to another store.")
 
+    # Enforce unique admin usernames across all shops
+    user_to_check = (admin_username or 'admin').strip() or 'admin'
+    if is_admin_username_taken(user_to_check):
+        master_conn.close()
+        raise ValueError(f"Admin username '{user_to_check}' is already used by another store. Please choose a different username.")
+
     resolved_features = DEFAULT_PLAN_CONFIG.get(plan, DEFAULT_PLAN_CONFIG['free'])['features'].copy()
     if feature_flags:
         resolved_features.update(feature_flags)
@@ -678,15 +932,32 @@ def provision_new_tenant(slug: str, store_name: str, owner_name: str,
     # Try to create a dedicated Turso database for this tenant
     tenant_turso_url, tenant_turso_token = _create_turso_tenant_db(slug)
 
-    m_cur.execute("""
-    INSERT INTO tenants (slug, store_name, owner_name, owner_email, owner_phone,
-                         custom_domain, plan, theme, max_products, feature_flags,
-                         turso_db_url, turso_auth_token)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, [slug, store_name, owner_name, owner_email, owner_phone,
-          custom_domain or None, plan, theme or 'standard', max_products, flags_json,
-          tenant_turso_url, tenant_turso_token])
-    master_conn.commit()
+    try:
+        m_cur.execute("""
+        INSERT INTO tenants (slug, store_name, owner_name, owner_email, owner_phone,
+                             custom_domain, plan, theme, max_products, feature_flags,
+                             turso_db_url, turso_auth_token, admin_username)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, [slug, store_name, owner_name, owner_email, owner_phone,
+              custom_domain or None, plan, theme or 'standard', max_products, flags_json,
+              tenant_turso_url, encrypt_token(tenant_turso_token), user_to_check])
+        master_conn.commit()
+    except Exception as e:
+        # Two people creating stores at the same moment: the unique index lets only one win.
+        try:
+            master_conn.rollback()
+        except Exception:
+            pass
+        master_conn.close()
+        if tenant_turso_url:
+            try:
+                _delete_turso_tenant_db(slug)
+            except Exception:
+                pass
+        if _is_unique_violation(e):
+            raise ValueError(f"Admin username '{user_to_check}' (or the store identifier / domain) was just taken by "
+                             f"another store. Please choose a different one.")
+        raise
     clear_tenant_cache()
     master_conn.close()
 

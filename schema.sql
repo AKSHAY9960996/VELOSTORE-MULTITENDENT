@@ -62,6 +62,7 @@ CREATE TABLE order_items (
 INSERT INTO settings (key, value) VALUES ('shop_name', 'The Cozy Corner');
 INSERT INTO settings (key, value) VALUES ('whatsapp_number', '919876543210');
 INSERT INTO settings (key, value) VALUES ('admin_username', 'admin');
-INSERT INTO settings (key, value) VALUES ('admin_password', 'admin123'); -- Will be hashed on first run by app.py
+-- NOTE: no admin_password is seeded here. It is always created as a salted hash by the app
+-- (init_db() for the default store, provision_new_tenant() for new stores).
 INSERT INTO settings (key, value) VALUES ('currency_symbol', '₹');
 INSERT INTO settings (key, value) VALUES ('currency_code', 'INR');

@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* replaces former inline onfocus/onmouseover handlers (blocked by the Content-Security-Policy) */
+    .focus-ring:focus { border-color: var(--primary) !important; }
+    .tenant-row:hover { background: rgba(255,255,255,0.02); }
     :root {
       --bg-dark: #0a0f1d;
       --bg-card: rgba(18, 24, 43, 0.85);
@@ -238,5 +241,6 @@
     Multi-Tenant Platform Engine &copy; {{ now_year if now_year else '2026' }} VeloStore Inc. All system rights reserved.
   </footer>
 
+<script src="{{ url_for('static', filename='js/ui-events.js') }}?v=1"></script>
 </body>
 </html>

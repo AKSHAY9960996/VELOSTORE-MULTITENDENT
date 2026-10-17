@@ -163,12 +163,12 @@ function renderCartItems() {
         <div class="cart-item-name">${escapeHtml(item.name)}</div>
         <div class="cart-item-price">${currency}${(item.price * item.quantity).toFixed(2)}</div>
         <div class="cart-item-controls">
-          <button class="qty-btn" onclick="updateCartQuantity(${item.id}, -1)" aria-label="Decrease quantity">−</button>
+          <button class="qty-btn" data-on-click="updateCartQuantity" data-args='[${item.id}, -1]' aria-label="Decrease quantity">−</button>
           <span class="qty-display">${item.quantity}</span>
-          <button class="qty-btn" onclick="updateCartQuantity(${item.id}, 1)" aria-label="Increase quantity">+</button>
+          <button class="qty-btn" data-on-click="updateCartQuantity" data-args='[${item.id}, 1]' aria-label="Increase quantity">+</button>
         </div>
       </div>
-      <button class="cart-item-remove" onclick="removeFromCart(${item.id})" aria-label="Remove item">✕</button>
+      <button class="cart-item-remove" data-on-click="removeFromCart" data-args='[${item.id}]' aria-label="Remove item">✕</button>
     </div>
   `).join('');
 
@@ -272,7 +272,7 @@ function renderCheckoutSummary() {
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:4px">
         <div class="summary-item-price" style="font-weight:700;color:var(--clr-gold);font-size:0.95rem;white-space:nowrap;">${currency}${(item.price * item.quantity).toFixed(2)}</div>
-        <button type="button" class="summary-remove-btn" onclick="removeCheckoutItem(${item.id})" style="background:none;border:none;color:var(--clr-danger);font-size:0.75rem;cursor:pointer;padding:2px 4px;font-weight:600;transition:opacity var(--t);">✕ Remove</button>
+        <button type="button" class="summary-remove-btn" data-on-click="removeCheckoutItem" data-args='[${item.id}]' style="background:none;border:none;color:var(--clr-danger);font-size:0.75rem;cursor:pointer;padding:2px 4px;font-weight:600;transition:opacity var(--t);">✕ Remove</button>
       </div>
     </div>
   `;

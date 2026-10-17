@@ -7,6 +7,7 @@
   <h2>⚙️ Store Settings</h2>
 
   <form method="POST" action="{{ url_for('admin_settings') }}" enctype="multipart/form-data">
+    {{ csrf_field() }}
     <!-- Shop Info -->
     <div class="form-section">
       <div class="form-section-title">🏪 Shop Information</div>
@@ -51,7 +52,7 @@
           </div>
 
           <div style="flex:1;min-width:210px">
-            <input type="file" id="shop_logo" name="shop_logo" accept="image/*" style="font-size:0.82rem;color:var(--a-text);width:100%;" onchange="handleLogoSelect(event)" />
+            <input type="file" id="shop_logo" name="shop_logo" accept="image/*" style="font-size:0.82rem;color:var(--a-text);width:100%;" data-on-change="handleLogoSelect" data-args='["$event"]' />
             <p style="font-size:0.72rem;color:var(--a-text-muted);margin-top:4px">
               Upload PNG, JPG, or WEBP. Square ratio recommended (e.g. 300x300 px).
             </p>
@@ -59,7 +60,7 @@
             {% if settings.get('shop_logo') %}
             <div style="margin-top:8px">
               <label style="font-size:0.78rem;color:var(--a-danger);display:inline-flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="checkbox" name="remove_logo" value="1" id="remove_logo" onchange="handleRemoveLogoToggle(this)" />
+                <input type="checkbox" name="remove_logo" value="1" id="remove_logo" data-on-change="handleRemoveLogoToggle" data-args='["$el"]' />
                 Remove custom logo (restore default {% if is_luxury %}Luxury Diamond{% else %}Sakura{% endif %} icon)
               </label>
             </div>
@@ -227,9 +228,14 @@
       </div>
       <div class="a-form-row">
         <div class="a-form-group">
+          <label for="current_password">Current Password</label>
+          <input type="password" id="current_password" name="current_password"
+                 placeholder="Required only when changing the password" autocomplete="current-password" />
+        </div>
+        <div class="a-form-group">
           <label for="admin_password">New Password</label>
           <input type="password" id="admin_password" name="admin_password"
-                 placeholder="Min 6 characters (Leave blank to keep current)" autocomplete="new-password" />
+                 placeholder="Min 8 characters (Leave blank to keep current)" autocomplete="new-password" />
         </div>
         <div class="a-form-group">
           <label for="confirm_password">Confirm Password</label>
@@ -302,7 +308,7 @@
         <div style="font-size:0.82rem;font-weight:600;color:var(--a-text);">🧹 Browser &amp; Service Worker Cache</div>
         <div style="font-size:0.72rem;color:var(--a-text-muted);">Purge stored CSS, JS, and PWA caches instantly without needing to press Shift+R.</div>
       </div>
-      <button type="button" class="topbar-btn" onclick="clearAppCache(this)" style="background:var(--a-surface);border:1px solid var(--a-border-md);color:var(--a-text);font-weight:700;">
+      <button type="button" class="topbar-btn" data-on-click="clearAppCache" data-args='["$el"]' style="background:var(--a-surface);border:1px solid var(--a-border-md);color:var(--a-text);font-weight:700;">
         🧹 Purge &amp; Clear Cache
       </button>
     </div>
@@ -325,8 +331,10 @@
           <div style="font-weight:600;font-size:0.875rem">🧾 Clear All Orders</div>
           <div style="font-size:0.75rem;color:var(--a-text-muted);margin-top:2px">Deletes all orders and order items. Customer records kept.</div>
         </div>
-        <form method="POST" action="{{ url_for('admin_clear_data') }}" onsubmit="return confirmClear('orders')">
+        <form method="POST" action="{{ url_for('admin_clear_data') }}" data-on-submit="confirmClear" data-args='["orders"]'>
+    {{ csrf_field() }}
           <input type="hidden" name="clear_type" value="orders" />
+          <input type="password" name="confirm_password" required autocomplete="current-password" placeholder="Admin password" style="width:150px;padding:7px 9px;margin-right:8px;border-radius:8px;border:1px solid var(--a-border-md);background:var(--a-surface2);color:var(--a-text);font-size:0.8rem" />
           <button type="submit" class="topbar-btn" style="background:rgba(239,68,68,0.12);color:var(--a-danger);border:1px solid rgba(239,68,68,0.3);white-space:nowrap">
             Clear Orders
           </button>
@@ -339,8 +347,10 @@
           <div style="font-weight:600;font-size:0.875rem">👤 Clear All Customers</div>
           <div style="font-size:0.75rem;color:var(--a-text-muted);margin-top:2px">Deletes all customer records (and their linked orders too).</div>
         </div>
-        <form method="POST" action="{{ url_for('admin_clear_data') }}" onsubmit="return confirmClear('customers')">
+        <form method="POST" action="{{ url_for('admin_clear_data') }}" data-on-submit="confirmClear" data-args='["customers"]'>
+    {{ csrf_field() }}
           <input type="hidden" name="clear_type" value="customers" />
+          <input type="password" name="confirm_password" required autocomplete="current-password" placeholder="Admin password" style="width:150px;padding:7px 9px;margin-right:8px;border-radius:8px;border:1px solid var(--a-border-md);background:var(--a-surface2);color:var(--a-text);font-size:0.8rem" />
           <button type="submit" class="topbar-btn" style="background:rgba(239,68,68,0.12);color:var(--a-danger);border:1px solid rgba(239,68,68,0.3);white-space:nowrap">
             Clear Customers
           </button>
@@ -353,8 +363,10 @@
           <div style="font-weight:700;font-size:0.875rem;color:var(--a-danger)">💥 Clear All Data</div>
           <div style="font-size:0.75rem;color:var(--a-text-muted);margin-top:2px">Deletes ALL orders, order items, and customers. Products are kept.</div>
         </div>
-        <form method="POST" action="{{ url_for('admin_clear_data') }}" onsubmit="return confirmClear('all')">
+        <form method="POST" action="{{ url_for('admin_clear_data') }}" data-on-submit="confirmClear" data-args='["all"]'>
+    {{ csrf_field() }}
           <input type="hidden" name="clear_type" value="all" />
+          <input type="password" name="confirm_password" required autocomplete="current-password" placeholder="Admin password" style="width:150px;padding:7px 9px;margin-right:8px;border-radius:8px;border:1px solid var(--a-border-md);background:var(--a-surface2);color:var(--a-text);font-size:0.8rem" />
           <button type="submit" class="topbar-btn" style="background:var(--a-danger);color:white;border:none;white-space:nowrap;font-weight:700">
             🗑️ Clear All
           </button>
@@ -406,7 +418,7 @@
   background: var(--a-text-light);
 }
 </style>
-<script>
+<script nonce="{{ csp_nonce() }}">
 (function () {
   const cb    = document.getElementById('show_out_of_stock');
   const label = document.getElementById('oosToggleLabel');

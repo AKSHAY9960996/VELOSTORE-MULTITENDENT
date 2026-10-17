@@ -38,7 +38,7 @@
         autocomplete="off"
       />
     </div>
-    <select name="category" class="admin-filter-select" onchange="this.form.submit()">
+    <select name="category" class="admin-filter-select" data-on-change="ui.submit">
       <option value="">All Categories</option>
       {% for cat in categories %}
       <option value="{{ cat }}" {% if active_category == cat %}selected{% endif %}>{{ cat }}</option>
@@ -57,11 +57,11 @@
   {% for product in products %}
   <div
     class="admin-product-card purchase-card"
-    onclick="showSalesHistory({{ product.id }}, '{{ product.name|e }}', '{{ product.image or '' }}', '{{ product.category or 'No category' }}', '{{ settings.get('currency_symbol','₹') }}{{ '%.2f'|format(product.price) }}')"
+    data-on-click="showSalesHistory" data-args='{{ [product.id, product.name, product.image or '', product.category or 'No category', settings.get('currency_symbol','₹') ~ ('%.2f'|format(product.price))]|tojson }}'
     role="button"
     tabindex="0"
     aria-label="View purchase history for {{ product.name|e }}"
-    onkeydown="if(event.key==='Enter'||event.key===' ')this.click()"
+    data-on-keydown="ui.activateOnKey"
   >
     <!-- Product Image -->
     <div class="admin-product-img">
@@ -160,7 +160,7 @@
         </div>
       </div>
       <button
-        onclick="closeSalesModal()"
+        data-on-click="closeSalesModal"
         class="sales-modal-close"
         aria-label="Close modal"
         id="salesModalCloseBtn"
@@ -521,7 +521,7 @@
 
 
 <!-- ===== JAVASCRIPT ===== -->
-<script>
+<script nonce="{{ csp_nonce() }}">
 const CURRENCY = '{{ settings.get("currency_symbol","₹") }}';
 
 function showSalesHistory(productId, productName, productImage, category, price) {

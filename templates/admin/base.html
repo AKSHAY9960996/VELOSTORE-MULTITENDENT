@@ -55,7 +55,7 @@
 {% endif %}
 
 <!-- Mobile overlay -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" data-on-click="closeSidebar"></div>
 
 <div class="admin-layout">
 
@@ -194,7 +194,7 @@
       <div class="topbar-title">
         <!-- Hamburger (mobile) -->
         <button id="sidebarToggle"
-                onclick="toggleSidebar()"
+                data-on-click="toggleSidebar"
                 style="background:none;border:none;color:var(--a-text-muted);
                        font-size:1.25rem;padding:4px 8px;border-radius:var(--r-sm);
                        cursor:pointer;display:none;line-height:1;"
@@ -204,7 +204,7 @@
 
       <div class="topbar-actions">
         {% block topbar_actions %}
-        <button type="button" class="topbar-btn" onclick="clearAppCache(this)" title="Purge browser, CSS, and Service Worker caches (replaces Shift+R)" style="background:var(--a-surface2);border-color:var(--a-border-md);color:var(--a-text-muted);">
+        <button type="button" class="topbar-btn" data-on-click="clearAppCache" data-args='["$el"]' title="Purge browser, CSS, and Service Worker caches (replaces Shift+R)" style="background:var(--a-surface2);border-color:var(--a-border-md);color:var(--a-text-muted);">
           🧹 Clear Cache
         </button>
         <a href="{{ url_for('admin_add_product') }}" class="topbar-btn primary">
@@ -233,7 +233,7 @@
   {% if messages %}
   <div class="admin-flash-messages" id="flashContainer">
     {% for category, message in messages %}
-    <div class="admin-flash-msg {{ category }}" onclick="this.remove()">
+    <div class="admin-flash-msg {{ category }}" data-on-click="ui.remove">
       <span>
         {% if category == 'success' %}✅
         {% elif category == 'error' %}❌
@@ -251,7 +251,7 @@
 <!-- =======================================================
      SCRIPTS
 ======================================================== -->
-<script>
+<script nonce="{{ csp_nonce() }}">
   /* ── Mobile sidebar ─────────────────────────────── */
   function toggleSidebar() {
     document.getElementById('adminSidebar').classList.toggle('open');
@@ -363,5 +363,6 @@
 
 {% block scripts %}{% endblock %}
 
+<script src="{{ url_for('static', filename='js/ui-events.js') }}?v=1"></script>
 </body>
 </html>

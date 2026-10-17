@@ -12,9 +12,13 @@ services:
         value: production
       - key: SECRET_KEY
         generateValue: true
+      - key: TOKEN_ENCRYPTION_KEY
+        generateValue: true
       - key: MASTER_ADMIN_USERNAME
         value: master
       - key: MASTER_ADMIN_PASSWORD
+        sync: false
+      - key: DEFAULT_STORE_ADMIN_PASSWORD
         sync: false
       - key: PLATFORM_WHATSAPP
         sync: false

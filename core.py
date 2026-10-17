@@ -7,14 +7,18 @@ import json
 import csv
 import io
 import hashlib
+import re
 import secrets
 from datetime import datetime, timedelta
 import urllib.parse
 from functools import wraps
 from flask import (Flask, render_template, render_template_string, request, redirect, url_for,
                    session, flash, jsonify, g, Response)
+from werkzeug.middleware.proxy_fix import ProxyFix
 from config import get_config, ProductionConfig
+from csrf import init_csrf
 from security import hash_password, verify_password, needs_rehash
+import ratelimit
 from db import (Database, get_connection, is_turso, init_master_db,
                 get_master_db_connection, get_tenant_by_identifier,
                 get_tenant_db_connection, provision_new_tenant,
@@ -30,6 +34,21 @@ app_config = get_config()
 app = Flask(__name__)
 
 app.secret_key = app_config.SECRET_KEY
+
+# Render (and most hosts) sit behind a proxy. Trust exactly ONE proxy hop for the client IP and
+# the https scheme, so request.remote_addr is the real visitor IP and cannot be spoofed with a
+# fake X-Forwarded-For header (which would let an attacker dodge the login lockout).
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=0, x_prefix=0)
+
+# Session cookie hardening + upload size limit
+IS_PRODUCTION = isinstance(app_config, ProductionConfig)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=app_config.SESSION_COOKIE_HTTPONLY,
+    SESSION_COOKIE_SAMESITE=app_config.SESSION_COOKIE_SAMESITE,
+    SESSION_COOKIE_SECURE=app_config.SESSION_COOKIE_SECURE,
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=app_config.SESSION_LIFETIME_HOURS),
+    MAX_CONTENT_LENGTH=app_config.MAX_CONTENT_LENGTH,
+)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -50,6 +69,7 @@ def _ensure_master_db_ready():
     if not _master_db_initialized:
         try:
             init_master_db()
+            ratelimit.ensure_table()
             _master_db_initialized = True
         except Exception as e:
             print(f"[Init] Master DB lazy init error: {e}")
@@ -63,6 +83,17 @@ def _ensure_default_db_ready():
             with app.app_context():
                 init_db()
             _default_db_initialized = True
+            # The default store's database only exists now on a brand-new install, so copy its admin
+            # username into the master table here (a no-op once every store has one).
+            try:
+                from db import backfill_admin_usernames
+                _m = get_master_db_connection()
+                try:
+                    backfill_admin_usernames(_m)
+                finally:
+                    _m.close()
+            except Exception as e:
+                print(f"[Init] admin username backfill after default DB init: {e}", flush=True)
         except Exception as e:
             print(f"[Init] default DB init error: {e}", flush=True)
 
@@ -103,6 +134,19 @@ def _error_page(code, title, message, error_id=None):
         code=code, title=title, message=message, home_url=home_url, error_id=error_id)
     return Response(html, status=code, mimetype='text/html')
 
+# CSRF protection for every POST (registered first so it runs before the tenant middleware)
+init_csrf(app, error_renderer=lambda code, title, msg: _error_page(code, title, msg))
+
+@app.errorhandler(400)
+def handle_bad_request(e):
+    return _error_page(400, 'Bad request', 'That request could not be understood. Please go back and try again.')
+
+@app.errorhandler(413)
+def handle_too_large(e):
+    if request.path.startswith('/api/') or request.path.endswith('/checkout'):
+        return jsonify(success=False, error='The upload is too large.'), 413
+    return _error_page(413, 'File too large', 'The file you uploaded is too large. Please upload an image under 16 MB.')
+
 @app.errorhandler(404)
 def handle_not_found(e):
     if request.path.startswith('/api/'):
@@ -121,6 +165,60 @@ def handle_server_error(e):
                        "Sorry, we hit a problem on our side. Please try again in a moment. "
                        "If it keeps happening, contact the store and share the reference below.",
                        error_id=error_id)
+
+# ---------------------------------------------------------------------------
+# Security headers
+# ---------------------------------------------------------------------------
+# Scripts: only files from this site, plus inline <script nonce="..."> blocks that carry this request's
+# random nonce. Inline event handlers (onclick=...) and attacker-injected <script> tags do NOT run, which
+# is what makes XSS hard to exploit. (Templates use data-on-* attributes + static/js/ui-events.js instead.)
+# Styles still allow 'unsafe-inline' because the templates use many style="..." attributes; that is far
+# lower risk than scripts, and can be tightened later.
+_CSP_TEMPLATE = (
+    "default-src 'self'; "
+    "script-src 'self' {nonce}; "
+    "script-src-attr 'none'; "
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+    "font-src 'self' https://fonts.gstatic.com data:; "
+    "img-src 'self' data: blob: https:; "
+    "connect-src 'self'; "
+    "worker-src 'self'; "
+    "manifest-src 'self'; "
+    "object-src 'none'; "
+    "base-uri 'self'; "
+    "form-action 'self'; "
+    "frame-ancestors 'self'"
+)
+
+
+def csp_nonce():
+    """Random per-request value for <script nonce="{{ csp_nonce() }}">. Created on first use."""
+    if not hasattr(g, 'csp_nonce'):
+        g.csp_nonce = secrets.token_urlsafe(18)
+    return g.csp_nonce
+
+
+app.jinja_env.globals['csp_nonce'] = csp_nonce
+
+
+def _build_csp():
+    nonce = getattr(g, 'csp_nonce', None)
+    return _CSP_TEMPLATE.format(nonce=f"'nonce-{nonce}'" if nonce else '')
+
+
+@app.after_request
+def set_security_headers(response):
+    response.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
+    response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()')
+    response.headers['Content-Security-Policy'] = _build_csp()
+    if IS_PRODUCTION and request.is_secure:
+        response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+    # Admin / master pages hold private data and CSRF tokens: never let browsers or proxies cache them
+    if request.path.startswith(('/admin', '/master', '/diag')) and not request.path.startswith('/admin-sw'):
+        response.headers['Cache-Control'] = 'no-store'
+    return response
 
 # ---------------------------------------------------------------------------
 # Multi-Tenant Middleware & Database Connection
@@ -257,6 +355,18 @@ def resolve_tenant_context():
                 </html>
                 """, store_name=tenant_info['store_name']), 403
 
+def rows_affected(cur):
+    """Number of rows changed by the last statement, or None if the driver does not report it."""
+    try:
+        n = cur.rowcount
+    except Exception:
+        return None
+    return n if isinstance(n, int) and n >= 0 else None
+
+def client_ip():
+    """Real client IP (ProxyFix already resolved the single trusted proxy hop)."""
+    return request.remote_addr or '0.0.0.0'
+
 def check_expired_reservations(db):
     """Finds all orders with status 'Reserved' that have expired,
     restores their stock, and marks them as 'Expired'."""
@@ -270,6 +380,13 @@ def check_expired_reservations(db):
     if expired_orders:
         for order in expired_orders:
             order_id = order['id']
+            # Claim the order first. If two requests run this cleanup at the same moment, only the
+            # one whose UPDATE actually changes the row may restore stock (prevents double-restore).
+            claim = db.execute(
+                "UPDATE orders SET status = 'Expired', reserved_until = NULL "
+                "WHERE id = ? AND status = 'Reserved'", [order_id])
+            if rows_affected(claim) == 0:
+                continue
             # Fetch items in this order
             items_cur = db.execute(
                 'SELECT product_id, quantity FROM order_items WHERE order_id = ?',
@@ -281,11 +398,6 @@ def check_expired_reservations(db):
                     'UPDATE products SET stock = stock + ? WHERE id = ?',
                     [item['quantity'], item['product_id']]
                 )
-            # Update order status to Expired and clear reservation time
-            db.execute(
-                "UPDATE orders SET status = 'Expired', reserved_until = NULL WHERE id = ?",
-                [order_id]
-            )
         db.commit()
 
 def get_db():
@@ -364,6 +476,24 @@ def init_db():
         db.commit()
     except Exception:
         pass
+
+    # --- Default store admin password: never seeded as plain text ---
+    pw_row = db.execute("SELECT value FROM settings WHERE key = 'admin_password'").fetchone()
+    if not pw_row:
+        initial_pw = os.environ.get('DEFAULT_STORE_ADMIN_PASSWORD', '')
+        generated = not initial_pw
+        if generated:
+            initial_pw = secrets.token_urlsafe(12)
+        db.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('admin_password', ?)",
+                   [hash_password(initial_pw)])
+        db.commit()
+        if generated:
+            print(f"[Security] No admin password existed for the default store. A random one was created: "
+                  f"{initial_pw}  (username: admin). Log in and change it in Settings, or set "
+                  f"DEFAULT_STORE_ADMIN_PASSWORD before first start.", flush=True)
+    elif verify_password('admin123', pw_row['value']):
+        print("[Security] WARNING: the default store still uses the password 'admin123'. "
+              "Change it in Admin > Settings now.", flush=True)
 
     # --- Migrations: insert missing default settings for existing installs ---
     defaults = [
@@ -475,10 +605,8 @@ def delete_image(url):
         cloudinary_helper.delete_image(url)
 
 # ---------------------------------------------------------------------------
-# Auth Decorator & Rate Limiting Storage
+# Auth Decorator (login rate limiting lives in ratelimit.py, stored in the database)
 # ---------------------------------------------------------------------------
-FAILED_LOGIN_ATTEMPTS = {}
-
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):

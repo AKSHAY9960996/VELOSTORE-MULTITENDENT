@@ -13,8 +13,9 @@ from db import (
 )
 from flask import flash, redirect, render_template, request, session, url_for
 from functools import wraps
-from security import hash_password, needs_rehash, verify_password
-from core import app
+from security import hash_password, needs_rehash, verify_password, validate_new_password
+import ratelimit
+from core import app, client_ip
 
 # ===========================================================================
 # Master Admin & Multi-Tenant Routes
@@ -34,6 +35,15 @@ def master_login():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
+
+        # Brute-force protection (stored in the database, so it survives restarts and multiple workers)
+        ip_key = f"master:{client_ip()}"
+        user_key = f"master-user:{username.lower()}"
+        locked = ratelimit.seconds_locked(ip_key, user_key)
+        if locked:
+            flash(f"🔒 Too many failed attempts. Please wait {locked} seconds before trying again.", 'error')
+            return render_template('master/login.html'), 429
+
         m_conn = get_master_db_connection()
         cur = m_conn.cursor()
         cur.execute("SELECT * FROM master_admins WHERE username = ?", [username])
@@ -51,12 +61,20 @@ def master_login():
         m_conn.close()
 
         if admin:
+            ratelimit.clear(ip_key, user_key)
+            session.clear()                      # new session on login (prevents session fixation)
             session['master_logged_in'] = True
             session['master_username'] = admin['username']
+            session.permanent = True             # expires after PERMANENT_SESSION_LIFETIME (8h)
             flash('Welcome to Master Control Panel! ⚡', 'success')
             return redirect(url_for('master_dashboard'))
 
-        flash('Invalid master username or password.', 'error')
+        remaining = ratelimit.record_failure(ip_key)
+        ratelimit.record_failure(user_key, max_attempts=15, lockout=900)
+        if remaining > 0:
+            flash(f'Invalid master username or password. ({remaining} attempt{"s" if remaining != 1 else ""} remaining before lockout)', 'error')
+        else:
+            flash('🔒 Too many failed attempts. Locked out for 5 minutes.', 'error')
 
     return render_template('master/login.html')
 
@@ -117,7 +135,7 @@ def master_dashboard():
         except Exception:
             pass
 
-        t['admin_username'] = adm_usr
+        t['admin_username'] = t.get('admin_username') or adm_usr   # master-table value first
 
         t['product_count'] = p_cnt
         t['order_count'] = o_cnt
@@ -166,7 +184,7 @@ def master_tenant_new():
         except ValueError:
             max_products = 100
         admin_username = request.form.get('admin_username', '').strip() or 'admin'
-        admin_password = request.form.get('admin_password', 'admin123')
+        admin_password = request.form.get('admin_password', '').strip()
 
         # Feature flags toggles
         feature_flags = {
@@ -256,7 +274,13 @@ def master_tenant_edit(tenant_id):
             if owner_phone:
                 t_conn.execute("UPDATE settings SET value = ? WHERE key = 'whatsapp_number'", [owner_phone])
             if new_username:
-                t_conn.execute("UPDATE settings SET value = ? WHERE key = 'admin_username'", [new_username])
+                from db import change_admin_username
+                try:
+                    def _save_username(name):
+                        t_conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_username', ?)", [name])
+                    change_admin_username(tenant['slug'], new_username, _save_username)
+                except ValueError:
+                    flash(f'⚠️ Admin username "{new_username}" is already used by another store. Username was NOT changed.', 'error')
             t_conn.commit()
             t_conn.close()
         except Exception:
@@ -264,6 +288,11 @@ def master_tenant_edit(tenant_id):
 
         # Optional Admin Password Reset
         new_password = request.form.get('admin_password', '').strip()
+        if new_password:
+            pw_error = validate_new_password(new_password, new_username or '')
+            if pw_error:
+                flash(f"Password NOT changed: {pw_error}", "error")
+                new_password = ''
         if new_password:
             try:
                 update_tenant_admin_password(tenant['slug'], new_password)
@@ -318,7 +347,7 @@ def master_tenant_delete(tenant_id):
         flash(f"Could not delete store: {str(e)}", 'error')
     return redirect(url_for('master_dashboard'))
 
-@app.route('/master/tenants/<int:tenant_id>/login-as')
+@app.route('/master/tenants/<int:tenant_id>/login-as', methods=['POST'])
 @master_login_required
 def master_impersonate(tenant_id):
     m_conn = get_master_db_connection()

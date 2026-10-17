@@ -12,6 +12,7 @@
 
   <form method="POST" enctype="multipart/form-data"
         action="{% if action == 'Edit' %}{{ url_for('admin_edit_product', product_id=product.id) }}{% else %}{{ url_for('admin_add_product') }}{% endif %}">
+    {{ csrf_field() }}
 
     <!-- Basic Info -->
     <div class="form-section">
@@ -76,10 +77,10 @@
                placeholder="e.g. S, M, L, XL or Free Size or 32, 34, 36 or 100ml / Standard" />
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;">
           <span style="font-size:0.75rem;color:var(--a-text-muted);">Quick Presets:</span>
-          <button type="button" class="topbar-btn" style="padding:3px 10px;font-size:0.72rem;background:var(--a-surface2);border:1px solid var(--a-border-md);border-radius:4px;cursor:pointer;" onclick="setQuickSize('Free Size')">Free Size</button>
-          <button type="button" class="topbar-btn" style="padding:3px 10px;font-size:0.72rem;background:var(--a-surface2);border:1px solid var(--a-border-md);border-radius:4px;cursor:pointer;" onclick="setQuickSize('S, M, L, XL')">S, M, L, XL</button>
-          <button type="button" class="topbar-btn" style="padding:3px 10px;font-size:0.72rem;background:var(--a-surface2);border:1px solid var(--a-border-md);border-radius:4px;cursor:pointer;" onclick="setQuickSize('XS, S, M, L, XL, XXL')">XS to XXL</button>
-          <button type="button" class="topbar-btn" style="padding:3px 10px;font-size:0.72rem;background:var(--a-surface2);border:1px solid var(--a-border-md);border-radius:4px;cursor:pointer;" onclick="setQuickSize('Standard')">Standard</button>
+          <button type="button" class="topbar-btn" style="padding:3px 10px;font-size:0.72rem;background:var(--a-surface2);border:1px solid var(--a-border-md);border-radius:4px;cursor:pointer;" data-on-click="setQuickSize" data-args='["Free Size"]'>Free Size</button>
+          <button type="button" class="topbar-btn" style="padding:3px 10px;font-size:0.72rem;background:var(--a-surface2);border:1px solid var(--a-border-md);border-radius:4px;cursor:pointer;" data-on-click="setQuickSize" data-args='["S, M, L, XL"]'>S, M, L, XL</button>
+          <button type="button" class="topbar-btn" style="padding:3px 10px;font-size:0.72rem;background:var(--a-surface2);border:1px solid var(--a-border-md);border-radius:4px;cursor:pointer;" data-on-click="setQuickSize" data-args='["XS, S, M, L, XL, XXL"]'>XS to XXL</button>
+          <button type="button" class="topbar-btn" style="padding:3px 10px;font-size:0.72rem;background:var(--a-surface2);border:1px solid var(--a-border-md);border-radius:4px;cursor:pointer;" data-on-click="setQuickSize" data-args='["Standard"]'>Standard</button>
         </div>
         <p style="font-size:0.74rem;color:var(--a-text-muted);margin-top:6px;margin-bottom:0;">
           Tip: Separate multiple sizes with commas (e.g. <code>S, M, L, XL</code>). Customers will see these size options on the storefront and product page.
@@ -111,7 +112,7 @@
             <div style="padding:8px 12px;background:var(--a-surface);display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:0.72rem;color:var(--a-text-muted)">Current Photo 1</span>
               <label style="font-size:0.75rem;color:var(--a-danger);display:inline-flex;align-items:center;gap:4px;cursor:pointer;margin:0;">
-                <input type="checkbox" name="remove_image1" value="1" onchange="toggleRemoveBox('prevBox1', this.checked)"> Remove
+                <input type="checkbox" name="remove_image1" value="1" data-on-change="toggleRemoveBoxEl" data-args='["prevBox1", "$el"]'> Remove
               </label>
             </div>
           </div>
@@ -119,7 +120,7 @@
 
           <div class="img-upload-area {% if product and product.image %}has-img{% endif %}"
                id="uploadArea1"
-               onclick="document.getElementById('image').click()"
+               data-on-click="ui.clickId" data-args='["image"]'
                style="cursor:pointer;min-height:130px;">
             <div class="img-upload-icon">📷</div>
             <div class="img-upload-label" id="uploadLabel1">{% if product and product.image %}Change Photo 1{% else %}Click to upload Photo 1{% endif %}</div>
@@ -127,7 +128,7 @@
           </div>
           <input type="file" id="image" name="image"
                  accept="image/*" style="display:none"
-                 onchange="previewSingleImage(this, 'uploadArea1', 'uploadLabel1')" />
+                 data-on-change="previewSingleImage" data-args='["$el", "uploadArea1", "uploadLabel1"]' />
         </div>
 
         <!-- Picture 2: Secondary / Angle View -->
@@ -146,7 +147,7 @@
             <div style="padding:8px 12px;background:var(--a-surface);display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:0.72rem;color:var(--a-text-muted)">Current Photo 2</span>
               <label style="font-size:0.75rem;color:var(--a-danger);display:inline-flex;align-items:center;gap:4px;cursor:pointer;margin:0;">
-                <input type="checkbox" name="remove_image2" value="1" onchange="toggleRemoveBox('prevBox2', this.checked)"> Remove
+                <input type="checkbox" name="remove_image2" value="1" data-on-change="toggleRemoveBoxEl" data-args='["prevBox2", "$el"]'> Remove
               </label>
             </div>
           </div>
@@ -154,7 +155,7 @@
 
           <div class="img-upload-area {% if product and product.image2 %}has-img{% endif %}"
                id="uploadArea2"
-               onclick="document.getElementById('image2').click()"
+               data-on-click="ui.clickId" data-args='["image2"]'
                style="cursor:pointer;min-height:130px;">
             <div class="img-upload-icon">📸</div>
             <div class="img-upload-label" id="uploadLabel2">{% if product and product.image2 %}Change Photo 2{% else %}Click to upload Photo 2{% endif %}</div>
@@ -162,7 +163,7 @@
           </div>
           <input type="file" id="image2" name="image2"
                  accept="image/*" style="display:none"
-                 onchange="previewSingleImage(this, 'uploadArea2', 'uploadLabel2')" />
+                 data-on-change="previewSingleImage" data-args='["$el", "uploadArea2", "uploadLabel2"]' />
         </div>
       </div>
     </div>
@@ -176,7 +177,7 @@
   </form>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce() }}">
   function previewSingleImage(input, areaId, labelId) {
     const area = document.getElementById(areaId);
     const label = document.getElementById(labelId);
@@ -192,6 +193,8 @@
       reader.readAsDataURL(input.files[0]);
     }
   }
+
+  function toggleRemoveBoxEl(boxId, el) { toggleRemoveBox(boxId, el.checked); }
 
   function toggleRemoveBox(boxId, isChecked) {
     const box = document.getElementById(boxId);

@@ -6,6 +6,12 @@
 <!-- Search & Filter Bar -->
 <div class="admin-search-bar">
   <form method="GET" action="{{ url_for('admin_orders') }}" style="display:flex;gap:10px;flex:1;flex-wrap:wrap;align-items:center">
+    <!-- Preserve the ?shop= tenant param across filter submissions.
+         Browsers discard query-string params that are in the action URL when the form
+         method is GET; they only forward named <input> fields. -->
+    {% if g.tenant_slug and g.tenant_slug != 'default' %}
+    <input type="hidden" name="shop" value="{{ g.tenant_slug }}" />
+    {% endif %}
     <!-- Search Input -->
     <div class="search-input-wrap" style="flex: 2; min-width: 250px;">
       <span class="search-icon">🔍</span>
@@ -15,7 +21,7 @@
     </div>
 
     <!-- Status Dropdown -->
-    <select name="status" class="admin-filter-select" style="min-width: 140px;" onchange="this.form.submit()">
+    <select name="status" class="admin-filter-select" style="min-width: 140px;" data-on-change="ui.submit">
       <option value="" {% if not status_filter %}selected{% endif %}>All Statuses</option>
       <option value="Pending"   {% if status_filter=='Pending' %}selected{% endif %}>⏳ Pending</option>
       <option value="Confirmed" {% if status_filter=='Confirmed' %}selected{% endif %}>✅ Confirmed</option>
@@ -24,7 +30,7 @@
     </select>
 
     <!-- Date Range Dropdown -->
-    <select name="date_filter" id="dateFilterSelect" class="admin-filter-select" onchange="toggleCustomDates()" style="min-width: 140px;">
+    <select name="date_filter" id="dateFilterSelect" class="admin-filter-select" data-on-change="toggleCustomDates" style="min-width: 140px;">
       <option value="" {% if not date_filter %}selected{% endif %}>All Dates</option>
       <option value="today" {% if date_filter=='today' %}selected{% endif %}>📅 Today</option>
       <option value="yesterday" {% if date_filter=='yesterday' %}selected{% endif %}>📅 Yesterday</option>
@@ -47,7 +53,7 @@
   </form>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce() }}">
   function toggleCustomDates() {
     const select = document.getElementById('dateFilterSelect');
     const customWrap = document.getElementById('customDatesWrap');

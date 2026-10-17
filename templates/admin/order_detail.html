@@ -45,7 +45,8 @@
         <div style="display:flex;gap:6px;align-items:center;margin-left:auto">
           {% if item.quantity > 1 %}
             <form method="POST" action="{{ url_for('admin_cancel_order_item', order_id=order.id, item_id=item.id) }}"
-                  onsubmit="return confirm('Cancel 1 piece of {{ item.product_name }}?\n\n• Order item quantity becomes {{ item.quantity - 1 }}\n• 1 item is returned back to inventory stock\n• Order total is automatically updated');">
+                  data-confirm="Cancel 1 piece of {{ item.product_name }}?\n\n• Order item quantity becomes {{ item.quantity - 1 }}\n• 1 item is returned back to inventory stock\n• Order total is automatically updated">
+    {{ csrf_field() }}
               <input type="hidden" name="action" value="cancel_one">
               <button type="submit" class="topbar-btn" title="Cancel only 1 piece"
                       style="padding:4px 8px;font-size:0.75rem;background:rgba(239, 68, 68, 0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.25);font-weight:600;border-radius:6px;cursor:pointer;">
@@ -53,7 +54,8 @@
               </button>
             </form>
             <form method="POST" action="{{ url_for('admin_cancel_order_item', order_id=order.id, item_id=item.id) }}"
-                  onsubmit="return confirm('Cancel ALL {{ item.quantity }} pieces of {{ item.product_name }}?\n\n• All {{ item.quantity }} pieces will be removed from order\n• {{ item.quantity }} units returned back to stock\n• Order total is automatically updated');">
+                  data-confirm="Cancel ALL {{ item.quantity }} pieces of {{ item.product_name }}?\n\n• All {{ item.quantity }} pieces will be removed from order\n• {{ item.quantity }} units returned back to stock\n• Order total is automatically updated">
+    {{ csrf_field() }}
               <input type="hidden" name="action" value="cancel_all">
               <button type="submit" class="topbar-btn" title="Cancel all pieces of this item"
                       style="padding:4px 8px;font-size:0.75rem;background:rgba(239, 68, 68, 0.15);color:#dc2626;border:1px solid rgba(239,68,68,0.4);font-weight:600;border-radius:6px;cursor:pointer;">
@@ -62,7 +64,8 @@
             </form>
           {% else %}
             <form method="POST" action="{{ url_for('admin_cancel_order_item', order_id=order.id, item_id=item.id) }}"
-                  onsubmit="return confirm('Cancel {{ item.product_name }} from this order?\n\n• Item will be removed from order\n• 1 unit returned back to inventory stock\n• Order total is automatically updated');">
+                  data-confirm="Cancel {{ item.product_name }} from this order?\n\n• Item will be removed from order\n• 1 unit returned back to inventory stock\n• Order total is automatically updated">
+    {{ csrf_field() }}
               <input type="hidden" name="action" value="cancel_all">
               <button type="submit" class="topbar-btn" title="Cancel this item"
                       style="padding:4px 8px;font-size:0.75rem;background:rgba(239, 68, 68, 0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.25);font-weight:600;border-radius:6px;cursor:pointer;">
@@ -85,6 +88,7 @@
       <h4>🔄 Update Order Status</h4>
       <form method="POST" action="{{ url_for('admin_update_order_status', order_id=order.id) }}"
             style="display:flex;gap:10px;flex-wrap:wrap">
+    {{ csrf_field() }}
         <select name="status" class="admin-filter-select" style="flex:1">
           <option value="Reserved"  {% if order.status=='Reserved' %}selected{% endif %}>⏳ Reserved</option>
           <option value="Confirmed" {% if order.status=='Confirmed' %}selected{% endif %}>✅ Confirmed</option>
