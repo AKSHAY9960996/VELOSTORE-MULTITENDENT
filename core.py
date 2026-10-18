@@ -764,7 +764,9 @@ def inject_settings():
             brand = ''
     brand = brand or 'My Shop'
     ctx = dict(settings=settings, now_year=datetime.utcnow().year, tenant=tenant, tenant_features=features, tenant_theme=tenant_theme,
-                 is_luxury=(tenant_theme in ('luxury', 'cocoa')), brand=brand)
+                 is_luxury=(tenant_theme in ('luxury', 'cocoa')), brand=brand,
+                 # Brown (cocoa) and Blue (luxury) share ONE storefront layout; only colours differ.
+                 yp_layout=(tenant_theme in ('cocoa', 'luxury')), yp_blue=(tenant_theme == 'luxury'))
 
     if request.path.startswith('/admin'):
         ctx['storage_stats'] = get_storage_stats()

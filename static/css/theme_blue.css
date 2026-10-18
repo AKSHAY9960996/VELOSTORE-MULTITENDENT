@@ -1,0 +1,67 @@
+/* ============================================================
+   THEME: BLUE (Royal Navy & Gold) - part 2 of 2
+   Loaded right AFTER theme_yumei.css. Same layout as Brown; only the colours change.
+   ============================================================ */
+/* ---- colour remap of theme_yumei.css ---- */
+body.yp { --yp-brown: #0f2a5c; --yp-brown-dk: #0a1f47; --yp-text: #0f1f3d; --yp-muted: #6a7898; }
+.yp-search:focus-within { box-shadow: 0 0 0 3px rgba(15,42,92,0.1); }
+.yp-search input[type="search"]::placeholder { color: #8e9ab3; }
+.yp-menu-overlay { background: rgba(10,25,61,0.45); }
+.yp-menu { box-shadow: 8px 0 40px rgba(10,25,61,0.18); }
+.yp-hero { background: radial-gradient(120% 90% at 85% 10%, #3a62b0 0%, transparent 60%), linear-gradient(115deg, #2b4f9a 0%, #1b3a78 55%, #0f2a5c 100%); box-shadow: 0 8px 28px rgba(15,42,92,0.1); }
+.yp-hero--text::before { background: linear-gradient(90deg, rgba(10,31,71,0.8) 0%, rgba(10,31,71,0.5) 45%, rgba(10,31,71,0) 72%); }
+.yp-hero-text { color: #5b6b8c; }
+.yp-hero-btn { box-shadow: 0 6px 18px rgba(10,31,71,0.28); }
+.yp-pf-slider::-webkit-slider-thumb { box-shadow: 0 2px 8px rgba(10,31,71,0.35); }
+.yp-pf-slider::-moz-range-thumb { box-shadow: 0 2px 8px rgba(10,31,71,0.35); }
+.yp-card:hover { box-shadow: 0 12px 30px rgba(15,42,92,0.13); }
+.yp-noimg { color: #9aa6c0; }
+.yp-badge { box-shadow: 0 2px 8px rgba(10,31,71,0.1); }
+.yp-heart { box-shadow: 0 2px 8px rgba(10,31,71,0.1); }
+.yp-add:disabled { background: #c3cadb; }
+
+/* ============================================================
+   BLUE-ONLY TOUCHES (match the navy + gold reference design)
+   ============================================================ */
+body.yp.yp-blue {
+  --yp-gold: #c8a265;
+  --yp-gold-lt: #e6cc99;
+  --yp-bg: #faf7f1;
+  --yp-line: #e7dfcf;
+  --yp-pill: #f4eee2;
+}
+
+/* Top bar: navy with gold icons + thin gold divider */
+body.yp-blue .yp-topbar { color: #eef1f8; border-bottom: 1px solid rgba(200, 162, 101, 0.35); }
+body.yp-blue .yp-topbar svg { color: var(--yp-gold); }
+body.yp-blue .yp-topbar-sep { background: rgba(200, 162, 101, 0.6); }
+
+/* Header: gold tagline under the shop name */
+body.yp-blue .yp-brand-tag { color: var(--yp-gold); }
+
+/* Hero: light text on a navy fade (works on any image the shop uploads) */
+body.yp-blue .yp-hero { box-shadow: 0 10px 30px rgba(10, 31, 71, 0.25); }
+body.yp-blue .yp-hero--text::before {
+  background: linear-gradient(90deg, rgba(8, 24, 60, 0.78) 0%, rgba(8, 24, 60, 0.46) 48%, rgba(8, 24, 60, 0) 78%);
+}
+body.yp-blue .yp-hero-title { color: #ffffff; text-shadow: 0 2px 18px rgba(5, 15, 40, 0.35); }
+body.yp-blue .yp-hero-eyebrow { color: #f4efe4; }
+body.yp-blue .yp-hero-rule { background: var(--yp-gold); opacity: 1; }
+body.yp-blue .yp-hero-text { color: #eef1f8; text-shadow: 0 1px 10px rgba(5, 15, 40, 0.35); }
+body.yp-blue .yp-hero-btn {
+  background: rgba(8, 24, 60, 0.35); color: var(--yp-gold-lt) !important;
+  border: 1.5px solid var(--yp-gold); box-shadow: none;
+}
+body.yp-blue .yp-hero-btn:hover { background: var(--yp-gold); color: #0a1f47 !important; transform: translateY(-1px); }
+body.yp-blue .yp-hero-dots button { background: rgba(255, 255, 255, 0.9); }
+body.yp-blue .yp-hero-dots button.is-active { background: var(--yp-brown-dk); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7); }
+
+/* Category pills: navy active pill with gold lettering */
+body.yp-blue .yp-cat { background: #f6f0e4; color: var(--yp-brown-dk); }
+body.yp-blue .yp-cat.is-active { background: var(--yp-brown); border-color: var(--yp-brown); color: var(--yp-gold-lt); box-shadow: 0 4px 12px rgba(10, 31, 71, 0.25); }
+
+/* "N products available": navy -> gold underline */
+body.yp-blue .yp-section-count { border-bottom: 0; background: linear-gradient(90deg, var(--yp-brown), var(--yp-gold)) left bottom / 100% 2px no-repeat; }
+
+/* Buttons keep cream lettering on navy */
+body.yp-blue .yp-add, body.yp-blue .yp-pf-apply { color: #f3efe6; }

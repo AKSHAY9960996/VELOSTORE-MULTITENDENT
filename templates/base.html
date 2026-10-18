@@ -16,19 +16,20 @@
     rel="stylesheet">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.1" />
-  {% if tenant_theme == 'cocoa' or (tenant and tenant.theme == 'cocoa') %}
+  {% if yp_layout %}
+  {# Brown + Blue share the same layout CSS; Blue just adds a colour layer on top. #}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_cocoa.css') }}?v=1.0" />
+  {% if yp_blue %}<link rel="stylesheet" href="{{ url_for('static', filename='css/theme_blue_base.css') }}?v=1.0" />{% endif %}
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_yumei.css') }}?v=1.0" />
-  {% elif tenant_theme == 'luxury' or (tenant and tenant.theme == 'luxury') %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_luxury.css') }}?v=1.0" />
+  {% if yp_blue %}<link rel="stylesheet" href="{{ url_for('static', filename='css/theme_blue.css') }}?v=1.0" />{% endif %}
   {% endif %}
   {% block head %}{% endblock %}
 </head>
 
-<body class="{% if tenant_theme == 'cocoa' %}yp{% endif %}" data-currency="{{ settings.get('currency_symbol','₹') }}">
+<body class="{% if yp_layout %}yp{% if yp_blue %} yp-blue{% endif %}{% endif %}" data-currency="{{ settings.get('currency_symbol','₹') }}">
 
-  {% if tenant_theme != 'cocoa' %}
+  {% if not yp_layout %}
   <!-- ===== FLOATING SAKURA CHERRY BLOSSOM PETALS ===== -->
   <div class="sakura-container" aria-hidden="true">
     <div class="sakura-petal"
@@ -89,7 +90,7 @@
   </div>
   {% endif %}
 
-  {% if tenant_theme == 'cocoa' %}
+  {% if yp_layout %}
   <!-- ===== YUMEI TOP BAR ===== -->
   <div class="yp-topbar">
     <span>
@@ -155,7 +156,7 @@
   </div>
   {% endif %}
 
-  {% if tenant_theme == 'cocoa' %}
+  {% if yp_layout %}
   {% set yp_first = (brand.split(' ')[0] if brand else 'Yumei') %}
   <!-- ===== YUMEI HEADER ===== -->
   <header class="yp-header">
