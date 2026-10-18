@@ -5,8 +5,8 @@
 
 {% block content %}
 
-{% if tenant_theme == 'cocoa' %}
-{# ================= YUMEI BROWN STOREFRONT ================= #}
+{% if yp_layout %}
+{# ================= YUMEI STOREFRONT (Brown + Blue share this layout) ================= #}
 {% set yp_first = (brand.split(' ')[0] if brand else 'Yumei') %}
 {% set hero_imgs = [] %}
 {% for n in [1, 2, 3] %}
@@ -479,7 +479,7 @@
   })();
 </script>
 
-{% if tenant_theme == 'cocoa' %}
+{% if yp_layout %}
 <script nonce="{{ csp_nonce() }}">
   (function () {
     // Hero carousel (only when 2+ banner images were chosen in the admin panel)

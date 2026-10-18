@@ -88,13 +88,13 @@
       </div>
     </div>
 
-    <!-- Homepage Hero Banner (Cocoa / brown storefront) -->
+    <!-- Homepage Hero Banner (Brown + Blue storefront) -->
     <div class="form-section">
       <div class="form-section-title">🖼️ Homepage Hero Banner</div>
       <p style="font-size:0.78rem;color:var(--a-text-muted);margin:-4px 0 16px;line-height:1.5">
         The big banner at the top of your storefront. Upload up to 3 images &mdash; with 2 or more they slide automatically.
         Use a wide landscape photo (about 1600&times;900 px) and keep the main subject on the <strong>right</strong> side, because the text sits on the left.
-        Shown on the brown (Cocoa) storefront theme. The title, small line and message on the banner come from <strong>Shop Name</strong>, <strong>Header &amp; Footer Logo Tagline</strong> and <strong>Shop Hero Slogan</strong> above.
+        Shown on the Brown and Blue storefront themes. The title, small line and message on the banner come from <strong>Shop Name</strong>, <strong>Header &amp; Footer Logo Tagline</strong> and <strong>Shop Hero Slogan</strong> above.
       </p>
 
       {% for n in [1, 2, 3] %}
@@ -131,19 +131,21 @@
         <input type="text" id="hero_button_text" name="hero_button_text" maxlength="24" value="{{ settings.get('hero_button_text','') }}" placeholder="Shop Now" />
       </div>
 
-      <div class="a-form-row" style="margin-top:16px">
-        <div class="a-form-group">
-          <label for="topbar_text_1">Top Bar &mdash; Left Text</label>
-          <input type="text" id="topbar_text_1" name="topbar_text_1" maxlength="50" value="{{ settings.get('topbar_text_1','') }}" placeholder="Free shipping on all orders" />
-        </div>
-        <div class="a-form-group">
-          <label for="topbar_text_2">Top Bar &mdash; Right Text</label>
-          <input type="text" id="topbar_text_2" name="topbar_text_2" maxlength="50" value="{{ settings.get('topbar_text_2','') }}" placeholder="Genuine &amp; premium quality" />
-        </div>
-      </div>
-      <p style="font-size:0.72rem;color:var(--a-text-muted);margin-top:6px">
-        Tip: change the top bar text if free shipping doesn&rsquo;t apply to your shop.
+      <p style="font-size:0.72rem;color:var(--a-text-muted);margin:16px 0 6px">
+        Three short messages shown in the bar at the very top of your storefront (they scroll on phones). Write anything that fits your shop &mdash; delivery, quality, returns, warranty, support, payment options. Leave a box empty to use the default.
       </p>
+      <div class="a-form-group" style="margin-top:10px">
+        <label for="topbar_text_1">Top Bar &mdash; Message 1</label>
+        <input type="text" id="topbar_text_1" name="topbar_text_1" maxlength="50" value="{{ settings.get('topbar_text_1','') }}" placeholder="Shipping on all orders" />
+      </div>
+      <div class="a-form-group" style="margin-top:10px">
+        <label for="topbar_text_2">Top Bar &mdash; Message 2</label>
+        <input type="text" id="topbar_text_2" name="topbar_text_2" maxlength="50" value="{{ settings.get('topbar_text_2','') }}" placeholder="Genuine &amp; premium quality" />
+      </div>
+      <div class="a-form-group" style="margin-top:10px">
+        <label for="topbar_text_3">Top Bar &mdash; Message 3</label>
+        <input type="text" id="topbar_text_3" name="topbar_text_3" maxlength="50" value="{{ settings.get('topbar_text_3','') }}" placeholder="Easy ordering &amp; support" />
+      </div>
     </div>
 
     <!-- Currency -->

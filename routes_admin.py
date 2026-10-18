@@ -747,7 +747,7 @@ def admin_settings():
                         delete_image(old_hero)
                     set_setting(hkey, new_hero)
                     flash(f'Banner image {n} uploaded ✅', 'success')
-        for key, limit in (('hero_button_text', 24), ('topbar_text_1', 50), ('topbar_text_2', 50)):
+        for key, limit in (('hero_button_text', 24), ('topbar_text_1', 50), ('topbar_text_2', 50), ('topbar_text_3', 50)):
             set_setting(key, request.form.get(key, '').strip()[:limit])
         set_setting('hero_show_text', '1' if request.form.get('hero_show_text') else '0')
 

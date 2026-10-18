@@ -16,19 +16,20 @@
     rel="stylesheet">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.1" />
-  {% if tenant_theme == 'cocoa' or (tenant and tenant.theme == 'cocoa') %}
+  {% if yp_layout %}
+  {# Brown + Blue share the same layout CSS; Blue just adds a colour layer on top. #}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_cocoa.css') }}?v=1.0" />
+  {% if yp_blue %}<link rel="stylesheet" href="{{ url_for('static', filename='css/theme_blue_base.css') }}?v=1.0" />{% endif %}
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_yumei.css') }}?v=1.0" />
-  {% elif tenant_theme == 'luxury' or (tenant and tenant.theme == 'luxury') %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme_luxury.css') }}?v=1.0" />
+  {% if yp_blue %}<link rel="stylesheet" href="{{ url_for('static', filename='css/theme_blue.css') }}?v=1.0" />{% endif %}
   {% endif %}
   {% block head %}{% endblock %}
 </head>
 
-<body class="{% if tenant_theme == 'cocoa' %}yp{% endif %}" data-currency="{{ settings.get('currency_symbol','₹') }}">
+<body class="{% if yp_layout %}yp{% if yp_blue %} yp-blue{% endif %}{% endif %}" data-currency="{{ settings.get('currency_symbol','₹') }}">
 
-  {% if tenant_theme != 'cocoa' %}
+  {% if not yp_layout %}
   <!-- ===== FLOATING SAKURA CHERRY BLOSSOM PETALS ===== -->
   <div class="sakura-container" aria-hidden="true">
     <div class="sakura-petal"
@@ -89,18 +90,31 @@
   </div>
   {% endif %}
 
-  {% if tenant_theme == 'cocoa' %}
-  <!-- ===== YUMEI TOP BAR ===== -->
+  {% if yp_layout %}
+  <!-- ===== YUMEI TOP BAR (3 shop-editable messages; scrolls as a ticker on phones) ===== -->
+  {% set tb_items = [
+    (settings.get('topbar_text_1') or 'Shipping on all orders', 'truck'),
+    (settings.get('topbar_text_2') or 'Genuine & premium quality', 'shield'),
+    (settings.get('topbar_text_3') or 'Easy ordering & support', 'chat')
+  ] %}
   <div class="yp-topbar">
-    <span>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h11v10H1z"/><path d="M12 9h4.5L20 12.5V16h-8"/><circle cx="5.5" cy="17.5" r="1.8"/><circle cx="16" cy="17.5" r="1.8"/><path d="M3 9H1M4 12H1" /></svg>
-      {{ settings.get('topbar_text_1') or 'Free shipping on all orders' }}
-    </span>
-    <i class="yp-topbar-sep"></i>
-    <span>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9-8 11-4.6-2-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
-      {{ settings.get('topbar_text_2') or 'Genuine & premium quality' }}
-    </span>
+    <div class="yp-topbar-track">
+      {% for copy in [0, 1] %}
+      <div class="yp-topbar-group"{% if copy == 1 %} aria-hidden="true"{% endif %}>
+        {% for text, icon in tb_items %}
+        <span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            {% if icon == 'truck' %}<path d="M1 6h11v10H1z"/><path d="M12 9h4.5L20 12.5V16h-8"/><circle cx="5.5" cy="17.5" r="1.8"/><circle cx="16" cy="17.5" r="1.8"/><path d="M3 9H1M4 12H1"/>
+            {% elif icon == 'shield' %}<path d="M12 2l8 3v6c0 5-3.4 9-8 11-4.6-2-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>
+            {% else %}<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>{% endif %}
+          </svg>
+          {{ text }}
+        </span>
+        <i class="yp-topbar-sep"></i>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
   </div>
   {% else %}
   <!-- ===== TOP ANNOUNCEMENT MARQUEE ===== -->
@@ -155,7 +169,7 @@
   </div>
   {% endif %}
 
-  {% if tenant_theme == 'cocoa' %}
+  {% if yp_layout %}
   {% set yp_first = (brand.split(' ')[0] if brand else 'Yumei') %}
   <!-- ===== YUMEI HEADER ===== -->
   <header class="yp-header">
