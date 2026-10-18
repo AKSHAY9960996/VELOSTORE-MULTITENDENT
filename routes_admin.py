@@ -172,15 +172,30 @@ def admin_login():
                 return False
 
         # Authenticate ONLY against the specific shop the user is trying to log into.
-        # Never fall back to scanning other shops — that would let overlapping
-        # credentials grant access to a different store.
         if target_slug:
             if verify_credentials_for_slug(target_slug):
                 authenticated_slug = target_slug
         else:
-            # No shop context at all — try the default database only
-            if verify_credentials_for_slug('default'):
-                authenticated_slug = 'default'
+            # No shop context — if the input looks like an email, scan master DB to
+            # auto-resolve the tenant slug (unique per store, so safe to do).
+            if '@' in username:
+                try:
+                    m_conn = get_master_db_connection()
+                    rows = m_conn.execute(
+                        "SELECT slug FROM tenants WHERE LOWER(owner_email) = ? AND is_active = 1",
+                        [username.lower()]
+                    ).fetchall()
+                    m_conn.close()
+                    for row in rows:
+                        if verify_credentials_for_slug(row['slug']):
+                            authenticated_slug = row['slug']
+                            break
+                except Exception:
+                    pass
+            # Fall back to the default database if still not resolved
+            if not authenticated_slug:
+                if verify_credentials_for_slug('default'):
+                    authenticated_slug = 'default'
 
         if authenticated_slug:
             ratelimit.clear(ip_key)
