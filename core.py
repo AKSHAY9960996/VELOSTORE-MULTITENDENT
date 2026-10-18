@@ -75,27 +75,38 @@ def _ensure_master_db_ready():
             print(f"[Init] Master DB lazy init error: {e}")
 
 _default_db_initialized = False
+_default_db_last_attempt = 0.0   # epoch seconds of last failed attempt
+_DEFAULT_DB_RETRY_INTERVAL = 15  # seconds to wait before retrying after a failure
 
 def _ensure_default_db_ready():
-    global _default_db_initialized
-    if not _default_db_initialized:
+    """Lazy-initialise the default tenant DB at most once per _DEFAULT_DB_RETRY_INTERVAL seconds
+    after a failure, so a Turso SQLITE_BUSY error on cold-start does not spam new transactions
+    on every incoming request and make the problem worse."""
+    global _default_db_initialized, _default_db_last_attempt
+    if _default_db_initialized:
+        return
+    import time as _time
+    now = _time.monotonic()
+    if now - _default_db_last_attempt < _DEFAULT_DB_RETRY_INTERVAL:
+        return  # still in cooldown — skip this request
+    _default_db_last_attempt = now
+    try:
+        with app.app_context():
+            init_db()
+        _default_db_initialized = True
+        # The default store's database only exists now on a brand-new install, so copy its admin
+        # username into the master table here (a no-op once every store has one).
         try:
-            with app.app_context():
-                init_db()
-            _default_db_initialized = True
-            # The default store's database only exists now on a brand-new install, so copy its admin
-            # username into the master table here (a no-op once every store has one).
+            from db import backfill_admin_usernames
+            _m = get_master_db_connection()
             try:
-                from db import backfill_admin_usernames
-                _m = get_master_db_connection()
-                try:
-                    backfill_admin_usernames(_m)
-                finally:
-                    _m.close()
-            except Exception as e:
-                print(f"[Init] admin username backfill after default DB init: {e}", flush=True)
+                backfill_admin_usernames(_m)
+            finally:
+                _m.close()
         except Exception as e:
-            print(f"[Init] default DB init error: {e}", flush=True)
+            print(f"[Init] admin username backfill after default DB init: {e}", flush=True)
+    except Exception as e:
+        print(f"[Init] default DB init error: {e}", flush=True)
 
 def _render_landing():
     """Marketing page for the platform itself (shown at / when no store is selected)."""

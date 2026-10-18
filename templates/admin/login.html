@@ -53,12 +53,16 @@
       {% else %}
         <div class="a-form-group" style="margin-bottom: 14px;">
           <label for="shop_slug" style="display: flex; justify-content: space-between; align-items: center;">
-            <span>Store ID / Slug <small style="color: var(--a-text-muted); font-weight: normal;">(Optional)</small></span>
+            <span>Store ID / Slug <small style="color: #f87171; font-weight: 600;">*Required</small></span>
           </label>
           <input type="text" id="shop_slug" name="shop_slug"
-                 placeholder="e.g. your-store-name (leave blank to auto-detect)" autocomplete="off" />
+                 placeholder="e.g. blulee  (your store's slug — required)" autocomplete="off" required />
+          <small style="color: var(--a-text-muted); font-size: 0.75rem; margin-top: 4px; display: block;">
+            💡 Tip: use your shop link — <code style="color:#818cf8;">velostore-multitendent.onrender.com/admin/login?shop=<strong>your-slug</strong></code>
+          </small>
         </div>
       {% endif %}
+
       <div class="a-form-group">
         <label for="username">Username or Email</label>
         <input type="text" id="username" name="username"
