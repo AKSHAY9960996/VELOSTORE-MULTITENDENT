@@ -191,7 +191,22 @@ def checkout():
         name        = request.form.get('name', '').strip()
         phone       = request.form.get('phone', '').strip()
         whatsapp    = request.form.get('whatsapp', '').strip()
-        address     = request.form.get('address', '').strip()
+        # Support both legacy single address field and new Amazon-style split fields
+        flat        = request.form.get('flat', '').strip()
+        area        = request.form.get('area', '').strip()
+        town_city   = request.form.get('town_city', '').strip()
+        state       = request.form.get('state', '').strip()
+        address_raw = request.form.get('address', '').strip()
+        # Build combined address from split fields if provided, otherwise fall back to legacy
+        if flat and area:
+            address_parts = [flat, area]
+            if town_city:
+                address_parts.append(town_city)
+            if state:
+                address_parts.append(state)
+            address = ', '.join(address_parts)
+        else:
+            address = address_raw
         landmark    = request.form.get('landmark', '').strip()
         post_office = request.form.get('post_office', '').strip()
         district    = request.form.get('district', '').strip()
@@ -206,7 +221,7 @@ def checkout():
         if not re.fullmatch(r'[0-9]{6}', pincode):
             return fail('Please enter a valid 6-digit pincode.')
         if (len(name) > 100 or len(address) > 500 or len(landmark) > 200 or len(post_office) > 100
-                or len(district) > 100 or len(notes) > 300):
+                or len(district) > 100 or len(notes) > 300 or len(town_city) > 100 or len(state) > 100):
             return fail('One of the fields is too long. Please shorten it and try again.')
 
         # ---- 3. Save everything in ONE transaction ----

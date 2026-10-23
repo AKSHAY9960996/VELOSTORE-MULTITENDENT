@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}{% if is_luxury %}💎 Checkout — {{ settings.get('shop_name','My Shop') }}{% else %}🌸 Checkout — {{ settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
+{% block title %}{% if is_luxury %}💎 Checkout — {{ settings.get('shop_name','My Shop') }}{% else %}🌸 Checkout — {{
+settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
 {% block description %}Complete your order at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
 
 {% block content %}
-<div class="checkout-page-wrap">
+<div class="checkout-page-wrap checkout-long-page">
   <!-- Breadcrumb -->
   <nav class="breadcrumb" style="margin-top:24px" aria-label="Breadcrumb">
     <a href="{{ url_for('index') }}">Home</a>
@@ -16,151 +17,224 @@
     {% if is_luxury %}Complete Your Order 💎{% else %}Complete Your Order 🌸{% endif %}
   </h1>
 
-  <div class="checkout-wrap">
-    <!-- ===== ORDER SUMMARY COLUMN ===== -->
-    <div class="checkout-summary-col">
-      <!-- ===== ORDER SUMMARY CARD ===== -->
-      <div class="order-summary-card">
-        <div class="order-summary-head">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+  <!-- ===== SECTION 1: ORDER SUMMARY ===== -->
+  <div class="checkout-section">
+    <div class="order-summary-card">
+      <div class="order-summary-head">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <h3>{% if is_luxury %}💎 Order Summary{% else %}🌸 Order Summary{% endif %}</h3>
+      </div>
+      <div class="order-summary-body">
+        <div id="checkoutSummary">
+          <p style="color:var(--clr-text-muted);font-size:0.875rem">Loading selection...</p>
+        </div>
+        <div class="summary-total-row">
+          <span class="summary-total-label">Subtotal</span>
+          <span class="summary-total-value" id="checkoutTotal">{{ settings.get('currency_symbol','₹') }}0.00</span>
+        </div>
+        <p class="summary-security-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          White-Glove Order Confirmation via {{ brand }} Concierge
+        </p>
+      </div>
+    </div>
+
+    <!-- ===== SHIPPING POLICY CARD ===== -->
+    <div class="order-summary-card shipping-policy-card">
+      <div class="shipping-policy-content">
+        <h4 class="shipping-policy-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="1" y="3" width="15" height="13"></rect>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+          </svg>
+          <span>Express Courier Shipping</span>
+        </h4>
+        <ul class="shipping-policy-list">
+          <li><strong>Up to 500g:</strong> {{ settings.get('currency_symbol','₹') }}50</li>
+          <li><strong>500g to 1kg:</strong> {{ settings.get('currency_symbol','₹') }}70</li>
+          <li>Insured delivery via <strong>India Post Express</strong>.</li>
+          <li class="shipping-policy-important">Final weight &amp; shipping charges will be verified with the {{ brand
+            }}
+            Concierge on WhatsApp upon placing order.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 2: DELIVERY ADDRESS FORM (Amazon-style) ===== -->
+  <form id="checkoutForm" method="POST" action="{{ url_for('checkout') }}">
+    {{ csrf_field() }}
+    <div class="form-card checkout-address-card">
+      <div class="form-card-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        <h2>{% if is_luxury %}💎 Enter Delivery Address{% else %}🌸 Enter Delivery Address{% endif %}</h2>
+      </div>
+
+      <div class="checkout-notice-alert">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <div>
+          <strong>Store Notice:</strong> You may request a high-definition video of your piece on WhatsApp
+          prior to dispatch for complete satisfaction.
+        </div>
+      </div>
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label for="name">Full Name (First and Last name) *</label>
+        <input type="text" id="name" name="name" placeholder="Enter your full name" required autocomplete="name" />
+      </div>
+
+      <!-- Phone + WhatsApp -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Mobile Number *</label>
+          <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210" required autocomplete="tel" />
+          <span class="field-hint">May be used to assist delivery</span>
+        </div>
+        <div class="form-group">
+          <label for="whatsapp">WhatsApp Number *</label>
+          <input type="tel" id="whatsapp" name="whatsapp" placeholder="e.g. 9876543210" required />
+        </div>
+      </div>
+
+      <div class="address-section-divider"></div>
+
+      <!-- Flat, House no., Building, Company, Apartment -->
+      <div class="form-group">
+        <label for="flat">Flat, House no., Building, Company, Apartment *</label>
+        <input type="text" id="flat" name="flat" placeholder="e.g. Flat 302, Ruby Residency" required
+          autocomplete="address-line1" />
+      </div>
+
+      <!-- Area, Street, Sector, Village -->
+      <div class="form-group">
+        <label for="area">Area, Street, Sector, Village *</label>
+        <input type="text" id="area" name="area" placeholder="e.g. MG Road, Sector 5" required
+          autocomplete="address-line2" />
+      </div>
+
+      <!-- Landmark -->
+      <div class="form-group">
+        <label for="landmark">Landmark</label>
+        <input type="text" id="landmark" name="landmark" placeholder="E.g. near apollo hospital" autocomplete="off" />
+      </div>
+
+      <!-- Post Office Name -->
+      <div class="form-group">
+        <label for="post_office">Post Office (P.O.) Name *</label>
+        <input type="text" id="post_office" name="post_office" placeholder="e.g. Kakkanad P.O." required
+          pattern="[A-Za-z\s.]+" title="Only letters, spaces and dots are allowed" data-on-input="ui.lettersOnly" />
+        <span class="field-hint">Enter the name of your nearest post office</span>
+      </div>
+
+      <!-- Pincode + Town/City -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="pincode">Pincode *</label>
+          <input type="text" id="pincode" name="pincode" placeholder="6-digit Pincode" required
+            autocomplete="postal-code" maxlength="6" />
+        </div>
+        <div class="form-group">
+          <label for="town_city">Town/City *</label>
+          <input type="text" id="town_city" name="town_city" placeholder="e.g. Kochi" required
+            autocomplete="address-level2" />
+        </div>
+      </div>
+
+      <!-- District + State -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="district">District *</label>
+          <input type="text" id="district" name="district" placeholder="e.g. Ernakulam" required />
+        </div>
+        <div class="form-group">
+          <label for="state">State *</label>
+          <select id="state" name="state" required autocomplete="address-level1">
+            <option value="" disabled selected>Select</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+            <option value="Assam">Assam</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Chhattisgarh">Chhattisgarh</option>
+            <option value="Goa">Goa</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Jharkhand">Jharkhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Sikkim">Sikkim</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="West Bengal">West Bengal</option>
+            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+            <option value="Ladakh">Ladakh</option>
+            <option value="Lakshadweep">Lakshadweep</option>
+            <option value="Puducherry">Puducherry</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="address-section-divider"></div>
+
+      <!-- Delivery Instructions (optional) -->
+      <div class="form-group delivery-instructions-group">
+        <label for="notes">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            style="vertical-align: -2px; margin-right: 6px;">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
-          <h3>{% if is_luxury %}💎 Order Summary{% else %}🌸 Order Summary{% endif %}</h3>
-        </div>
-        <div class="order-summary-body">
-          <div id="checkoutSummary">
-            <p style="color:var(--clr-text-muted);font-size:0.875rem">Loading selection...</p>
-          </div>
-          <div class="summary-total-row">
-            <span class="summary-total-label">Subtotal</span>
-            <span class="summary-total-value" id="checkoutTotal">{{ settings.get('currency_symbol','₹') }}0.00</span>
-          </div>
-          <p class="summary-security-note">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            White-Glove Order Confirmation via {{ brand }} Concierge
-          </p>
-        </div>
+          Delivery Instructions (optional)
+        </label>
+        <textarea id="notes" name="notes" rows="2"
+          placeholder="Notes, preferences and more — e.g. Gift packaging notes or specific delivery instructions..."></textarea>
       </div>
 
-      <!-- ===== SHIPPING POLICY CARD ===== -->
-      <div class="order-summary-card shipping-policy-card">
-        <div class="shipping-policy-content">
-          <h4 class="shipping-policy-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <rect x="1" y="3" width="15" height="13"></rect>
-              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-              <circle cx="5.5" cy="18.5" r="2.5"></circle>
-              <circle cx="18.5" cy="18.5" r="2.5"></circle>
-            </svg>
-            <span>Express Courier Shipping</span>
-          </h4>
-          <ul class="shipping-policy-list">
-            <li><strong>Up to 500g:</strong> {{ settings.get('currency_symbol','₹') }}50</li>
-            <li><strong>500g to 1kg:</strong> {{ settings.get('currency_symbol','₹') }}70</li>
-            <li>Insured delivery via <strong>India Post Express</strong>.</li>
-            <li class="shipping-policy-important">Final weight & shipping charges will be verified with the {{ brand }}
-              Concierge on WhatsApp upon placing order.</li>
-          </ul>
-        </div>
-      </div>
+      <button type="submit" class="btn-place-order" id="placeOrderBtn">
+        <span>{% if is_luxury %}PLACE ORDER 💎{% else %}PLACE ORDER 🌸{% endif %}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
     </div>
-
-    <!-- ===== DELIVERY FORM ===== -->
-    <form id="checkoutForm" method="POST" action="{{ url_for('checkout') }}">
-    {{ csrf_field() }}
-      <div class="form-card">
-        <div class="form-card-title">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <h2>{% if is_luxury %}💎 Delivery Details{% else %}🌸 White-Glove Delivery Details{% endif %}</h2>
-        </div>
-
-        <div class="checkout-notice-alert">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          <div>
-            <strong>Store Notice:</strong> You may request a high-definition video of your piece on WhatsApp
-            prior to dispatch for complete satisfaction.
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="name">Full Name *</label>
-          <input type="text" id="name" name="name" placeholder="Enter your full name" required autocomplete="name" />
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="phone">Phone Number *</label>
-            <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210" required autocomplete="tel" />
-          </div>
-          <div class="form-group">
-            <label for="whatsapp">WhatsApp Number *</label>
-            <input type="tel" id="whatsapp" name="whatsapp" placeholder="e.g. 9876543210" required />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="address">Delivery Address *</label>
-          <textarea id="address" name="address" rows="3"
-            placeholder="House/Villa No., Street, Residence, Area, City, State" required
-            autocomplete="street-address"></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="landmark">Landmark</label>
-            <input type="text" id="landmark" name="landmark" placeholder="e.g. Near City Mall, Opposite SBI Bank"
-              autocomplete="off" />
-          </div>
-          <div class="form-group">
-            <label for="post_office">Post Office (P.O.) *</label>
-            <input type="text" id="post_office" name="post_office" placeholder="e.g. Kakkanad" required
-              pattern="[A-Za-z\s.]+" title="Only letters, spaces and dots are allowed"
-              data-on-input="ui.lettersOnly" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="district">District *</label>
-            <input type="text" id="district" name="district" placeholder="e.g. Ernakulam" required />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pincode">Pincode *</label>
-              <input type="text" id="pincode" name="pincode" placeholder="e.g. 682001" required
-                autocomplete="postal-code" />
-            </div>
-            <div class="form-group">
-              <label for="notes">Instructions</label>
-              <input type="text" id="notes" name="notes"
-                placeholder="Gift packaging notes or specific instructions..." />
-            </div>
-          </div>
-
-          <button type="submit" class="btn-place-order" id="placeOrderBtn">
-            <span>{% if is_luxury %}PLACE ORDER 💎{% else %}PLACE ORDER 🌸{% endif %}</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </button>
-        </div>
-    </form>
-  </div>
+  </form>
 </div>
 {% endblock %}

@@ -1,0 +1,243 @@
+/* ============================================================
+   CHECKOUT — compact mobile layout (all themes)
+   Loaded LAST in base.html so it wins over every theme file.
+   Only affects phones; desktop checkout is unchanged.
+   ============================================================ */
+@media (max-width: 640px) {
+
+    /* ---- page shell ---- */
+    .checkout-page-wrap {
+        padding: 8px 12px 56px;
+    }
+
+    .checkout-page-wrap .breadcrumb {
+        margin-top: 8px !important;
+        font-size: 0.62rem;
+    }
+
+    .checkout-long-page .checkout-section {
+        margin-bottom: 14px;
+    }
+
+    /* ---- main title: one line, not two ---- */
+    .checkout-main-title {
+        font-size: 1.05rem;
+        letter-spacing: 0.08em;
+        line-height: 1.25;
+        margin: 8px 0 14px;
+    }
+
+    /* ---- order summary card ---- */
+    .order-summary-card {
+        margin-bottom: 12px;
+        border-radius: 14px;
+    }
+
+    .order-summary-head {
+        padding: 11px 14px;
+        gap: 8px;
+    }
+
+    .order-summary-head svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .order-summary-head h3 {
+        font-size: 0.8rem;
+        letter-spacing: 0.1em;
+    }
+
+    .order-summary-body {
+        padding: 4px 14px 12px;
+    }
+
+    .checkout-page-wrap .summary-item {
+        padding: 9px 0 !important;
+        gap: 10px !important;
+    }
+
+    .checkout-page-wrap .summary-item img,
+    .checkout-page-wrap .summary-item>div:first-child:not([style*="flex:1"]) {
+        width: 44px !important;
+        height: 44px !important;
+    }
+
+    .checkout-page-wrap .summary-item-name {
+        font-size: 0.8rem !important;
+    }
+
+    .checkout-page-wrap .summary-item-meta {
+        font-size: 0.7rem !important;
+        margin-top: 2px !important;
+    }
+
+    .checkout-page-wrap .summary-item-price {
+        font-size: 0.82rem !important;
+    }
+
+    .checkout-page-wrap .summary-remove-btn {
+        font-size: 0.68rem !important;
+    }
+
+    .summary-total-row {
+        margin-top: 8px;
+        padding-top: 10px;
+    }
+
+    .summary-total-label {
+        font-size: 0.62rem;
+        letter-spacing: 0.14em;
+    }
+
+    .summary-total-value {
+        font-size: 1.1rem;
+    }
+
+    .summary-security-note {
+        font-size: 0.62rem;
+        margin-top: 8px;
+        gap: 6px;
+        line-height: 1.4;
+    }
+
+    /* ---- shipping policy: compact ---- */
+    .shipping-policy-card {
+        padding: 12px 14px;
+    }
+
+    .shipping-policy-title {
+        font-size: 0.68rem;
+        margin-bottom: 8px;
+        letter-spacing: 0.08em;
+        gap: 8px;
+    }
+
+    .shipping-policy-title svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    .shipping-policy-list {
+        font-size: 0.7rem;
+        gap: 4px;
+        line-height: 1.4;
+    }
+
+    .shipping-policy-important {
+        font-size: 0.65rem;
+        margin-top: 2px;
+    }
+
+    /* ---- delivery form card ---- */
+    .checkout-address-card.form-card,
+    .form-card.checkout-address-card {
+        padding: 14px 14px 16px;
+        border-radius: 14px;
+    }
+
+    .form-card-title {
+        margin-bottom: 10px;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .form-card-title svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
+    .form-card-title h2 {
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        line-height: 1.3;
+    }
+
+    .checkout-notice-alert {
+        padding: 9px 11px;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-size: 0.68rem;
+        line-height: 1.45;
+        border-radius: 10px;
+    }
+
+    .checkout-notice-alert svg {
+        width: 14px;
+        height: 14px;
+        margin-top: 1px;
+    }
+
+    /* ---- fields: tighter + short fields share a row ---- */
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-group label {
+        font-size: 0.56rem;
+        letter-spacing: 0.12em;
+        margin-bottom: 5px;
+        line-height: 1.3;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 9px 11px;
+        font-size: 0.85rem;
+        border-radius: 10px;
+    }
+
+    .form-group select {
+        padding-right: 30px;
+        background-position: right 10px center;
+    }
+
+    .form-group textarea {
+        min-height: 0;
+    }
+
+    .field-hint {
+        font-size: 0.6rem;
+        margin-top: 3px;
+    }
+
+    /* override the old "1 column on phones" rule: keep pairs side by side */
+    .checkout-address-card .form-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .checkout-address-card .form-row .form-group {
+        min-width: 0;
+    }
+
+    .address-section-divider {
+        margin: 10px 0;
+    }
+
+    .delivery-instructions-group label {
+        font-size: 0.6rem;
+        letter-spacing: 0.08em;
+    }
+
+    .delivery-instructions-group label svg {
+        width: 13px;
+        height: 13px;
+        margin-right: 4px !important;
+    }
+
+    /* ---- place order button ---- */
+    .btn-place-order {
+        padding: 13px;
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        margin-top: 14px;
+    }
+
+    .btn-place-order svg {
+        width: 15px;
+        height: 15px;
+    }
+}

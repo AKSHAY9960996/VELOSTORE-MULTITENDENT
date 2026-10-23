@@ -1703,6 +1703,12 @@ input, textarea, select {
   padding: 20px 40px 100px;
 }
 
+/* Long page single-column layout */
+.checkout-long-page .checkout-section {
+  max-width: 720px;
+  margin: 0 auto 40px;
+}
+
 .checkout-main-title {
   font-family: var(--font-display);
   font-size: 2.4rem;
@@ -1710,6 +1716,7 @@ input, textarea, select {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 36px;
+  text-align: center;
 }
 
 .checkout-wrap {
@@ -1813,12 +1820,17 @@ input, textarea, select {
   font-style: italic;
 }
 
-/* Form Card */
+/* Form Card — Single Column Address Card */
 .form-card {
   background: var(--clr-surface);
   border: 1px solid var(--clr-border);
   border-radius: var(--r-lg);
   padding: 40px;
+}
+
+.checkout-address-card {
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .form-card-title {
@@ -1871,7 +1883,8 @@ input, textarea, select {
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
   width: 100%;
   padding: 14px 18px;
   background: var(--clr-bg);
@@ -1881,10 +1894,23 @@ input, textarea, select {
   font-size: 0.88rem;
   outline: none;
   transition: all var(--t);
+  font-family: inherit;
+}
+
+.form-group select {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 14px;
+  padding-right: 40px;
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   border-color: var(--clr-gold);
   box-shadow: 0 0 0 3px rgba(196,69,105,0.08), var(--shadow-gold);
   background: var(--clr-surface);
@@ -1894,6 +1920,34 @@ input, textarea, select {
 .form-group textarea::placeholder {
   color: var(--clr-text-light);
   font-style: italic;
+}
+
+/* Field hints (like "May be used to assist delivery") */
+.field-hint {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--clr-text-light);
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+  font-style: italic;
+}
+
+/* Address section divider */
+.address-section-divider {
+  height: 1px;
+  background: var(--clr-border);
+  margin: 28px 0;
+}
+
+/* Delivery instructions group */
+.delivery-instructions-group label {
+  display: flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--clr-text);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .form-row {
