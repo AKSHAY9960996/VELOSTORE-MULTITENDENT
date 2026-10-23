@@ -28,7 +28,7 @@ settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        <h3>{% if is_luxury %}💎 Order Summary{% else %}🌸 Order Summary{% endif %}</h3>
+        <h3>{% if is_luxury %} Order Summary{% else %} Order Summary{% endif %}</h3>
       </div>
       <div class="order-summary-body">
         <div id="checkoutSummary">
@@ -58,16 +58,10 @@ settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
             <circle cx="5.5" cy="18.5" r="2.5"></circle>
             <circle cx="18.5" cy="18.5" r="2.5"></circle>
           </svg>
-          <span>Express Courier Shipping</span>
+          <span>Courier Shipping Charges will be extra</span>
         </h4>
-        <ul class="shipping-policy-list">
-          <li><strong>Up to 500g:</strong> {{ settings.get('currency_symbol','₹') }}50</li>
-          <li><strong>500g to 1kg:</strong> {{ settings.get('currency_symbol','₹') }}70</li>
-          <li>Insured delivery via <strong>India Post Express</strong>.</li>
-          <li class="shipping-policy-important">Final weight &amp; shipping charges will be verified with the {{ brand
-            }}
-            Concierge on WhatsApp upon placing order.</li>
-        </ul>
+        <p>You will be informed of the exact shipping charges by the {{ brand }} Concierge on WhatsApp before your order
+          is confirmed.</p>
       </div>
     </div>
   </div>
@@ -81,7 +75,7 @@ settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
           <circle cx="12" cy="10" r="3"></circle>
         </svg>
-        <h2>{% if is_luxury %}💎 Enter Delivery Address{% else %}🌸 Enter Delivery Address{% endif %}</h2>
+        <h2>{% if is_luxury %} Enter Delivery Address{% else %} Enter Delivery Address{% endif %}</h2>
       </div>
 
       <div class="checkout-notice-alert">
