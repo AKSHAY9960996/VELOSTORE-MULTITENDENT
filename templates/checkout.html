@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{% if is_luxury %}💎 Checkout — {{ settings.get('shop_name','My Shop') }}{% else %}🌸 Checkout — {{
+{% block title %}{% if is_luxury %} Checkout — {{ settings.get('shop_name','My Shop') }}{% else %} Checkout — {{
 settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
 {% block description %}Complete your order at {{ settings.get('shop_name','My Shop') }}.{% endblock %}
 
@@ -10,7 +10,7 @@ settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
   <nav class="breadcrumb" style="margin-top:24px" aria-label="Breadcrumb">
     <a href="{{ url_for('index') }}">Home</a>
     <span class="breadcrumb-sep">›</span>
-    <span class="breadcrumb-current">{% if is_luxury %}💎 Checkout{% else %}🌸 Checkout{% endif %}</span>
+    <span class="breadcrumb-current">{% if is_luxury %} Checkout{% else %} Checkout{% endif %}</span>
   </nav>
 
   <h1 class="checkout-main-title">
@@ -222,7 +222,7 @@ settings.get('shop_name','My Shop') }}{% endif %}{% endblock %}
       </div>
 
       <button type="submit" class="btn-place-order" id="placeOrderBtn">
-        <span>{% if is_luxury %}PLACE ORDER 💎{% else %}PLACE ORDER 🌸{% endif %}</span>
+        <span>{% if is_luxury %}PLACE ORDER {% else %}PLACE ORDER {% endif %}</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="5" y1="12" x2="19" y2="12"></line>
           <polyline points="12 5 19 12 12 19"></polyline>
