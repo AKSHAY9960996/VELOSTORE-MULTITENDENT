@@ -302,11 +302,27 @@ def resolve_tenant_context():
     # Option 4: Host custom domain
     else:
         host = request.host.split(':')[0]
+        # ------------------------------------------------------------
+        # 1️⃣ Custom‑domain (explicitly stored in `tenants.custom_domain`)
+        # ------------------------------------------------------------
         if host and host not in ('localhost', '127.0.0.1'):
             t_info = get_tenant_by_identifier(host)
             if t_info:
                 tenant_slug = t_info['slug']
                 g.tenant_via_host = True
+            else:
+                # ------------------------------------------------------------
+                # 2️⃣ Sub‑domain fallback – treat the left‑most label as the slug
+                #    e.g. yumei.online-store.design → slug "yumei"
+                # ------------------------------------------------------------
+                base_domain = os.getenv('BASE_TENANT_DOMAIN', 'online-store.design')
+                if host.endswith('.' + base_domain):
+                    possible_slug = host.split('.')[0]
+                    # Verify the slug actually exists (prevents typos from being accepted)
+                    slug_info = get_tenant_by_identifier(possible_slug)
+                    if slug_info:
+                        tenant_slug = possible_slug
+                        g.tenant_via_host = True
 
     # Marketing page at '/': shown whenever no store is explicitly named in the request
     # (no /s/slug, ?shop=, header or custom domain). The remembered session store is ignored
