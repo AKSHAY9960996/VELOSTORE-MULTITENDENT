@@ -435,16 +435,73 @@ class Database:
 # Master Database connection
 # ---------------------------------------------------------------------------
 
+# Cached Turso master connection — reused across requests to avoid re-opening
+# an HTTPS connection (and paying ~300-800 ms of round-trip latency) on every
+# incoming request. For local SQLite we still open a fresh connection each time
+# because sqlite3 connections are not thread-safe across requests.
+_master_turso_conn = None
+# Per-slug cache for tenant Turso connections (same rationale as master)
+_tenant_turso_conns: dict = {}
+
+
+def clear_tenant_conn_cache(slug: str = None):
+    """Evict cached Turso connection(s) — call after updating credentials."""
+    global _tenant_turso_conns
+    if slug:
+        _tenant_turso_conns.pop(slug, None)
+    else:
+        _tenant_turso_conns.clear()
+
+
+class _CachedConnectionWrapper:
+    """
+    Wraps a persistent (cached) DB connection so that callers who do
+    ``conn.close()`` don't actually close the shared connection.
+    All other methods are forwarded transparently.
+    """
+    def __init__(self, real_conn):
+        self._real = real_conn
+
+    # Forward every attribute/method to the real connection …
+    def __getattr__(self, name):
+        return getattr(self._real, name)
+
+    # … except close() — we keep the connection alive.
+    def close(self):
+        pass   # intentional no-op; the connection is reused across requests
+
+    # Convenience pass-throughs so Python special methods work
+    def execute(self, sql, params=None):
+        return self._real.execute(sql, params)
+
+    def executemany(self, sql, seq):
+        return self._real.executemany(sql, seq)
+
+    def commit(self):
+        return self._real.commit()
+
+    def rollback(self):
+        return self._real.rollback()
+
+    def cursor(self):
+        return self._real.cursor()
+
+
 def get_master_db_connection():
     """
     Returns a connection to the Master Database.
-    Uses Turso (TURSO_DB_URL + TURSO_AUTH_TOKEN) if set, else local master.db.
+    Reuses a per-process cached connection for Turso to avoid the cost of
+    opening a new HTTPS connection on every request (each round-trip to Turso
+    adds ~300-800 ms of network latency).
     """
     turso_url = _config.TURSO_DB_URL
     turso_token = _config.TURSO_AUTH_TOKEN
 
     if turso_url and turso_token and HAS_LIBSQL:
-        return _connect_turso(turso_url, turso_token)
+        global _master_turso_conn
+        if _master_turso_conn is None:
+            _master_turso_conn = _CachedConnectionWrapper(_connect_turso(turso_url, turso_token))
+        return _master_turso_conn
 
     conn = sqlite3.connect(MASTER_DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -663,9 +720,16 @@ def get_tenant_db_connection(tenant_slug: str):
       1. Tenant's own Turso DB (credentials stored in master DB)
       2. Default Turso DB (for 'default' tenant via TURSO_DB_URL env var)
       3. Local SQLite fallback (local dev only)
+
+    Turso connections are cached per-slug (like the master connection) so a
+    new HTTPS round-trip is not needed on every request.
     """
     if not tenant_slug or tenant_slug == 'default':
         return Database().connect()
+
+    # Return cached Turso connection if we already have one for this slug
+    if tenant_slug in _tenant_turso_conns:
+        return _tenant_turso_conns[tenant_slug]
 
     try:
         row = get_tenant_by_identifier(tenant_slug)
@@ -677,10 +741,11 @@ def get_tenant_db_connection(tenant_slug: str):
                 # Never fall back to an empty local database for a store that lives on Turso.
                 print(f"[DB] {e} (store '{tenant_slug}')", flush=True)
                 raise
-            return Database(
-                turso_url=row['turso_db_url'],
-                auth_token=token
-            ).connect()
+            cached = _CachedConnectionWrapper(
+                Database(turso_url=row['turso_db_url'], auth_token=token).connect()
+            )
+            _tenant_turso_conns[tenant_slug] = cached
+            return cached
     except RuntimeError:
         raise
     except Exception as e:
