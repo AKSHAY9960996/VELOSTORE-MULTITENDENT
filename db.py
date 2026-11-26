@@ -435,77 +435,113 @@ class Database:
 # Master Database connection
 # ---------------------------------------------------------------------------
 
-# Cached Turso master connection — reused across requests to avoid re-opening
-# an HTTPS connection (and paying ~300-800 ms of round-trip latency) on every
-# incoming request. For local SQLite we still open a fresh connection each time
-# because sqlite3 connections are not thread-safe across requests.
-_master_turso_conn = None
-# Per-slug cache for tenant Turso connections (same rationale as master)
-_tenant_turso_conns: dict = {}
-
-
-def clear_tenant_conn_cache(slug: str = None):
-    """Evict cached Turso connection(s) — call after updating credentials."""
-    global _tenant_turso_conns
-    if slug:
-        _tenant_turso_conns.pop(slug, None)
-    else:
-        _tenant_turso_conns.clear()
-
-
-class _CachedConnectionWrapper:
+class _ReusableTursoConn:
     """
-    Wraps a persistent (cached) DB connection so that callers who do
-    ``conn.close()`` don't actually close the shared connection.
-    All other methods are forwarded transparently.
+    Per-process cached Turso connection with auto-reconnect.
+
+    Why:  Every call to _connect_turso() opens a new TLS + HTTP/2 session to
+          Turso's servers (300-800 ms of latency). With Gunicorn sync workers
+          each process handles one request at a time, so sharing one connection
+          per process is safe — no concurrent access within a single process.
+
+    Reconnect: Turso closes idle connections server-side after a few minutes.
+          When we detect a stale connection (any exception whose message
+          contains "closed", "reset", "eof", or "broken pipe") we transparently
+          reconnect and retry the operation once so the caller never sees the
+          error.
+
+    close(): Made a no-op so the many existing ``conn.close()`` call-sites
+          don't destroy the cached connection.
     """
-    def __init__(self, real_conn):
-        self._real = real_conn
 
-    # Forward every attribute/method to the real connection …
-    def __getattr__(self, name):
-        return getattr(self._real, name)
+    _RECONNECT_HINTS = ('closed', 'reset', 'eof', 'broken pipe', 'pipe', 'connection')
 
-    # … except close() — we keep the connection alive.
+    def __init__(self, url: str, token: str):
+        self._url = url
+        self._token = token
+        self._conn = _connect_turso(url, token)
+
+    def _reconnect(self):
+        try:
+            self._conn = _connect_turso(self._url, self._token)
+        except Exception as exc:
+            raise RuntimeError(f'[DB] Turso reconnect failed: {exc}') from exc
+
+    def _is_stale_error(self, exc: Exception) -> bool:
+        msg = str(exc).lower()
+        return any(hint in msg for hint in self._RECONNECT_HINTS)
+
+    # --- public API (mirrors the sqlite3 / LibsqlConnectionWrapper interface) ---
+
     def close(self):
-        pass   # intentional no-op; the connection is reused across requests
-
-    # Convenience pass-throughs so Python special methods work
-    def execute(self, sql, params=None):
-        return self._real.execute(sql, params)
-
-    def executemany(self, sql, seq):
-        return self._real.executemany(sql, seq)
-
-    def commit(self):
-        return self._real.commit()
-
-    def rollback(self):
-        return self._real.rollback()
+        pass  # intentional no-op — keep the connection alive between requests
 
     def cursor(self):
-        return self._real.cursor()
+        return self._conn.cursor()
+
+    def commit(self):
+        try:
+            return self._conn.commit()
+        except Exception as exc:
+            if self._is_stale_error(exc):
+                self._reconnect()
+                return self._conn.commit()
+            raise
+
+    def rollback(self):
+        try:
+            return self._conn.rollback()
+        except Exception:
+            pass  # best-effort on a stale connection
+
+    def execute(self, sql, params=None):
+        try:
+            return self._conn.execute(sql, params)
+        except Exception as exc:
+            if self._is_stale_error(exc):
+                self._reconnect()
+                return self._conn.execute(sql, params)
+            raise
+
+    def executemany(self, sql, seq):
+        try:
+            return self._conn.executemany(sql, seq)
+        except Exception as exc:
+            if self._is_stale_error(exc):
+                self._reconnect()
+                return self._conn.executemany(sql, seq)
+            raise
+
+    def __getattr__(self, name):
+        # Forward anything else (e.g. row_factory) to the real connection
+        return getattr(self._conn, name)
+
+
+# One cached connection per Gunicorn worker process
+_master_reusable_conn: '_ReusableTursoConn | None' = None
+# Per-slug tenant connection cache (same approach)
+_tenant_reusable_conns: 'dict[str, _ReusableTursoConn]' = {}
 
 
 def get_master_db_connection():
     """
     Returns a connection to the Master Database.
-    Reuses a per-process cached connection for Turso to avoid the cost of
-    opening a new HTTPS connection on every request (each round-trip to Turso
-    adds ~300-800 ms of network latency).
+    For Turso: returns a long-lived per-process connection (auto-reconnects on
+    stale errors). For local SQLite: opens a fresh connection each time.
     """
     turso_url = _config.TURSO_DB_URL
     turso_token = _config.TURSO_AUTH_TOKEN
 
     if turso_url and turso_token and HAS_LIBSQL:
-        global _master_turso_conn
-        if _master_turso_conn is None:
-            _master_turso_conn = _CachedConnectionWrapper(_connect_turso(turso_url, turso_token))
-        return _master_turso_conn
+        global _master_reusable_conn
+        if _master_reusable_conn is None:
+            _master_reusable_conn = _ReusableTursoConn(turso_url, turso_token)
+            print('[DB] Opened persistent Turso master connection.', flush=True)
+        return _master_reusable_conn
 
     conn = sqlite3.connect(MASTER_DB_PATH)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute('PRAGMA foreign_keys = ON')
     return conn
 
 
@@ -688,8 +724,9 @@ _tenant_cache = {}
 
 
 def clear_tenant_cache():
-    """Forget cached store lookups (call after changing the tenants table)."""
+    """Forget cached store lookups AND evict any cached DB connection (call after changing the tenants table)."""
     _tenant_cache.clear()
+    _tenant_reusable_conns.clear()  # force fresh connection if credentials changed
 
 
 def get_tenant_by_identifier(identifier: str):
@@ -717,19 +754,16 @@ def get_tenant_db_connection(tenant_slug: str):
     """
     Returns a connection to the specific tenant's database.
     Priority:
-      1. Tenant's own Turso DB (credentials stored in master DB)
+      1. Tenant's own Turso DB (cached per slug, auto-reconnects on stale errors)
       2. Default Turso DB (for 'default' tenant via TURSO_DB_URL env var)
       3. Local SQLite fallback (local dev only)
-
-    Turso connections are cached per-slug (like the master connection) so a
-    new HTTPS round-trip is not needed on every request.
     """
     if not tenant_slug or tenant_slug == 'default':
         return Database().connect()
 
-    # Return cached Turso connection if we already have one for this slug
-    if tenant_slug in _tenant_turso_conns:
-        return _tenant_turso_conns[tenant_slug]
+    # Return cached connection for this slug if available
+    if tenant_slug in _tenant_reusable_conns:
+        return _tenant_reusable_conns[tenant_slug]
 
     try:
         row = get_tenant_by_identifier(tenant_slug)
@@ -738,13 +772,11 @@ def get_tenant_db_connection(tenant_slug: str):
             try:
                 token = decrypt_token(row['turso_auth_token'])
             except RuntimeError as e:
-                # Never fall back to an empty local database for a store that lives on Turso.
                 print(f"[DB] {e} (store '{tenant_slug}')", flush=True)
                 raise
-            cached = _CachedConnectionWrapper(
-                Database(turso_url=row['turso_db_url'], auth_token=token).connect()
-            )
-            _tenant_turso_conns[tenant_slug] = cached
+            cached = _ReusableTursoConn(row['turso_db_url'], token)
+            _tenant_reusable_conns[tenant_slug] = cached
+            print(f"[DB] Opened persistent Turso connection for tenant '{tenant_slug}'.", flush=True)
             return cached
     except RuntimeError:
         raise
