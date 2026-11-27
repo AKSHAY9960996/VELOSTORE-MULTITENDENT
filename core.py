@@ -256,6 +256,19 @@ def _add_shop_to_links(endpoint, values):
         values['shop'] = slug
 
 @app.before_request
+def enforce_https():
+    """In production, permanently redirect any plain-HTTP request to HTTPS.
+
+    Works because ProxyFix (x_proto=1) makes request.scheme reflect the
+    original scheme from X-Forwarded-Proto, so this check is reliable behind
+    Render's proxy.  In dev/test IS_PRODUCTION is False so it's a no-op.
+    """
+    if IS_PRODUCTION and request.scheme == 'http':
+        url = request.url.replace('http://', 'https://', 1)
+        return redirect(url, code=301)
+
+
+@app.before_request
 def resolve_tenant_context():
     """
     Middleware that identifies current tenant from:
@@ -318,8 +331,14 @@ def resolve_tenant_context():
                 base_domain = os.getenv('BASE_TENANT_DOMAIN', 'online-store.design')
                 if host.endswith('.' + base_domain):
                     possible_slug = host.split('.')[0]
+                    # Guard: reject absurdly long labels before hitting the DB.
+                    # Real slugs are validated to ≤60 chars at provisioning time.
+                    # A crafted Host header with thousands of chars would otherwise
+                    # cause a pointless DB round-trip on every request (DoS vector).
+                    if len(possible_slug) > 60:
+                        possible_slug = None
                     # Verify the slug actually exists (prevents typos from being accepted)
-                    slug_info = get_tenant_by_identifier(possible_slug)
+                    slug_info = get_tenant_by_identifier(possible_slug) if possible_slug else None
                     if slug_info:
                         tenant_slug = possible_slug
                         g.tenant_via_host = True
